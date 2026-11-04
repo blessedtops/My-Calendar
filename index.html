@@ -12,7 +12,7 @@
 <title>My Day</title>
 
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@900&family=Michroma&family=Poppins:wght@500&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Michroma&family=Poppins:wght@500&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: today's live clock and status on top, then a Mon–Sun grid of day clocks */
 :root{
@@ -329,7 +329,7 @@ header{align-items:center}
     <radialGradient id="face" cx="38%" cy="28%" r="80%"><stop offset="0%" style="stop-color:var(--panel-top)"/><stop offset="100%" style="stop-color:var(--panel)"/></radialGradient>
   </defs></svg>
   <header>
-    <h1 class="todaytitle" id="todayTitle"><span class="tw" id="tWeekday">Today</span> <span class="td" id="tDate"></span> <span class="ty" id="tYear"></span></h1>
+    <h1 class="todaytitle" id="todayTitle"><span class="tw" id="tWeekday">Today</span> <span class="td" id="tDate"></span></h1>
     <span class="date" id="date" hidden>—</span>
   </header>
 
@@ -761,7 +761,7 @@ function tick(){
 }
 function status(now,h,sched){
   {const wd=now.toLocaleDateString('en-US',{weekday:'long'}),dt=`${now.getDate()} ${now.toLocaleDateString('en-US',{month:'long'})}`;
-   const tw=document.getElementById('tWeekday'),td=document.getElementById('tDate');if(tw.textContent!==wd)tw.textContent=wd;if(td.textContent!==dt)td.textContent=dt;const ty=document.getElementById('tYear'),yr=String(now.getFullYear());if(ty.textContent!==yr)ty.textContent=yr;}
+   const tw=document.getElementById('tWeekday'),td=document.getElementById('tDate');if(tw.textContent!==wd)tw.textContent=wd;if(td.textContent!==dt)td.textContent=dt;}
   const cur=sched.find(b=>h>=b.s&&h<b.e);
   let nextAt=null,nextLabel='';
   const nb=sched.find(b=>b.s>h&&b.type!==cur.type);

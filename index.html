@@ -305,6 +305,20 @@ header{align-items:center}
   text-shadow:0 0 6px rgba(90,235,255,.9),0 0 16px rgba(70,200,255,.55),
     1px 1px 0 #2f8fd8,2px 2px 0 #3d79d9,3px 3px 0 #5a63d4,4px 4px 0 #8c5ccb,5px 5px 0 #c25fae,6px 6px 0 #dd6a8e,7px 8px 10px rgba(0,0,0,.45)}
 .setfoot{display:flex;justify-content:center;padding-block:8px 0}
+
+/* Time color follows the sun: gold 6-18, blue 18-6, dawn/dusk violet in between */
+@property --neon{syntax:'<color>';inherits:true;initial-value:#1f7bff}
+@property --neon-core{syntax:'<color>';inherits:true;initial-value:#d9edff}
+@property --date-ink{syntax:'<color>';inherits:true;initial-value:#1b5fc4}
+:root{transition:--neon 1.6s ease,--neon-core 1.6s ease,--date-ink 1.6s ease}
+:root.tod-day{--neon:#e08600;--neon-core:#fff4d6;--date-ink:#9a5600}
+:root.tod-twi{--neon:#c2479f;--neon-core:#ffe3f6;--date-ink:#8e2f78}
+@media (prefers-color-scheme: dark){
+  :root.tod-day:not([data-theme="light"]){--neon:#ffa514;--neon-core:#fff2c4;--date-ink:#ffc94d}
+  :root.tod-twi:not([data-theme="light"]){--neon:#e070c8;--neon-core:#ffe8f8;--date-ink:#f2aee0}}
+:root.tod-day[data-theme="dark"]{--neon:#ffa514;--neon-core:#fff2c4;--date-ink:#ffc94d}
+:root.tod-twi[data-theme="dark"]{--neon:#e070c8;--neon-core:#ffe8f8;--date-ink:#f2aee0}
+@media (prefers-reduced-motion:reduce){:root{transition:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -752,6 +766,7 @@ function tick(){
   const sched=schedFor(now);
   safe(()=>{if(builtFor!==now.toDateString()+'|'+cfgVer){build(now)}});
   safe(()=>status(now,h,sched));
+  safe(()=>{const r=document.documentElement,twi=(h>=5.75&&h<6.25)||(h>=17.75&&h<18.25),day=!twi&&h>=6&&h<18;r.classList.toggle('tod-day',day);r.classList.toggle('tod-twi',twi)});
   safe(()=>earthTick(now));
   safe(()=>{
     setHand(big,h);

@@ -543,12 +543,6 @@ function drawClock(svg,sched,opts){
   }
   const step=big?3:6;
   for(let h=0;h<24;h+=step){const [x,y]=pt(h,big?172:176);el('text',{x,y:y+(big?5:8),'text-anchor':'middle','font-size':big?14:24,fill:'var(--fg)','font-family':'Manrope,sans-serif'},svg).textContent=h}
-  if(big){
-    const segs=sched.map(b=>Object.assign({},b));
-    if(segs.length>1&&segs[0].type==='free'&&segs[segs.length-1].type==='free'){const f=segs.shift(),l=segs.pop();segs.push(Object.assign({},l,{e:24+f.e}))}
-    segs.forEach(g=>{const dur=g.e-g.s;if(dur<2)return;const [x,y]=pt(((g.s+g.e)/2)%24,104);
-      el('text',{x,y:y+4,'text-anchor':'middle','font-size':12,'font-weight':500,fill:textOn(g.color),'font-family':'Manrope,sans-serif'},svg).textContent=`${Math.round(dur*4)/4} hrs`});
-  }
   el('circle',{cx:C,cy:CY,r:150,fill:'url(#dome)','pointer-events':'none'},svg);
   el('circle',{cx:C,cy:CY,r:150,fill:'url(#gloss)','pointer-events':'none'},svg);
   const cur=(live&&big)?el('path',{class:'curhr',d:'M0 0',fill:'#fff','fill-opacity':.24,stroke:'#ffd34d','stroke-width':2.4,'stroke-linejoin':'round'},svg):null;

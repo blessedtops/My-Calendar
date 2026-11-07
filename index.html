@@ -344,6 +344,11 @@ html.focus .status .next{font-size:13px}
 @media (max-width:560px){html.focus .status .next{display:none}}
 @keyframes grow{from{transform:scale(.82);opacity:.6}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.expandbtn{transition:none}html.focus .sunwrap{animation:none}}
+.dayleft{display:none}
+html.focus .status .row,html.focus .status .next{display:none}
+html.focus .status .dayleft{display:flex;align-items:center;gap:14px}
+.dl-k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dl-v{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;color:var(--fg)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -425,6 +430,7 @@ html.focus .status .next{font-size:13px}
           <span class="count" id="count">--:--:--</span>
         </div>
         <div class="next" id="next">Calculating…</div>
+        <div class="dayleft" id="focusLeft"><span class="dl-k">Hours of day left</span><span class="dl-v" id="focusLeftV">--:--:--</span></div>
       </section>
       <section class="stats">
         <div class="stat"><span class="k">Worked today</span><span class="v" id="worked">0h 00m</span><div class="bar"><i id="workedBar" style="background:var(--work);width:0"></i></div></div>
@@ -821,7 +827,7 @@ function status(now,h,sched){
   const freeTotal=sched.reduce((a,b)=>a+(b.type==='free'?b.e-b.s:0),0)*60;
   document.getElementById('worked').textContent=hm(worked)+` / ${Math.round(dayWork/60*4)/4}h`;
   document.getElementById('workedBar').style.width=(dayWork?worked/dayWork*100:0)+'%';
-  const dayLeft=(24-h)*60;document.getElementById('freeLeft').textContent=hm(dayLeft);
+  const dayLeft=(24-h)*60;{const sl=Math.max(0,Math.round((24-h)*3600)),v=`${pad(Math.floor(sl/3600))}:${pad(Math.floor(sl%3600/60))}:${pad(sl%60)}`,fe=document.getElementById('focusLeftV');if(fe&&fe.textContent!==v)fe.textContent=v;}document.getElementById('freeLeft').textContent=hm(dayLeft);
   document.getElementById('freeBar').style.width=(dayLeft/1440*100)+'%';
   let wkDone=0,wkTotal=0;const sun=monday(now);
   for(let i=0;i<7;i++){const d=new Date(sun);d.setDate(sun.getDate()+i);const sc=schedFor(d),t=workedIn(sc,0,24);wkTotal+=t;wkDone+=i<now.getDay()?t:i===now.getDay()?workedIn(sc,0,h):0}

@@ -369,6 +369,9 @@ html.focus .bezel{overflow:hidden}
 .bghour text{font-family:"Cinzel",Georgia,serif;font-weight:700;font-size:150px;letter-spacing:-.02em}
 .bghour-blur{fill:var(--neon);opacity:.13;filter:blur(3px)}
 .bghour-line{fill:none;stroke:var(--neon);stroke-width:1.2px;opacity:.32}
+.zfrac text{font-family:"Poppins","Futura",system-ui,sans-serif;font-weight:600;font-size:17px;letter-spacing:.12em}
+.zfrac-glow{fill:var(--neon)}
+.zfrac-core{fill:var(--neon-core)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -925,6 +928,9 @@ function drawZoom(svg,Z,sched){
   el('circle',{cx:C,cy:CY-10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:C,cy:CY+10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);
   const sub=el('text',{class:'tdate',x:C,y:CY+34,'text-anchor':'middle','dominant-baseline':'central'},svg);
   sub.textContent=`${hhmm(Z.w0)} – ${hhmm(Z.w0+Z.span)}`;
+  if(Z.level===1){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
+    el('text',{x:C,y:CY-44,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
+    el('text',{x:C,y:CY-44,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
   return {Z,done,cur,sec,hand,core,halo,tip,a,b};
 }
 function zoomTick(now,h){

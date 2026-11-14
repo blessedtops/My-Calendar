@@ -349,12 +349,30 @@ html.focus .status .row,html.focus .status .next{display:none}
 html.focus .status .dayleft{display:flex;align-items:center;gap:14px}
 .dl-k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .dl-v{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;color:var(--fg)}
+
+/* Zoom levels in full screen */
+.zoomcrumb{position:fixed;z-index:30;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;
+  background:color-mix(in srgb,var(--panel-top) 72%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:var(--sh1),inset 0 1px 0 var(--hi)}
+.zoomcrumb button{font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:transparent;border:0;border-radius:999px;padding:6px 13px;min-height:34px;cursor:pointer}
+.zoomcrumb button[aria-current="true"]{background:var(--glow);color:#fff}
+.zoomcrumb button:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.zoomcrumb span{color:var(--muted);font-size:12px}
+html.focus .bezel{overflow:hidden}
+.zin{animation:zin .6s cubic-bezier(.2,.8,.2,1)}
+.zout{animation:zout .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes zin{from{transform:scale(.25);opacity:0}to{transform:none;opacity:1}}
+@keyframes zout{from{transform:scale(2.6);opacity:0}to{transform:none;opacity:1}}
+#rays.rayfade{animation:rayfade .7s ease}
+@keyframes rayfade{from{opacity:.1}to{opacity:1}}
+.secdot{filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 7px rgba(150,200,255,.7))}
+@media (prefers-reduced-motion:reduce){.zin,.zout,#rays.rayfade{animation:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
 
 
+<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button></nav>
 <div id="galaxy" aria-hidden="true"></div>
 <button type="button" class="exitfocus" id="exitFocus" aria-label="Exit full clock" title="Exit full clock" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button>
 <div class="wrap">
@@ -403,7 +421,7 @@ html.focus .status .dayleft{display:flex;align-items:center;gap:14px}
         <g filter="url(#haloBlur)"><path d="M-100 0A100 100 0 0 1 100 0Z" fill="url(#moonHaloG)"/><path d="M100 0A100 100 0 0 1 -100 0Z" fill="url(#haloG)"/></g>
         <g class="rl" id="raysLong"></g><g class="rs" id="raysShort"></g>
       </svg>
-      <div class="bezel"><svg id="clock" viewBox="-20 -10 400 400" role="img" aria-label="Live 24-hour clock for today"></svg><div class="hit" id="clockHit" aria-hidden="true"></div><button type="button" class="expandbtn" id="expandBtn" aria-label="Enlarge clock" title="Enlarge clock"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div>
+      <div class="bezel"><svg id="clock" viewBox="-20 -10 400 400" role="img" aria-label="Live 24-hour clock for today"></svg><svg id="zclock" viewBox="-20 -10 400 400" role="img" aria-label="Zoomed clock" hidden></svg><div class="hit" id="clockHit" aria-hidden="true"></div><button type="button" class="expandbtn" id="expandBtn" aria-label="Enlarge clock" title="Enlarge clock"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div>
     </div>
     <div class="side">
       <section class="earthcard" aria-label="Earth's rotation toward the sun, live">
@@ -774,17 +792,20 @@ function earthTick(now){
   document.getElementById('orbitDay').textContent=`${doy} of ${(now.getFullYear()%4?365:366)}`;
 }
 
-(function buildRays(){
+function buildRaysFor(Z){
   const L=document.getElementById('raysLong'),S=document.getElementById('raysShort');if(!L||!S)return;
+  while(L.firstChild)L.removeChild(L.firstChild);while(S.firstChild)S.removeChild(S.firstChild);
   const P=(r,deg)=>{const a=(deg-90)*Math.PI/180;return `${(r*Math.cos(a)).toFixed(2)} ${(r*Math.sin(a)).toFixed(2)}`};
-  for(let h=0;h<24;h++){
-    const a=h*15,major=h%3===0,odd=h%2===1;
-    const r0=73,r1=major?99:odd?86:92,hw=major?4.6:3.4,bend=major?5:4;
+  const n=Z.level===0?24:12,majEvery=Z.level===1?4:3,k=24/n,sc=Z.level===0?1:k*.75;
+  for(let i=0;i<n;i++){
+    const a=i*360/n,major=i%majEvery===0,odd=i%2===1,t=(Z.w0+Z.span*i/n)%24;
+    const r0=73,r1=major?99:odd?86:92,hw=(major?4.6:3.4)*sc,bend=(major?5:4)*sc;
     const d=`M${P(r0,a-hw)} Q${P((r0+r1)/2,a-hw*.2+bend*.35)} ${P(r1,a+bend)} Q${P((r0+r1)/2+2,a+hw*1.1+bend*.5)} ${P(r0,a+hw)} Z`;
-    const night=h>18||h<6,dusk=h===18||h===6;
+    const dusk=Math.abs(t-6)<.01||Math.abs(t-18)<.01,night=!dusk&&(t>18||t<6);
     el('path',{d,fill:night?'url(#moonRayG)':dusk?'url(#duskRayG)':'url(#rayG)',stroke:night?'#9fb2ee':dusk?'#e0a8c8':'#ffb21e','stroke-opacity':.55,'stroke-width':.4,'stroke-linejoin':'round'},major||!odd?L:S);
   }
-})();
+}
+buildRaysFor({w0:0,span:24,level:0});
 let lastType=null;
 function tick(){
   const now=new Date();
@@ -799,6 +820,7 @@ function tick(){
     if(big&&big.text){const tt=`${pad(now.getHours())}:${pad(now.getMinutes())}`;big.text.textContent=tt;if(big.hh){const a=pad(now.getHours()),b=pad(now.getMinutes());big.hh.forEach(x=>{if(x.textContent!==a)x.textContent=a});big.mm.forEach(x=>{if(x.textContent!==b)x.textContent=b})}}
     minis.forEach(m=>{if(m.isToday){setHand(m.parts,h);m.parts.text.textContent=`${pad(now.getHours())}:${pad(now.getMinutes())}`}});
   });
+  safe(()=>zoomTick(now,h));
 }
 function status(now,h,sched){
   {const wd=now.toLocaleDateString('en-US',{weekday:'long'}),dt=`${now.getDate()} ${now.toLocaleDateString('en-US',{month:'long'})}`;
@@ -844,6 +866,92 @@ function renderLegend(){
 renderLegend();
 
 
+
+/* ---------- full-screen zoom levels: day > current 3 hours > current hour ---------- */
+var zoomLevel=0,zparts=null;
+var ZSPAN=[24,3,1];
+var zsvg=document.getElementById('zclock');
+function zWin(level,h){const sp=ZSPAN[level];return {w0:level===0?0:Math.floor(h/sp)*sp,span:sp,level}}
+function zpt(Z,t,r){const a=((t-Z.w0)/Z.span*360-90)*Math.PI/180;return[C+r*Math.cos(a),CY+r*Math.sin(a)]}
+function zarc(Z,a,b,ro,ri){
+  if(b-a>=Z.span-1e-9)return `M${C} ${CY-ro}A${ro} ${ro} 0 1 1 ${C-0.01} ${CY-ro}ZM${C} ${CY-ri}A${ri} ${ri} 0 1 0 ${C+0.01} ${CY-ri}Z`;
+  if(b-a<=1e-9)return 'M0 0';
+  const [x1,y1]=zpt(Z,a,ro),[x2,y2]=zpt(Z,b,ro),[x3,y3]=zpt(Z,b,ri),[x4,y4]=zpt(Z,a,ri),lg=(b-a)/Z.span>.5?1:0;
+  return `M${x1} ${y1}A${ro} ${ro} 0 ${lg} 1 ${x2} ${y2}L${x3} ${y3}A${ri} ${ri} 0 ${lg} 0 ${x4} ${y4}Z`;
+}
+function hhmm(x){const m=Math.round(x*60);return `${pad(Math.floor(m/60))}:${pad(m%60)}`}
+function drawZoom(svg,Z,sched){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const lane=blues[Math.floor(Z.w0/3)%8],unit=Z.level===1?.25:1/12,n=Math.round(Z.span/unit);
+  for(let i=0;i<n;i++){const a=Z.w0+i*unit;el('path',{d:zarc(Z,a,a+unit,150,124),fill:lane,'fill-opacity':i%2?.8:1},svg)}
+  sched.forEach(b=>{const a=Math.max(b.s,Z.w0),e=Math.min(b.e,Z.w0+Z.span);if(e>a)el('path',{d:zarc(Z,a,e,120,88),fill:b.color||FREE_COLOR},svg)});
+  const g=el('g',{class:'donehrs'},svg);
+  const done=[el('path',{d:'M0 0',fill:'#808080',style:'mix-blend-mode:saturation'},g),el('path',{d:'M0 0',fill:'var(--panel)','fill-opacity':.5},g)];
+  const minor=Z.level===1?5/60:1/60,mid=Z.level===1?.25:5/60,maj=Z.level===1?1:.25,cnt=Math.round(Z.span/minor);
+  const on=(x,m)=>Math.abs(x/m-Math.round(x/m))<1e-6;
+  for(let i=0;i<cnt;i++){const off=i*minor,t=Z.w0+off;
+    if(on(off,maj)){const [x1,y1]=zpt(Z,t,160),[x2,y2]=zpt(Z,t,88);el('line',{x1,y1,x2,y2,stroke:'var(--tick)','stroke-width':1.6},svg)}
+    else if(on(off,mid)){const [x1,y1]=zpt(Z,t,154),[x2,y2]=zpt(Z,t,88);el('line',{x1,y1,x2,y2,stroke:'var(--tick-soft)','stroke-width':.8},svg)}
+    else{const [x1,y1]=zpt(Z,t,150),[x2,y2]=zpt(Z,t,142);el('line',{x1,y1,x2,y2,stroke:'var(--tick-soft)','stroke-width':.7},svg)}}
+  const F='Manrope,sans-serif';
+  if(Z.level===1){
+    for(let k=0;k<3;k++){const t=Z.w0+k,[x,y]=zpt(Z,t,173);el('text',{x,y:y+5,'text-anchor':'middle','font-size':15,'font-weight':600,fill:'var(--fg)','font-family':F},svg).textContent=String(t%24)}
+    for(let k=0;k<3;k++){const [x,y]=zpt(Z,Z.w0+k+.5,173);el('text',{x,y:y+4,'text-anchor':'middle','font-size':10,fill:'var(--muted)','font-family':F},svg).textContent=':30'}
+  }else{
+    for(let m=0;m<60;m+=5){const [x,y]=zpt(Z,Z.w0+m/60,173),q=m%15===0;el('text',{x,y:y+(q?5:4),'text-anchor':'middle','font-size':q?14:11,'font-weight':q?600:400,fill:q?'var(--fg)':'var(--muted)','font-family':F},svg).textContent=pad(m)}
+  }
+  el('circle',{cx:C,cy:CY,r:150,fill:'url(#dome)','pointer-events':'none'},svg);
+  el('circle',{cx:C,cy:CY,r:150,fill:'url(#gloss)','pointer-events':'none'},svg);
+  const cur=el('path',{class:'curhr',d:'M0 0',fill:'#fff','fill-opacity':.24,stroke:'#ffd34d','stroke-width':2.4,'stroke-linejoin':'round'},svg);
+  const sec=Z.level===2?el('circle',{class:'secdot',cx:C,cy:CY-137,r:4.2,fill:'#fff'},svg):null;
+  const hand=el('line',{class:'hand bighand',x1:C,y1:CY,x2:C,y2:CY-157,stroke:'#ff2d55','stroke-width':4.5,'stroke-linecap':'round'},svg);
+  const core=el('line',{x1:C,y1:CY,x2:C,y2:CY-157,stroke:'#fff','stroke-opacity':.85,'stroke-width':1.4,'stroke-linecap':'round'},svg);
+  const halo=el('circle',{class:'halo',cx:C,cy:CY-157,r:9,fill:'#ff2d55','fill-opacity':.35},svg);
+  const tip=el('circle',{class:'hand bighand',cx:C,cy:CY-157,r:7,fill:'#ff2d55',stroke:'#fff','stroke-width':2.2},svg);
+  el('circle',{cx:C,cy:CY,r:88,fill:'#000','fill-opacity':.12},svg);
+  el('circle',{cx:C,cy:CY,r:86,fill:'url(#face)'},svg);
+  const T=el('g',{class:'bigtime',transform:'translate(0 -7)'},svg);
+  const mk2=(x,anchor)=>[el('text',{x,y:CY,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:CY,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
+  const a=mk2(C-10,'end'),b=mk2(C+10,'start');b.forEach(x=>x.classList.add('neon-min'));
+  el('circle',{cx:C,cy:CY-10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:C,cy:CY+10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);
+  const sub=el('text',{class:'tdate',x:C,y:CY+34,'text-anchor':'middle','dominant-baseline':'central'},svg);
+  sub.textContent=`${hhmm(Z.w0)} – ${hhmm(Z.w0+Z.span)}`;
+  return {Z,done,cur,sec,hand,core,halo,tip,a,b};
+}
+function zoomTick(now,h){
+  if(!(zoomLevel>0)||!zsvg)return;
+  const Z=zWin(zoomLevel,h);
+  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zparts=drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
+  const P=zparts,t=Math.min(h,Z.w0+Z.span-1e-6),[x,y]=zpt(Z,t,157);
+  [P.hand,P.core].forEach(l=>{l.setAttribute('x2',x);l.setAttribute('y2',y)});
+  [P.halo,P.tip].forEach(c=>{c.setAttribute('cx',x);c.setAttribute('cy',y)});
+  const dd=t-Z.w0>1e-4?zarc(Z,Z.w0,t,150,88):'M0 0';P.done.forEach(p=>p.setAttribute('d',dd));
+  const u=Z.level===1?.25:1/12,k=Math.floor((t-Z.w0)/u+1e-9);P.cur.setAttribute('d',zarc(Z,Z.w0+k*u,Z.w0+(k+1)*u,152,86));
+  if(P.sec){const an=(now.getSeconds()+now.getMilliseconds()/1000)/60*2*Math.PI-Math.PI/2;P.sec.setAttribute('cx',C+137*Math.cos(an));P.sec.setAttribute('cy',CY+137*Math.sin(an))}
+  const A=Z.level===2?pad(now.getMinutes()):pad(now.getHours()),B=Z.level===2?pad(now.getSeconds()):pad(now.getMinutes());
+  P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});
+  const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');
+  if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;
+}
+function updateZoomUI(){
+  document.querySelectorAll('#zoomCrumb button').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.z===zoomLevel)));
+  const ex=document.getElementById('exitFocus'),lab=zoomLevel>0?'Zoom out':'Exit full clock';ex.setAttribute('aria-label',lab);ex.title=lab;
+  const k=document.querySelector('#focusLeft .dl-k');if(k)k.textContent=['Hours of day left','Left in these 3 hours','Left this hour'][zoomLevel];
+}
+function setZoom(lv,instant){
+  lv=Math.max(0,Math.min(2,lv));if(lv===zoomLevel||!zsvg)return;
+  const now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600,prev=zoomLevel,inward=lv>prev;
+  const small=zWin(Math.max(lv,prev),h),outer=zWin(Math.min(lv,prev),h),[ox,oy]=zpt(outer,small.w0+small.span/2,125);
+  zoomLevel=lv;zparts=null;
+  const showMain=lv===0;bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);
+  if(showMain)buildRaysFor({w0:0,span:24,level:0});else zoomTick(now,h);
+  updateZoomUI();
+  if(instant||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const tgt=showMain?bigSvg:zsvg,rays=document.getElementById('rays');
+  tgt.style.transformOrigin=`${(ox+20)/4}% ${(oy+10)/4}%`;
+  tgt.classList.remove('zin','zout');rays.classList.remove('rayfade');void tgt.getBoundingClientRect();
+  tgt.classList.add(inward?'zin':'zout');rays.classList.add('rayfade');
+}
 /* ---------- focus (enlarged clock) mode ---------- */
 (function(){
   const root=document.documentElement,hit=document.getElementById('clockHit'),btn=document.getElementById('expandBtn'),exit=document.getElementById('exitFocus');
@@ -855,18 +963,27 @@ renderLegend();
         else if(!on&&lock){await lock.release();lock=null}}catch(e){lock=null}
   }
   function setFocus(on){
-    root.classList.toggle('focus',on);exit.hidden=!on;btn.classList.remove('show');
+    if(!on&&zoomLevel>0)setZoom(0,true);
+    root.classList.toggle('focus',on);exit.hidden=!on;document.getElementById('zoomCrumb').hidden=!on;updateZoomUI();btn.classList.remove('show');
     btn.setAttribute('aria-label',on?'Exit full clock':'Enlarge clock');
     if(on){window.scrollTo(0,0);exit.focus({preventScroll:true})}else{btn.focus({preventScroll:true})}
     wake(on);
   }
-  let lastTap=0;
+  let lastTap=0,tapT=null;
+  const inFocus=()=>root.classList.contains('focus');
   hit.addEventListener('click',()=>{const t=Date.now();
-    if(t-lastTap<350){lastTap=0;setFocus(!root.classList.contains('focus'));return}
-    lastTap=t;if(!root.classList.contains('focus'))showBtn()});
+    if(t-lastTap<350){lastTap=0;clearTimeout(tapT);setFocus(!inFocus());return}
+    lastTap=t;
+    if(!inFocus()){showBtn();return}
+    clearTimeout(tapT);tapT=setTimeout(()=>{if(zoomLevel<2)setZoom(zoomLevel+1)},320)});
+  const back=()=>{zoomLevel>0?setZoom(zoomLevel-1):setFocus(false)};
+  document.querySelectorAll('#zoomCrumb button').forEach(b=>b.addEventListener('click',()=>setZoom(+b.dataset.z)));
+  document.addEventListener('gesturestart',e=>{if(inFocus())e.preventDefault()},{passive:false});
+  document.addEventListener('gesturechange',e=>{if(inFocus())e.preventDefault()},{passive:false});
+  document.addEventListener('gestureend',e=>{if(!inFocus())return;e.preventDefault();if(e.scale>1.2&&zoomLevel<2)setZoom(zoomLevel+1);else if(e.scale<.83)back()},{passive:false});
   btn.addEventListener('click',()=>setFocus(!root.classList.contains('focus')));
-  exit.addEventListener('click',()=>setFocus(false));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&root.classList.contains('focus'))setFocus(false)});
+  exit.addEventListener('click',back);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&inFocus())back()});
   document.addEventListener('visibilitychange',()=>{if(root.classList.contains('focus')&&document.visibilityState==='visible')wake(true)});
 })();
 /* ---------- galaxy background ---------- */

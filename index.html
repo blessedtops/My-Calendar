@@ -366,6 +366,9 @@ html.focus .bezel{overflow:hidden}
 @keyframes rayfade{from{opacity:.1}to{opacity:1}}
 .secdot{filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 7px rgba(150,200,255,.7))}
 @media (prefers-reduced-motion:reduce){.zin,.zout,#rays.rayfade{animation:none}}
+.bghour text{font-family:"Cinzel",Georgia,serif;font-weight:700;font-size:150px;letter-spacing:-.02em}
+.bghour-blur{fill:var(--neon);opacity:.13;filter:blur(3px)}
+.bghour-line{fill:none;stroke:var(--neon);stroke-width:1.2px;opacity:.32}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -910,6 +913,12 @@ function drawZoom(svg,Z,sched){
   const tip=el('circle',{class:'hand bighand',cx:C,cy:CY-157,r:7,fill:'#ff2d55',stroke:'#fff','stroke-width':2.2},svg);
   el('circle',{cx:C,cy:CY,r:88,fill:'#000','fill-opacity':.12},svg);
   el('circle',{cx:C,cy:CY,r:86,fill:'url(#face)'},svg);
+  if(Z.level===2){
+    const cp=el('clipPath',{id:'faceClip'},el('defs',{},svg));el('circle',{cx:C,cy:CY,r:84},cp);
+    const bg=el('g',{'clip-path':'url(#faceClip)',class:'bghour','aria-hidden':'true'},svg);
+    el('text',{x:C,y:CY+4,'text-anchor':'middle','dominant-baseline':'central',class:'bghour-blur'},bg).textContent=String(Z.w0%24);
+    el('text',{x:C,y:CY+4,'text-anchor':'middle','dominant-baseline':'central',class:'bghour-line'},bg).textContent=String(Z.w0%24);
+  }
   const T=el('g',{class:'bigtime',transform:'translate(0 -7)'},svg);
   const mk2=(x,anchor)=>[el('text',{x,y:CY,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:CY,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
   const a=mk2(C-10,'end'),b=mk2(C+10,'start');b.forEach(x=>x.classList.add('neon-min'));

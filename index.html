@@ -901,7 +901,12 @@ function drawZoom(svg,Z,sched){
     else{const [x1,y1]=zpt(Z,t,150),[x2,y2]=zpt(Z,t,142);el('line',{x1,y1,x2,y2,stroke:'var(--tick-soft)','stroke-width':.7},svg)}}
   const F='Manrope,sans-serif';
   if(Z.level===1){
-    for(let k=0;k<3;k++){const t=Z.w0+k,[x,y]=zpt(Z,t,173);el('text',{x,y:y+5,'text-anchor':'middle','font-size':15,'font-weight':600,fill:'var(--fg)','font-family':F},svg).textContent=String(t%24)}
+    for(let k=1;k<3;k++){const t=Z.w0+k,[x,y]=zpt(Z,t,173);el('text',{x,y:y+5,'text-anchor':'middle','font-size':15,'font-weight':600,fill:'var(--fg)','font-family':F},svg).textContent=String(t%24)}
+    {const d=Z.span*11/360,[sx,sy]=zpt(Z,Z.w0+d,174),[ex,ey]=zpt(Z,Z.w0+Z.span-d,174),e=(Z.w0+Z.span)%24||24;
+     el('text',{x:sx,y:sy+5,'text-anchor':'middle','font-size':16,'font-weight':700,fill:'var(--fg)','font-family':F},svg).textContent=String(Z.w0%24);
+     el('text',{x:ex,y:ey+5,'text-anchor':'middle','font-size':16,'font-weight':700,fill:'var(--glow)','font-family':F},svg).textContent=String(e);
+     const [ax,ay]=zpt(Z,Z.w0+d*2.1,166),[bx,by]=zpt(Z,Z.w0+d*3,163);
+     el('text',{x:(sx+ex)/2,y:sy-9,'text-anchor':'middle','font-size':9,fill:'var(--muted)','font-family':F,'letter-spacing':'.08em'},svg).textContent='END · START';}
     for(let k=0;k<3;k++){const [x,y]=zpt(Z,Z.w0+k+.5,173);el('text',{x,y:y+4,'text-anchor':'middle','font-size':10,fill:'var(--muted)','font-family':F},svg).textContent=':30'}
   }else{
     for(let m=0;m<60;m+=5){const [x,y]=zpt(Z,Z.w0+m/60,173),q=m%15===0;el('text',{x,y:y+(q?5:4),'text-anchor':'middle','font-size':q?14:11,'font-weight':q?600:400,fill:q?'var(--fg)':'var(--muted)','font-family':F},svg).textContent=pad(m)}

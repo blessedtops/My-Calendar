@@ -960,8 +960,8 @@ function drawZoom(svg,Z,sched){
 /* 1-hour view: the current hour as a slice of 60 minute squares on a sun ray */
 var SQ={TL:[108,100],TR:[252,100],BL:[70,300],BR:[290,300],cols:5,rows:12};
 function sqP(u,v){const a=[SQ.TL[0]+(SQ.TR[0]-SQ.TL[0])*u,SQ.TL[1]+(SQ.TR[1]-SQ.TL[1])*u],b=[SQ.BL[0]+(SQ.BR[0]-SQ.BL[0])*u,SQ.BL[1]+(SQ.BR[1]-SQ.BL[1])*u];return [a[0]+(b[0]-a[0])*v,a[1]+(b[1]-a[1])*v]}
-function sqPoly(i,frac){const c=i%SQ.cols,r=Math.floor(i/SQ.cols),gu=.016,gv=.012,u0=c/SQ.cols+gu,u1=(c+1)/SQ.cols-gu,v0=r/SQ.rows+gv,v1=(r+1)/SQ.rows-gv,ue=frac==null?u1:u0+(u1-u0)*frac;
-  return [sqP(u0,v0),sqP(ue,v0),sqP(ue,v1),sqP(u0,v1)].map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
+function sqPoly(i,frac,s0){const c=i%SQ.cols,r=Math.floor(i/SQ.cols),gu=.016,gv=.012,u0=c/SQ.cols+gu,u1=(c+1)/SQ.cols-gu,v0=r/SQ.rows+gv,v1=(r+1)/SQ.rows-gv,ue=frac==null?u1:u0+(u1-u0)*frac,us=u0+(u1-u0)*(s0||0);
+  return [sqP(us,v0),sqP(ue,v0),sqP(ue,v1),sqP(us,v1)].map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
 
 /* 3-hour view: the current 3-hour sector, cut from the 24 h dial at its true angle and enlarged */
 function drawSector(svg,Z,sched){
@@ -995,8 +995,8 @@ function drawSector(svg,Z,sched){
   const G=el('g',{class:'slice'},svg);
   el('path',{d:ann(R+3,RO,a1,a2),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
   el('path',{d:ann(RO-7,RO-2,a1+.5,a2-.5),fill:blues[Math.floor(Z.w0/3)%8],'fill-opacity':.9},G);
-  const band=(RO-9-RI)/6,geo=(i,fr)=>{const k=Math.floor(i/6),r=i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
-    return ann(r1,r2,d1,fr==null?d2:d1+(d2-d1)*fr)};
+  const band=(RO-9-RI)/6,geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
+    return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
   const colors=[],cells=[];
   for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(b&&b.color||FREE_COLOR);cells.push(el('path',{d:geo(i),fill:colors[i]},G))}
   const prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
@@ -1009,7 +1009,7 @@ function drawSector(svg,Z,sched){
   const a=mk(CX-9,'end'),b=mk(CX+9,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr3'));
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},svg).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
-  return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr)=>e.setAttribute('d',geo(i,fr))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
@@ -1056,16 +1056,16 @@ function drawSlice(svg,Z,sched){
   if(three){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
-  return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1,N,UM,shape:(e,i,fr)=>e.setAttribute('points',sqPoly(i,fr))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 function zoomTick(now,h){
   if(!(zoomLevel>0)||!zsvg)return;
   const Z=zWin(zoomLevel,h);
   if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
-    if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.28')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
+    if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
       P.shape(P.curOut,m);P.prog.setAttribute('fill',P.colors[m])}
-    P.shape(P.prog,m,Math.max(.02,fr));
+    P.shape(P.prog,m,1,Math.min(.985,fr));
     const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});
     const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;
     return}

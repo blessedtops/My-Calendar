@@ -390,6 +390,10 @@ html.focus.z1h .bezel{overflow:visible}
 .srccut{filter:drop-shadow(0 0 3px rgba(255,205,70,.95)) drop-shadow(0 0 8px rgba(255,180,40,.6))}
 .neon-tube.neon-hr3,.neon-core.neon-hr3{font-size:52px}
 .sechr{font-family:"Manrope",sans-serif;font-weight:700;font-size:16px;fill:var(--fg);paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round}
+.mnum{font-family:var(--mono);font-size:8.5px;font-weight:600;pointer-events:none}
+.mnum.mnow{font-size:10px;font-weight:700;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:2px;stroke-linejoin:round}
+.curlab{font-family:var(--mono);font-weight:700;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:2.2px;stroke-linejoin:round;pointer-events:none}
+.curlab .cl2{font-weight:500;fill-opacity:.8}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1046,7 +1050,9 @@ function drawSlice(svg,Z,sched){
     cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},G))}
   const prog=el('polygon',{points:sqPoly(0,0),fill:colors[0],class:'mprog'},G);
   const curOut=el('polygon',{points:sqPoly(0),fill:'none',class:'mcur'},G);
-  for(let r=0;r<SQ.rows;r++){const [x,y]=sqP(0,(r+.5)/SQ.rows);el('text',{x:x-7,y,'text-anchor':'end','dominant-baseline':'central',class:'sqlab'},G).textContent=three?hhmm(Z.w0+r*.5):':'+pad(r*5)}
+  const nums=[];
+  for(let k=0;k<N;k++){const c=k%SQ.cols,r=Math.floor(k/SQ.cols),[x,y]=sqP((c+.5)/SQ.cols,(r+.5)/SQ.rows);
+    nums.push(el('text',{x,y,'text-anchor':'middle','dominant-baseline':'central',class:'mnum'},G));nums[k].textContent=pad(k*UM)}
   /* neon time + date on top */
   const T=el('g',{class:'bigtime'},svg),ty=38;
   const mk=(x,anchor)=>[el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
@@ -1056,7 +1062,7 @@ function drawSlice(svg,Z,sched){
   if(three){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
-  return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,nums,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 function zoomTick(now,h){
   if(!(zoomLevel>0)||!zsvg)return;
@@ -1064,7 +1070,7 @@ function zoomTick(now,h){
   if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
-      P.shape(P.curOut,m);P.prog.setAttribute('fill',P.colors[m])}
+      P.shape(P.curOut,m);if(P.nums)P.nums.forEach((t,i)=>{t.setAttribute('fill',i<m?'var(--muted)':i===m?'#ffffff':textOn(P.colors[i]));t.setAttribute('fill-opacity',i<m?'.55':'1');t.classList.toggle('mnow',i===m)});P.prog.setAttribute('fill',P.colors[m])}
     P.shape(P.prog,m,1,Math.min(.985,fr));
     const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});
     const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;

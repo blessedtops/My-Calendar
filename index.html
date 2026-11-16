@@ -385,6 +385,7 @@ html.focus.z1h .bezel{overflow:visible}
 .sqlab{font-family:var(--mono);font-size:9px;fill:var(--muted)}
 .slray{filter:drop-shadow(0 0 6px rgba(255,190,80,.45))}
 @media (prefers-reduced-motion:reduce){.mcur{animation:none}}
+.neon-tube.neon-hr,.neon-core.neon-hr{font-size:60px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -983,7 +984,7 @@ function drawSlice(svg,Z,sched){
   /* neon time + date on top */
   const T=el('g',{class:'bigtime'},svg),ty=40;
   const mk=(x,anchor)=>[el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
-  const a=mk(C-10,'end'),b=mk(C+10,'start');b.forEach(x=>x.classList.add('neon-min'));
+  const a=mk(C-10,'end'),b=mk(C+10,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr'));
   el('circle',{cx:C,cy:ty-10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:C,cy:ty+10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate',x:C,y:80,'text-anchor':'middle','dominant-baseline':'central'},svg).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
   return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1};

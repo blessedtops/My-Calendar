@@ -396,6 +396,11 @@ html.focus.z1h .bezel{overflow:visible}
 .curlab .cl2{font-weight:500;fill-opacity:.8}
 .halfmark{stroke:#fff;stroke-opacity:.32;stroke-width:3.2px;stroke-linecap:round;pointer-events:none}
 .sechr-cur{font-family:"Poppins","Arial Black",system-ui,sans-serif;font-weight:800;font-size:28px;letter-spacing:.01em;fill:#0a1428;stroke:var(--neon-core);stroke-width:1.6px;stroke-linejoin:round;paint-order:fill;filter:drop-shadow(0 0 1.5px var(--neon)) drop-shadow(0 0 5px var(--neon)) drop-shadow(0 0 13px var(--neon));animation:hrglow 3.2s ease-in-out infinite;pointer-events:none}
+.dweb path{stroke:#efe2c8;stroke-opacity:.32;stroke-width:.7px;stroke-linejoin:round}
+.dcenter{stroke:#efe2c8;stroke-opacity:.35;stroke-width:.8px}
+.dbead{fill:#2ec4b6;stroke:#d6fff9;stroke-width:1px;filter:drop-shadow(0 0 3px #2ec4b6) drop-shadow(0 0 8px rgba(46,196,182,.7))}
+.dream{filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.eagle{filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1035,17 +1040,40 @@ function drawSlice(svg,Z,sched){
   el('path',{d:ray,fill:rc[1],'fill-opacity':.55,filter:'url(#slBlur)'},svg);
   el('path',{d:ray,fill:'url(#slRay)',class:'slray'},svg);
   el('path',{d:'M122 306 C142 322,156 338,166 370 C172 348,186 330,214 306 Z',fill:rc[0],'fill-opacity':.55},svg);
-  /* source clock: a faint ring the slice was cut from */
-  {const RX=C,RY=50,R=94,rg=el('linearGradient',{id:'srcRing',x1:'0',x2:'0',y1:'0',y2:'1'},df);
-   [['0','#ffffff',.9],['.45','#c9d6ff',.7],['.62','#ffd34d',.85],['1','#ff8a00',.95]].forEach(([o,c,a])=>el('stop',{offset:o,'stop-color':c,'stop-opacity':a},rg));
-   const S=el('g',{class:'srcring','aria-hidden':'true'},svg);
-   el('circle',{cx:RX,cy:RY,r:R,fill:'none',stroke:'url(#srcRing)','stroke-width':7,'stroke-opacity':.25,filter:'url(#slBlur)'},S);
-   el('circle',{cx:RX,cy:RY,r:R,fill:'#0b0f1a','fill-opacity':.18,stroke:'url(#srcRing)','stroke-width':2,'stroke-opacity':.6},S);
-   el('circle',{cx:RX,cy:RY,r:R-9,fill:'none',stroke:'var(--tick-soft)','stroke-width':.6,'stroke-opacity':.45},S);
-   for(let k=0;k<24;k++){const an=(k/24*360-90)*Math.PI/180,r0=R-(k%3?4:7);
-     el('line',{x1:RX+r0*Math.cos(an),y1:RY+r0*Math.sin(an),x2:RX+(R-1.5)*Math.cos(an),y2:RY+(R-1.5)*Math.sin(an),stroke:'var(--tick-soft)','stroke-width':k%3?.6:1.1,'stroke-opacity':.6},S)}
-   const a0=(h0/24*360-90)*Math.PI/180,a1=((h0+Z.span)/24*360-90)*Math.PI/180,rr=R-4.5;
-   el('path',{d:`M${RX+rr*Math.cos(a0)} ${RY+rr*Math.sin(a0)} A${rr} ${rr} 0 ${Z.span>12?1:0} 1 ${RX+rr*Math.cos(a1)} ${RY+rr*Math.sin(a1)}`,fill:'none',stroke:'#ffd34d','stroke-width':6,'stroke-linecap':'round',class:'srccut'},S);}
+  /* dreamcatcher: hoop, spiral web, bead at the current hour, feathered strands */
+  {const RX=C,RY=50,R=94,deg2=t=>(t-90)*Math.PI/180,H=(r,t)=>[RX+r*Math.cos(deg2(t)),RY+r*Math.sin(deg2(t))];
+   const S=el('g',{class:'dream','aria-hidden':'true'},svg);
+   const hg=el('linearGradient',{id:'hoopG',x1:'0',x2:'1',y1:'0',y2:'1'},df);
+   [['0','#d9a86a'],['.5','#8a5a2b'],['1','#5c3816']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},hg));
+   /* web */
+   const N=12,web=el('g',{class:'dweb'},S);let prev=[];for(let k=0;k<N;k++)prev.push(H(R-5,k*360/N));
+   let rot=0,rr=R-5;
+   while(rr>20){rot+=180/N;rr*=.8;const cur=[];for(let k=0;k<N;k++)cur.push(H(rr,k*360/N+rot));
+     let d='';for(let k=0;k<N;k++){const p1=prev[k],c1=cur[k],p2=prev[(k+1)%N];d+=`${k?'L':'M'}${p1[0].toFixed(2)} ${p1[1].toFixed(2)}L${c1[0].toFixed(2)} ${c1[1].toFixed(2)}`}
+     d+=`L${prev[0][0].toFixed(2)} ${prev[0][1].toFixed(2)}`;el('path',{d,fill:'none'},web);prev=cur}
+   el('circle',{cx:RX,cy:RY,r:rr+1.5,fill:'none',class:'dcenter'},web);
+   /* hoop wrapped in leather */
+   el('circle',{cx:RX,cy:RY,r:R,fill:'none',stroke:'#000','stroke-opacity':.35,'stroke-width':9,filter:'url(#slBlur)'},S);
+   el('circle',{cx:RX,cy:RY,r:R,fill:'none',stroke:'url(#hoopG)','stroke-width':7},S);
+   el('circle',{cx:RX,cy:RY,r:R,fill:'none',stroke:'#f0d2a0','stroke-opacity':.55,'stroke-width':7,'stroke-dasharray':'1.1 2.6'},S);
+   el('circle',{cx:RX,cy:RY,r:R+3.2,fill:'none',stroke:'#3a2210','stroke-opacity':.5,'stroke-width':.8},S);
+   /* strands with beads and feathers, hanging beside the slice */
+   if(!document.getElementById('eagleG')){const eg=el('linearGradient',{id:'eagleG',x1:'0',x2:'0',y1:'0',y2:'1'},df);
+     [['0','#fbf7ee'],['.5','#f1e9d8'],['.6','#7a5634'],['.72','#3b2414'],['1','#1c120a']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},eg))}
+   const feather=(x,y,tilt)=>{const g=el('g',{transform:`translate(${x} ${y}) rotate(${tilt})`,class:'eagle'},S);
+     /* down fluff at the base */
+     for(let k=0;k<7;k++){const a=-60+k*20;el('path',{d:`M0 6 q${(Math.sin(a*Math.PI/180)*7).toFixed(1)} -2 ${(Math.sin(a*Math.PI/180)*11).toFixed(1)} 6`,fill:'none',stroke:'#fff','stroke-opacity':.7,'stroke-width':1.1,'stroke-linecap':'round'},g)}
+     /* vane: long, broad, rounded tip, slight asymmetry and a split */
+     el('path',{d:'M0 4 C-7 14,-12 34,-12 56 C-12 70,-8 80,-2 86 L-4 62 L0 88 C6 82,11 70,11 56 C11 34,7 14,0 4 Z',fill:'url(#eagleG)'},g);
+     /* barbs */
+     for(let k=0;k<13;k++){const yy=14+k*5.6,w=Math.min(10,4+k*1.1);el('path',{d:`M0 ${yy} q${-w*.6} 2 ${-w} 6 M0 ${yy} q${w*.6} 2 ${w} 6`,fill:'none',stroke:k>7?'#000':'#9b8a70','stroke-opacity':k>7?.35:.35,'stroke-width':.45},g)}
+     /* quill */
+     el('path',{d:'M0 -3 L0 84',stroke:'#efe4cf','stroke-width':1,'stroke-linecap':'round'},g);
+     el('path',{d:'M0 -6 L0 4',stroke:'#c9a06a','stroke-width':2,'stroke-linecap':'round'},g)};
+   [[245,46,236,10],[115,314,236,-10]].forEach(([t,ex,ey,tilt])=>{const [sx,sy]=H(R+2,t);
+     el('path',{d:`M${sx} ${sy} Q${(sx+ex)/2+(ex<C?-6:6)} ${(sy+ey)/2} ${ex} ${ey}`,fill:'none',stroke:'#c9a06a','stroke-width':1.1},S);
+     feather(ex,ey,tilt)});
+}
   /* slice body */
   const G=el('g',{class:'slice'},svg);
   const body=[sqP(0,0),sqP(1,0),sqP(1,1),sqP(0,1)];

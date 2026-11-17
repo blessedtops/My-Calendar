@@ -1018,12 +1018,12 @@ function drawSector(svg,Z,sched){
   for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr'},G).textContent=String((Z.w0+k)%24||(k?24:0))}
   for(let r=0;r<6;r++){const q=P(RI+(r+.5)*band,a1-4.5);el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G).textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
-  const T=el('g',{class:'bigtime'},svg),ty=CYY-4;
+  const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;
   const mk=(x,anchor)=>[el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
   const a=mk(CX-9,'end'),b=mk(CX+9,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr3'));
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
-  const dn=new Date();el('text',{class:'tdate',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},svg).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
-  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+  const dn=new Date();el('text',{class:'tdate',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
+  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
@@ -1088,15 +1088,15 @@ function drawSlice(svg,Z,sched){
   for(let k=0;k<N;k++){const c=k%SQ.cols,r=Math.floor(k/SQ.cols),[x,y]=sqP((c+.5)/SQ.cols,(r+.5)/SQ.rows);
     nums.push(el('text',{x,y,'text-anchor':'middle','dominant-baseline':'central',class:'mnum'},G));nums[k].textContent=pad(k*UM)}
   /* neon time + date on top */
-  const T=el('g',{class:'bigtime'},svg),ty=38;
+  const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=38;
   const mk=(x,anchor)=>[el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
   const a=mk(C-10,'end'),b=mk(C+10,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr'));
   el('circle',{cx:C,cy:ty-10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:C,cy:ty+10,r:4.2,class:'tdot',filter:'url(#neonGlow)'},T);
-  const dn=new Date();el('text',{class:'tdate',x:C,y:80,'text-anchor':'middle','dominant-baseline':'central'},svg).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
+  const dn=new Date();el('text',{class:'tdate',x:C,y:80,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
   if(three){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
-  return {kind:'slice',Z,cells,colors,prog,curOut,nums,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,nums,TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 function zoomTick(now,h){
   if(!(zoomLevel>0)||!zsvg)return;
@@ -1106,7 +1106,7 @@ function zoomTick(now,h){
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
       P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.nums)P.nums.forEach((t,i)=>{t.setAttribute('fill',i<m?'var(--muted)':i===m?'#ffffff':textOn(P.colors[i]));t.setAttribute('fill-opacity',i<m?'.55':'1');t.classList.toggle('mnow',i===m)});P.prog.setAttribute('fill',P.colors[m])}
     P.shape(P.prog,m,1,Math.min(.985,fr));
-    const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});
+    const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});if(P.TG&&P.lastTxt!==A+B){P.lastTxt=A+B;try{const bb=P.TG.getBBox();if(bb.width>0)P.TG.setAttribute('transform',`translate(${(P.ccx-(bb.x+bb.width/2)).toFixed(1)} ${(P.ccy-(bb.y+bb.height/2)).toFixed(1)})`)}catch(e){}}
     const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;
     return}
   const P=zparts,t=Math.min(h,Z.w0+Z.span-1e-6),[x,y]=zpt(Z,t,157);

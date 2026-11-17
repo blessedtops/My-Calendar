@@ -395,6 +395,7 @@ html.focus.z1h .bezel{overflow:visible}
 .curlab{font-family:var(--mono);font-weight:700;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:2.2px;stroke-linejoin:round;pointer-events:none}
 .curlab .cl2{font-weight:500;fill-opacity:.8}
 .halfmark{stroke:#fff;stroke-opacity:.32;stroke-width:3.2px;stroke-linecap:round;pointer-events:none}
+.sechr-cur{font-family:"Manrope",sans-serif;font-weight:800;font-size:22px;fill:var(--neon-core);stroke:var(--neon);stroke-width:1.2px;stroke-linejoin:round;filter:drop-shadow(0 0 2px var(--neon)) drop-shadow(0 0 7px var(--neon)) drop-shadow(0 0 16px var(--neon));animation:hrglow 3.2s ease-in-out infinite;pointer-events:none}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1007,7 +1008,9 @@ function drawSector(svg,Z,sched){
   const prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
   {const rh=RI+3*band;el('path',{d:`M${f(P(rh,a1+.3))}A${rh} ${rh} 0 0 1 ${f(P(rh,a2-.3))}`,fill:'none',class:'halfmark'},G);}
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
-  for(let k=0;k<=3;k++){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr'},G).textContent=String((Z.w0+k)%24||(k?24:0))}
+  const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
+  const curHr=i=>{const k=Math.floor(i/6),q=P(RO-24,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=String((Z.w0+k)%24)};
+  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr'},G).textContent=String((Z.w0+k)%24||(k?24:0))}
   for(let r=0;r<6;r++){const q=P(RI+(r+.5)*band,a1-4.5);el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G).textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
   const T=el('g',{class:'bigtime'},svg),ty=CYY-4;
@@ -1015,7 +1018,7 @@ function drawSector(svg,Z,sched){
   const a=mk(CX-9,'end'),b=mk(CX+9,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr3'));
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},svg).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
-  return {kind:'slice',Z,cells,colors,prog,curOut,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
@@ -1073,7 +1076,7 @@ function zoomTick(now,h){
   if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
-      P.shape(P.curOut,m);if(P.nums)P.nums.forEach((t,i)=>{t.setAttribute('fill',i<m?'var(--muted)':i===m?'#ffffff':textOn(P.colors[i]));t.setAttribute('fill-opacity',i<m?'.55':'1');t.classList.toggle('mnow',i===m)});P.prog.setAttribute('fill',P.colors[m])}
+      P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.nums)P.nums.forEach((t,i)=>{t.setAttribute('fill',i<m?'var(--muted)':i===m?'#ffffff':textOn(P.colors[i]));t.setAttribute('fill-opacity',i<m?'.55':'1');t.classList.toggle('mnow',i===m)});P.prog.setAttribute('fill',P.colors[m])}
     P.shape(P.prog,m,1,Math.min(.985,fr));
     const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});
     const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;

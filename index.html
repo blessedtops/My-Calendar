@@ -1193,6 +1193,8 @@ function drawSlice(svg,Z,sched){
    /* outer day ring: 24 ray-colored hours, past hours gone, current hour glowing */
    {const hn=new Date().getHours(),RR=R+11,rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
     el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'#000','stroke-opacity':.25,'stroke-width':9,filter:'url(#slBlur)'},S);
+    el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'var(--tick-soft)','stroke-width':.7,'stroke-opacity':.45},S);
+    for(let k=0;k<hn;k++){const g=1.1,[x0,y0]=H(RR,k*15+g),[x1,y1]=H(RR,(k+1)*15-g);el('path',{d:`M${x0.toFixed(2)} ${y0.toFixed(2)}A${RR} ${RR} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`,fill:'none',stroke:'#c8d2ea','stroke-opacity':.14,'stroke-width':6.5,'stroke-linecap':'round'},S)}
     for(let k=0;k<24;k++){if(k<hn)continue;const g=1.1,a0=k*15+g,a1=(k+1)*15-g,[x0,y0]=H(RR,a0),[x1,y1]=H(RR,a1),cur=k===hn;
       const dA=`M${x0.toFixed(2)} ${y0.toFixed(2)}A${RR} ${RR} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
       if(cur){el('path',{d:dA,class:'ringneon-tube',filter:'url(#neonGlow)'},S);el('path',{d:dA,class:'ringneon-core'},S)}

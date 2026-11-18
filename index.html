@@ -390,8 +390,8 @@ html.focus.z1h .bezel{overflow:visible}
 .srccut{filter:drop-shadow(0 0 3px rgba(255,205,70,.95)) drop-shadow(0 0 8px rgba(255,180,40,.6))}
 .neon-tube.neon-hr3,.neon-core.neon-hr3{font-size:52px}
 .sechr{font-family:"Manrope",sans-serif;font-weight:700;font-size:16px;fill:var(--fg);paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round}
-.mnum{font-family:var(--mono);font-size:8.5px;font-weight:600;pointer-events:none}
-.mnum.mnow{font-size:10px;font-weight:700;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:2px;stroke-linejoin:round}
+.mnum{font-family:var(--mono);font-size:6px;font-weight:600;opacity:.8;pointer-events:none}
+.mnum.mnow{font-size:6.5px;font-weight:700;opacity:.9;paint-order:stroke;stroke:rgba(0,0,0,.45);stroke-width:1.2px;stroke-linejoin:round}
 .curlab{font-family:var(--mono);font-weight:700;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:2.2px;stroke-linejoin:round;pointer-events:none}
 .curlab .cl2{font-weight:500;fill-opacity:.8}
 .halfmark{stroke:#fff;stroke-opacity:.32;stroke-width:3.2px;stroke-linecap:round;pointer-events:none}
@@ -1071,7 +1071,13 @@ function drawZoom(svg,Z,sched){
 /* 1-hour view: the current hour as a slice of 60 minute squares on a sun ray */
 var SQ={TL:[108,100],TR:[252,100],BL:[70,300],BR:[290,300],cols:5,rows:12};
 function sqP(u,v){const a=[SQ.TL[0]+(SQ.TR[0]-SQ.TL[0])*u,SQ.TL[1]+(SQ.TR[1]-SQ.TL[1])*u],b=[SQ.BL[0]+(SQ.BR[0]-SQ.BL[0])*u,SQ.BL[1]+(SQ.BR[1]-SQ.BL[1])*u];return [a[0]+(b[0]-a[0])*v,a[1]+(b[1]-a[1])*v]}
+function sqV(r,f){if(!SQ.round)return (r+f)/SQ.rows;const g1=.55,g2=1.5,T=SQ.rows+g1*5+(g2-g1);return (r+f+g1*Math.floor(r/2)+(r>=6?g2-g1:0))/T}
+function sqHalf(){return (sqV(5,1)+sqV(6,0))/2}
 function sqPoly(i,frac,s0){const c=i%SQ.cols,r=Math.floor(i/SQ.cols),gu=.016,gv=.012,u0=c/SQ.cols+gu,u1=(c+1)/SQ.cols-gu,v0=r/SQ.rows+gv,v1=(r+1)/SQ.rows-gv,ue=frac==null?u1:u0+(u1-u0)*frac,us=u0+(u1-u0)*(s0||0);
+  if(SQ.round){const uc=(c+.5)/SQ.cols,vc=sqV(r,.5),[cx,cy]=sqP(uc,vc),w=Math.hypot(...[0,1].map(k=>sqP(u1,vc)[k]-sqP(u0,vc)[k])),h=Math.hypot(...[0,1].map(k=>sqP(uc,sqV(r,.98))[k]-sqP(uc,sqV(r,.02))[k])),R=Math.min(w,h)/2*.96,
+      xl=cx-R+2*R*(s0||0),xr=cx-R+2*R*(frac==null?1:frac),pts=[];
+    for(let k=0;k<36;k++){const t=k/36*2*Math.PI;pts.push([Math.max(xl,Math.min(xr,cx+R*Math.cos(t))),cy+R*Math.sin(t)])}
+    return pts.map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
   return [sqP(us,v0),sqP(ue,v0),sqP(ue,v1),sqP(us,v1)].map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
 
 /* 3-hour view: the current 3-hour sector, cut from the 24 h dial at its true angle and enlarged */
@@ -1128,7 +1134,7 @@ function drawSector(svg,Z,sched){
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
-  const three=Z.level===1,N=three?18:60,UM=three?10:1;SQ.cols=three?3:5;SQ.rows=three?6:12;
+  const three=Z.level===1,N=three?18:60,UM=three?10:1;SQ.cols=three?3:5;SQ.rows=three?6:12;SQ.round=!three;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   const h0=Z.w0%24,dusk=h0===6||h0===17||h0===18,night=!dusk&&(h0>18||h0<6);
   const rc=night?['#ffffff','#c9d6ff','#7f97d8']:dusk?['#fff3e8','#ffb9a0','#9a86d8']:['#fff5cf','#ffc93d','#ff8a00'];
@@ -1174,6 +1180,9 @@ function drawSlice(svg,Z,sched){
    [[245,46,236,10],[115,314,236,-10]].forEach(([t,ex,ey,tilt])=>{const [sx,sy]=H(R+2,t);
      el('path',{d:`M${sx} ${sy} Q${(sx+ex)/2+(ex<C?-6:6)} ${(sy+ey)/2} ${ex} ${ey}`,fill:'none',stroke:'#c9a06a','stroke-width':1.1},S);
      feather(ex,ey,tilt)});
+   [[SQ.BL[0]-1,SQ.BL[1],-1,14],[SQ.BR[0]+1,SQ.BR[1],1,-14]].forEach(([x,y,sd,tilt])=>{const ex=x+sd*5,ey=y+12;
+     el('path',{d:`M${x} ${y} Q${x+sd*1} ${y+6} ${ex} ${ey}`,fill:'none',stroke:'#c9a06a','stroke-width':1.1},S);
+     el('circle',{cx:x,cy:y,r:1.8,fill:'#c9a06a'},S);feather(ex,ey,tilt)});
 }
   /* slice body */
   const G=el('g',{class:'slice'},svg);
@@ -1184,10 +1193,10 @@ function drawSlice(svg,Z,sched){
     cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},G))}
   const logOv=el('g',{class:'logov'},G);
   const prog=el('polygon',{points:sqPoly(0,0),fill:colors[0],class:'mprog'},G);
-  if(!three){const [x1,y1]=sqP(0,.5),[x2,y2]=sqP(1,.5);el('line',{x1:x1+1,y1,x2:x2-1,y2,class:'halfmark'},G);}
+  if(!three){const hv=sqHalf(),[x1,y1]=sqP(0,hv),[x2,y2]=sqP(1,hv);el('line',{x1:x1+1,y1,x2:x2-1,y2,class:'halfmark'},G);}
   const curOut=el('polygon',{points:sqPoly(0),fill:'none',class:'mcur'},G);
   const nums=[];
-  for(let k=0;k<N;k++){const c=k%SQ.cols,r=Math.floor(k/SQ.cols),[x,y]=sqP((c+.5)/SQ.cols,(r+.5)/SQ.rows);
+  for(let k=0;k<N;k++){const c=k%SQ.cols,r=Math.floor(k/SQ.cols),[x,y]=sqP((c+.5)/SQ.cols,sqV(r,.5));
     nums.push(el('text',{x,y,'text-anchor':'middle','dominant-baseline':'central',class:'mnum'},G));nums[k].textContent=pad(k*UM)}
   /* neon time + date on top */
   const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=38;

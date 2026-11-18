@@ -476,6 +476,8 @@ html.focus.z1h .bezel{overflow:visible}
 .srccur{filter:drop-shadow(0 0 3px rgba(255,205,70,.9)) drop-shadow(0 0 8px rgba(255,180,40,.5))}
 html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 118px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.845));padding:0;max-width:none}
 html.focus.zlv2 .bezel{padding:0}
+.ringneon-tube{fill:none;stroke:var(--neon);stroke-width:8px;stroke-linecap:round;filter:drop-shadow(0 0 3px var(--neon)) drop-shadow(0 0 9px var(--neon));animation:hrglow 3.2s ease-in-out infinite}
+.ringneon-core{fill:none;stroke:var(--neon-core);stroke-width:2.6px;stroke-linecap:round}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1192,7 +1194,9 @@ function drawSlice(svg,Z,sched){
    {const hn=new Date().getHours(),RR=R+11,rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
     el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'#000','stroke-opacity':.25,'stroke-width':9,filter:'url(#slBlur)'},S);
     for(let k=0;k<24;k++){if(k<hn)continue;const g=1.1,a0=k*15+g,a1=(k+1)*15-g,[x0,y0]=H(RR,a0),[x1,y1]=H(RR,a1),cur=k===hn;
-      el('path',{d:`M${x0.toFixed(2)} ${y0.toFixed(2)}A${RR} ${RR} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`,fill:'none',stroke:rayCol(k),'stroke-width':cur?9:6.5,'stroke-linecap':'round','stroke-opacity':cur?1:.9,class:cur?'srccur':''},S)}
+      const dA=`M${x0.toFixed(2)} ${y0.toFixed(2)}A${RR} ${RR} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+      if(cur){el('path',{d:dA,class:'ringneon-tube',filter:'url(#neonGlow)'},S);el('path',{d:dA,class:'ringneon-core'},S)}
+      else el('path',{d:dA,fill:'none',stroke:rayCol(k),'stroke-width':6.5,'stroke-linecap':'round','stroke-opacity':.9},S)}
     for(let k=0;k<24;k+=3){const [x0,y0]=H(RR+5.5,k*15),[x1,y1]=H(RR+9,k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,stroke:'#f0d2a0','stroke-opacity':.6,'stroke-width':1.2,'stroke-linecap':'round'},S)}}
    /* strands with beads and feathers, hanging beside the slice */
    if(!document.getElementById('eagleG')){const eg=el('linearGradient',{id:'eagleG',x1:'0',x2:'0',y1:'0',y2:'1'},df);

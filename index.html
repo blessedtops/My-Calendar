@@ -474,6 +474,8 @@ html.focus.z1h .bezel{overflow:visible}
 .catcard input[type=text]{flex:1 1 140px;min-width:0;font:inherit;font-size:14px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px}
 .catcard input[type=color]{width:40px;height:38px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
 .srccur{filter:drop-shadow(0 0 3px rgba(255,205,70,.9)) drop-shadow(0 0 8px rgba(255,180,40,.5))}
+html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 118px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.845));padding:0;max-width:none}
+html.focus.zlv2 .bezel{padding:0}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1243,7 +1245,7 @@ function drawSlice(svg,Z,sched){
 function zoomTick(now,h){
   if(!(zoomLevel>0)||!zsvg)return;
   const Z=zWin(zoomLevel,h);
-  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-66 -74 492 548':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
+  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -72 448 530':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
       P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.ringUpd)P.ringUpd(h);
@@ -1279,7 +1281,7 @@ function setZoom(lv,instant){
   const now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600,prev=zoomLevel,inward=lv>prev;
   const small=zWin(Math.max(lv,prev),h),outer=zWin(Math.min(lv,prev),h),[ox,oy]=zpt(outer,small.w0+small.span/2,125);
   zoomLevel=lv;zparts=null;
-  const showMain=lv===0;bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);document.documentElement.classList.toggle('z1h',lv>=1);
+  const showMain=lv===0;bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);document.documentElement.classList.toggle('z1h',lv>=1);document.documentElement.classList.toggle('zlv2',lv===2);
   if(showMain)buildRaysFor({w0:0,span:24,level:0});else zoomTick(now,h);
   updateZoomUI();
   if(instant||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -1299,7 +1301,7 @@ function setZoom(lv,instant){
         else if(!on&&lock){await lock.release();lock=null}}catch(e){lock=null}
   }
   function setFocus(on){
-    if(!on&&zoomLevel>0)setZoom(0,true);root.classList.remove('z1h');
+    if(!on&&zoomLevel>0)setZoom(0,true);root.classList.remove('z1h');root.classList.remove('zlv2');
     root.classList.toggle('focus',on);exit.hidden=!on;const fm=document.getElementById('focusMoon');fm.hidden=!on;if(on){fm.dataset.d='';drawFocusMoon()}document.getElementById('zoomCrumb').hidden=!on;updateZoomUI();btn.classList.remove('show');
     btn.setAttribute('aria-label',on?'Exit full clock':'Enlarge clock');
     if(on){window.scrollTo(0,0);exit.focus({preventScroll:true})}else{btn.focus({preventScroll:true})}

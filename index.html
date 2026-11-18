@@ -461,6 +461,19 @@ html.focus.z1h .bezel{overflow:visible}
 @media (prefers-reduced-motion:reduce){.runpill .dia{animation:none}}
 .tenblk{fill:#fff;fill-opacity:.06;stroke:#ffd34d;stroke-opacity:.38;stroke-width:1px;stroke-linejoin:round}
 .sunday{filter:drop-shadow(0 0 3px rgba(255,190,60,.95)) drop-shadow(0 0 7px rgba(255,160,30,.6))}
+.cartbtn{font-size:22px;letter-spacing:.06em;padding:8px 16px}
+.actcats{display:flex;flex-direction:column;gap:12px}
+.actsec{display:flex;flex-direction:column;gap:6px}
+.acthead{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--fg)}
+.acthead .em{font-size:16px}
+.catlist{display:flex;flex-direction:column;gap:10px}
+.catcard{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.catcard .actrow{padding-left:22px}
+.catcard .addact{align-self:flex-start;margin-left:22px}
+.catcard input[type=text].emo{width:4.2em;flex:0 0 auto;text-align:center;font-size:17px}
+.catcard input[type=text]{flex:1 1 140px;min-width:0;font:inherit;font-size:14px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px}
+.catcard input[type=color]{width:40px;height:38px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
+.srccur{filter:drop-shadow(0 0 3px rgba(255,205,70,.9)) drop-shadow(0 0 8px rgba(255,180,40,.5))}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -470,13 +483,13 @@ html.focus.z1h .bezel{overflow:visible}
 <nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button></nav>
 <div class="focusmoon" id="focusMoon" hidden><svg viewBox="0 0 200 200" role="img" aria-label="This month"></svg></div>
 <div class="logbar" id="logBar" hidden>
-  <button type="button" class="logbtn" id="logOpen"><span aria-hidden="true">＋</span> Log activity</button>
+  <button type="button" class="logbtn cartbtn" id="logOpen" aria-label="Activity Cart" title="Activity Cart"><span aria-hidden="true">➕🛒🕰️</span></button>
   <button type="button" class="logbtn ghost" id="repOpen">Day report</button>
 </div>
 <div class="lpwrap" id="logPanel" hidden>
   <section class="lpanel" role="dialog" aria-modal="true" aria-labelledby="lpTitle">
-    <div class="lphead"><h2 id="lpTitle">Log activity</h2><button type="button" class="lpx" data-close aria-label="Close">×</button></div>
-    <div class="actgrid" id="actGrid" role="radiogroup" aria-label="Activity"></div>
+    <div class="lphead"><h2 id="lpTitle">Activity Cart</h2><button type="button" class="lpx" data-close aria-label="Close">×</button></div>
+    <div class="actcats" id="actGrid" role="radiogroup" aria-label="Activity"></div>
     <div class="lprow">
       <label>From <input type="time" id="logFrom" step="60"></label>
       <label>To <input type="time" id="logTo" step="60"></label>
@@ -486,14 +499,14 @@ html.focus.z1h .bezel{overflow:visible}
     </div>
     <label class="lpnote">Note <input type="text" id="logNote" maxlength="80" placeholder="Optional"></label>
     <p class="lperr" id="logErr" role="alert"></p>
-    <div class="lpfoot"><button type="button" class="edsmall ghost" id="actManage">Edit activities</button><span class="spacer"></span><button type="button" class="edsmall" id="logSave">Save time block</button><button type="button" class="edsave" id="logStart">＋ Add to this half hour</button></div>
+    <div class="lpfoot"><button type="button" class="edsmall ghost" id="actManage">Edit categories</button><span class="spacer"></span><button type="button" class="edsmall" id="logSave">Save time block</button><button type="button" class="edsave" id="logStart">＋ Add to this half hour</button></div>
     <h3 class="lpsub">Today</h3>
     <ul class="loglist" id="logList"></ul>
     <div class="actman" id="actMan" hidden>
-      <h3 class="lpsub">Activities</h3>
-      <p class="edhint">Pick an emoji, a name and a color. New activities show up in the list above.</p>
-      <div id="actManList" class="edlist"></div>
-      <button type="button" class="edsmall" id="actAdd">+ Add activity</button>
+      <h3 class="lpsub">Categories &amp; activities</h3>
+      <p class="edhint">Make a category heading with an emoji and a color, then add the activities that belong under it. Activities take their category's color.</p>
+      <div id="actManList" class="catlist"></div>
+      <button type="button" class="edsmall" id="actAdd">+ Add category</button>
     </div>
   </section>
 </div>
@@ -1108,13 +1121,15 @@ function drawSector(svg,Z,sched){
   const ray=`M${f(P(RO,phi-8))}Q${f(P(RO+RAY*.55,phi-3))} ${f(P(RO+RAY,phi+2))}Q${f(P(RO+RAY*.5,phi+4.5))} ${f(P(RO,phi+8))}Z`;
   el('path',{d:ray,fill:rc[1],'fill-opacity':.5,filter:'url(#slBlur)'},svg);
   el('path',{d:ray,fill:'url(#secRay)',class:'slray'},svg);
-  /* source ring */
+  /* source ring: the main clock's 24 ray colors, past hours greyed, current 3 hours highlighted */
   const S=el('g',{class:'srcring','aria-hidden':'true'},svg);
-  el('circle',{cx:CX,cy:CYY,r:R,fill:'none',stroke:'url(#srcRing)','stroke-width':7,'stroke-opacity':.25,filter:'url(#slBlur)'},S);
-  el('circle',{cx:CX,cy:CYY,r:R,fill:'#0b0f1a','fill-opacity':.25,stroke:'url(#srcRing)','stroke-width':2,'stroke-opacity':.6},S);
-  el('circle',{cx:CX,cy:CYY,r:R-9,fill:'none',stroke:'var(--tick-soft)','stroke-width':.6,'stroke-opacity':.45},S);
-  for(let k=0;k<24;k++){const d=deg(k),r0=R-(k%3?4:7);el('line',{x1:P(r0,d)[0],y1:P(r0,d)[1],x2:P(R-1.5,d)[0],y2:P(R-1.5,d)[1],stroke:'var(--tick-soft)','stroke-width':k%3?.6:1.1,'stroke-opacity':.6},S)}
-  el('path',{d:`M${f(P(R-4.5,a1))}A${R-4.5} ${R-4.5} 0 0 1 ${f(P(R-4.5,a2))}`,fill:'none',stroke:'#ffd34d','stroke-width':6,'stroke-linecap':'round',class:'srccut'},S);
+  el('circle',{cx:CX,cy:CYY,r:R,fill:'#0b0f1a','fill-opacity':.3},S);
+  el('circle',{cx:CX,cy:CYY,r:R-11,fill:'none',stroke:'var(--tick-soft)','stroke-width':.6,'stroke-opacity':.4},S);
+  const rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
+  const ringSegs=[];for(let k=0;k<24;k++){const g=.9,rr=R-4;
+    ringSegs.push(el('path',{d:`M${f(P(rr,deg(k)+g))}A${rr} ${rr} 0 0 1 ${f(P(rr,deg(k+1)-g))}`,fill:'none','stroke-linecap':'round'},S))}
+  const ringUpd=hn=>{ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk;
+    e.setAttribute('stroke',past?'#6b6e78':rayCol(k));e.setAttribute('stroke-opacity',past?'.55':inBlk?'1':'.85');e.setAttribute('stroke-width',inBlk?'7.5':'4.5');e.classList.toggle('srccur',inBlk)})};
   /* sector body: 3 hour columns (angle) x 6 ten-minute rows (outward) */
   const G=el('g',{class:'slice'},svg);
   el('path',{d:ann(R+3,RO,a1,a2),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
@@ -1137,7 +1152,7 @@ function drawSector(svg,Z,sched){
   const a=mk(CX-9,'end'),b=mk(CX+9,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr3'));
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
-  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
@@ -1224,7 +1239,7 @@ function zoomTick(now,h){
   if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
-      P.shape(P.curOut,m);if(P.curHr)P.curHr(m);
+      P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.ringUpd)P.ringUpd(h);
       if(P.logOv){while(P.logOv.firstChild)P.logOv.removeChild(P.logOv.firstChild);P.logC=[];
         P.cells.forEach((c,i)=>{const cs=loggedAll(now,P.Z.w0*60+i*P.UM+Math.floor(P.UM/2)),k=cs.length;P.logC[i]=cs[0]||null;if(!k)return;
           cs.forEach((col,j)=>{const e=P.mk(P.logOv);P.shape(e,i,(j+1)/k,j/k);e.setAttribute('fill',col);e.setAttribute('fill-opacity',i<m?'.62':'.95')})});
@@ -1319,22 +1334,19 @@ function setZoom(lv,instant){
 
 /* ---------- activity log & day report ---------- */
 function _g(id){return document.getElementById(id)}
-var ACT_DEFAULTS=[
- {id:'doom',em:'🌀📱',name:'Doomscrolling',color:'#7a6f8f'},{id:'apps',em:'📱',name:'Phone apps',color:'#a197c0'},{id:'sleep',em:'😴',name:'Sleep',color:'#2b3a67'},
- {id:'spirit',em:'🧘🏾🤺🛡️✡️',name:'Spirit & practice',color:'#3d7bf2'},{id:'self',em:'😎🤩🦷👌🏽',name:'Self-care',color:'#5fe0e8'},
- {id:'nature',em:'🍃',name:'Nature',color:'#8a9a2e'},{id:'cook',em:'🧑🏾‍🍳',name:'Cooking',color:'#8b5a2b'},{id:'food',em:'🍽️😋💪🏾',name:'Food & fitness',color:'#2e8b2e'},
- {id:'spend',em:'💸',name:'Spending',color:'#f2e33a'},{id:'money',em:'💰⬇️',name:'Money',color:'#c6f06a'},{id:'home',em:'🏠☑️😎',name:'Home & chores',color:'#3a3a3a'},
- {id:'work',em:'☎️💻📱🏹💡',name:'Work',color:'#8c8cf0'},{id:'ai',em:'🤖💬🏹💡',name:'AI & ideas',color:'#e85ad8'},{id:'calls',em:'👥📞💬',name:'Meetings & calls',color:'#f08cc8'},
- {id:'sun',em:'☀️',name:'Outdoors',color:'#f0922e'},{id:'learn',em:'🎓👨🏾‍💻🎥',name:'Learning & video',color:'#8a3fd6'},{id:'code',em:'👨🏾‍💻',name:'Coding',color:'#1430f0'},
- {id:'gemini',em:'♊🎬',name:'Gemini TV',color:'#e8442a'},{id:'proj',em:'🏹💰🚜💎🎥📺',name:'Projects',color:'#a8f05a'},{id:'rest',em:'☯️💆🏾‍♂️⏺️',name:'Rest & balance',color:'#b8b8b8'}];
-var acts=(function(){try{const a=JSON.parse(localStorage.getItem('activityTypes')||'null');if(Array.isArray(a)&&a.length)return a}catch(e){}return JSON.parse(JSON.stringify(ACT_DEFAULTS))})();
+var CAT_DEFAULTS=[{id:'phone',em:'📱',name:'Phone',color:'#7a6f8f'}];
+var ACT_DEFAULTS=[{id:'doom',cat:'phone',em:'🌀',name:'Doomscrolling'},{id:'apps',cat:'phone',em:'📲',name:'Phone apps'}];
+function loadJ(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');if(Array.isArray(v))return v}catch(e){}return JSON.parse(JSON.stringify(d))}
+var cats=loadJ('activityCats',CAT_DEFAULTS),acts=loadJ('activityItems',ACT_DEFAULTS);
 var logs=(function(){try{const l=JSON.parse(localStorage.getItem('activityLog')||'null');if(l&&typeof l==='object')return l}catch(e){}return {}})();
-function saveActs(){try{localStorage.setItem('activityTypes',JSON.stringify(acts))}catch(e){}}
+function saveActs(){try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts))}catch(e){}}
 function saveLogs(){try{localStorage.setItem('activityLog',JSON.stringify(logs))}catch(e){}}
 function dayKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function mm2t(m){m=Math.max(0,Math.min(1440,Math.round(m)));return `${pad(Math.floor(m/60)%24===0&&m===1440?24:Math.floor(m/60))}:${pad(m%60)}`}
 function t2mm(v,end){if(!v)return NaN;const [H,M]=v.split(':').map(Number);let x=H*60+M;if(end&&x===0)x=1440;return x}
-function actById(id){return acts.find(a=>a.id===id)||{id,em:'❔',name:'Removed activity',color:'#8a8d96'}}
+function catById(id){return cats.find(c=>c.id===id)}
+function actById(id){const a=acts.find(x=>x.id===id);if(!a)return {id,em:'❔',name:'Removed activity',color:'#8a8d96',catEm:'',catName:''};const c=catById(a.cat)||{em:'',name:'Other',color:'#8a8d96'};return Object.assign({},a,{color:c.color,catEm:c.em,catName:c.name})}
+function actLabel(a){return (a.catEm?a.catEm+' › ':'')+a.em+' '+a.name}
 function dur(m){m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?`${h}h ${r}m`:`${h}h`):`${r}m`}
 function dayEntries(d){const k=dayKey(d),L=(logs[k]||[]).slice();if(running&&running.day===k){const n=new Date();{const nm=n.getHours()*60+n.getMinutes();L.push({s:running.s,e:dayKey(n)===k?Math.min(1440,Math.max(Math.ceil((nm+1)/30)*30,running.s+30)):1440,a:running.a,run:true})}}return L}
 function loggedAll(d,minute){const out=[];for(const e of dayEntries(d)){if(minute>=e.s&&minute<e.e&&!out.includes(e.a))out.push(e.a)}return out.map(id=>actById(id).color)}
@@ -1359,7 +1371,7 @@ function startRun(id){if(running){if(running.a===id)return;stopRun(true)}const n
   logs[k]=(logs[k]||[]).filter(e=>!(e.s>=bs&&e.s<bs+30));logs[k].forEach(e=>{if(e.s<bs&&e.e>bs)e.e=bs});saveLogs();
   running={a:id,s:bs,day:k,t:n.getTime()};saveRun();refreshSlice();renderRun();toast(`Started ${actById(id).name}`)}
 function renderRun(){const pill=_g('runPill');if(!pill)return;pill.hidden=!running;if(!running)return;const a=actById(running.a),el2=Math.max(0,Math.floor((Date.now()-running.t)/1000));
-  pill.querySelector('.dia').style.background=a.color;pill.querySelector('.rn').textContent=`${a.em} ${a.name}`;
+  pill.querySelector('.dia').style.background=a.color;pill.querySelector('.rn').textContent=actLabel(a);
   pill.querySelector('.rt').textContent=el2>=3600?`${Math.floor(el2/3600)}:${pad(Math.floor(el2%3600/60))}:${pad(el2%60)}`:`${pad(Math.floor(el2/60))}:${pad(el2%60)}`}
 function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
 function openLog(){const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce((a,e)=>Math.max(a,e.e),-1);
@@ -1367,26 +1379,43 @@ function openLog(){const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce
   if(!LG.sel&&acts[0])LG.sel=acts[0].id;_g('logStart').textContent=halfLabel();renderActs();renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip[aria-checked="true"]');c&&c.focus()},30)}
 function closePanels(){_g('logPanel').hidden=true;_g('repPanel').hidden=true}
 function renderActs(){const g=_g('actGrid');g.innerHTML='';
-  acts.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='actchip';b.setAttribute('role','radio');b.setAttribute('aria-checked',String(a.id===LG.sel));
-    b.innerHTML=`<span class="dia"></span><span class="em"></span><span class="nm"></span>`;b.querySelector('.dia').style.background=a.color;b.querySelector('.em').textContent=a.em;b.querySelector('.nm').textContent=a.name;
-    b.addEventListener('click',()=>{LG.sel=a.id;renderActs()});g.appendChild(b)})}
+  if(!acts.some(a=>a.id===LG.sel))LG.sel=acts[0]&&acts[0].id;
+  if(!cats.length){g.innerHTML='<p class="edhint">Your cart is empty. Tap Edit categories to add your first category and activities.</p>';return}
+  const groups=cats.map(c=>({c,items:acts.filter(a=>a.cat===c.id)}));const orphan=acts.filter(a=>!catById(a.cat));if(orphan.length)groups.push({c:{id:'_',em:'',name:'Other',color:'#8a8d96'},items:orphan});
+  groups.forEach(({c,items})=>{const sec=document.createElement('div');sec.className='actsec';
+    const h=document.createElement('div');h.className='acthead';h.innerHTML='<span class="dia"></span><span class="em"></span><span class="nm"></span>';
+    h.querySelector('.dia').style.background=c.color;h.querySelector('.em').textContent=c.em;h.querySelector('.nm').textContent=c.name;sec.appendChild(h);
+    const gr=document.createElement('div');gr.className='actgrid';
+    if(!items.length){const p=document.createElement('p');p.className='edhint';p.textContent='No activities yet. Add some under Edit categories.';gr.appendChild(p)}
+    items.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='actchip';b.setAttribute('role','radio');b.setAttribute('aria-checked',String(a.id===LG.sel));
+      b.innerHTML='<span class="dia"></span><span class="em"></span><span class="nm"></span>';b.querySelector('.dia').style.background=c.color;b.querySelector('.em').textContent=a.em;b.querySelector('.nm').textContent=a.name;
+      const pick=()=>{if(LG.sel===a.id)return;LG.sel=a.id;setTimeout(renderActs,0)};b.addEventListener('pointerdown',pick);b.addEventListener('click',pick);gr.appendChild(b)});
+    sec.appendChild(gr);g.appendChild(sec)})}
 function renderLogList(){const ul=_g('logList'),L=(logs[dayKey(new Date())]||[]).slice().sort((x,y)=>x.s-y.s);ul.innerHTML='';
   if(!L.length){ul.innerHTML='<li class="empty">Nothing logged yet today.</li>';return}
   L.forEach(e=>{const a=actById(e.a),li=document.createElement('li');
     li.innerHTML=`<span class="dia"></span><span class="tm"></span><span class="lb"></span><button type="button" class="edx" aria-label="Delete entry">×</button>`;
-    li.querySelector('.dia').style.background=a.color;li.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)}`;li.querySelector('.lb').textContent=`${a.em} ${a.name}${e.n?' · '+e.n:''}`;
+    li.querySelector('.dia').style.background=a.color;li.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)}`;li.querySelector('.lb').textContent=`${actLabel(a)}${e.n?' · '+e.n:''}`;
     li.querySelector('button').addEventListener('click',()=>{const k=dayKey(new Date());logs[k]=(logs[k]||[]).filter(x=>x!==e);saveLogs();renderLogList();refreshSlice()});ul.appendChild(li)})}
 function refreshSlice(){if(typeof zparts!=='undefined'&&zparts)zparts.lastM=-1;if(typeof big!=='undefined'&&big)big.doneHr=-1;if(typeof minis!=='undefined')minis.forEach(x=>{if(x.parts)x.parts.doneHr=-1})}
 function renderActMan(){const box=_g('actManList');box.innerHTML='';
-  acts.forEach((a,i)=>{const r=document.createElement('div');r.className='edrow';
-    const em=document.createElement('input');em.type='text';em.className='emo';em.value=a.em;em.setAttribute('aria-label','Emoji');em.id='ame-'+a.id;
-    const nm=document.createElement('input');nm.type='text';nm.value=a.name;nm.maxLength=28;nm.setAttribute('aria-label','Name');nm.id='amn-'+a.id;
-    const co=document.createElement('input');co.type='color';co.value=a.color;co.setAttribute('aria-label','Color');co.id='amc-'+a.id;
-    const del=document.createElement('button');del.type='button';del.className='edx';del.textContent='×';del.setAttribute('aria-label','Remove '+a.name);
-    em.addEventListener('change',()=>{a.em=em.value.trim()||'•';saveActs();renderActs()});nm.addEventListener('change',()=>{a.name=nm.value.trim()||'Activity';saveActs();renderActs()});
-    co.addEventListener('input',()=>{a.color=co.value;saveActs();renderActs();refreshSlice()});
-    del.addEventListener('click',()=>{acts.splice(i,1);if(LG.sel===a.id)LG.sel=acts[0]&&acts[0].id;saveActs();renderActMan();renderActs()});
-    r.append(em,nm,co,del);box.appendChild(r)})}
+  const inp=(type,val,id,label,cls)=>{const x=document.createElement('input');x.type=type;x.value=val;x.id=id;x.setAttribute('aria-label',label);if(cls)x.className=cls;if(type==='text')x.maxLength=28;return x};
+  const xbtn=label=>{const b=document.createElement('button');b.type='button';b.className='edx';b.textContent='×';b.setAttribute('aria-label',label);return b};
+  cats.forEach((c,ci)=>{const card=document.createElement('div');card.className='catcard';
+    const r=document.createElement('div');r.className='edrow cathead';
+    const em=inp('text',c.em,'cme-'+c.id,'Category emoji','emo'),nm=inp('text',c.name,'cmn-'+c.id,'Category name'),co=inp('color',c.color,'cmc-'+c.id,'Category color'),del=xbtn('Remove category '+c.name);
+    em.addEventListener('change',()=>{c.em=em.value.trim();saveActs();renderActs()});nm.addEventListener('change',()=>{c.name=nm.value.trim()||'Category';saveActs();renderActs()});
+    co.addEventListener('input',()=>{c.color=co.value;saveActs();renderActs();refreshSlice()});
+    del.addEventListener('click',()=>{cats.splice(ci,1);acts=acts.filter(a=>a.cat!==c.id);saveActs();renderActMan();renderActs();refreshSlice()});
+    r.append(em,nm,co,del);card.appendChild(r);
+    acts.filter(a=>a.cat===c.id).forEach(a=>{const ar=document.createElement('div');ar.className='edrow actrow';
+      const ae=inp('text',a.em,'ame-'+a.id,'Activity emoji','emo'),an=inp('text',a.name,'amn-'+a.id,'Activity name'),ad=xbtn('Remove '+a.name);
+      ae.addEventListener('change',()=>{a.em=ae.value.trim()||'•';saveActs();renderActs()});an.addEventListener('change',()=>{a.name=an.value.trim()||'Activity';saveActs();renderActs()});
+      ad.addEventListener('click',()=>{acts=acts.filter(x=>x!==a);saveActs();renderActMan();renderActs();refreshSlice()});
+      ar.append(ae,an,ad);card.appendChild(ar)});
+    const add=document.createElement('button');add.type='button';add.className='edsmall addact';add.textContent=`+ Add activity to ${c.name}`;
+    add.addEventListener('click',()=>{const a={id:'a'+Date.now().toString(36),cat:c.id,em:'⭐',name:'New activity'};acts.push(a);saveActs();renderActMan();renderActs();const t=_g('amn-'+a.id);if(t){t.focus();t.select()}});
+    card.appendChild(add);box.appendChild(card)})}
 function report(off){const d=new Date();d.setDate(d.getDate()+off);const L=dayEntries(d).filter(e=>e.e>e.s).sort((x,y)=>x.s-y.s||x.e-y.e);
   const endM=off===0?nowMin():1440,gaps=[];let t=0;
   L.forEach(e=>{if(e.s>t&&t<endM)gaps.push({s:t,e:Math.min(e.s,endM),gap:true});t=Math.max(t,e.e)});if(t<endM)gaps.push({s:t,e:endM,gap:true});
@@ -1402,12 +1431,13 @@ function renderReport(){const R=report(LG.day),tr=_g('rpTrack');tr.innerHTML='';
   if(R.endM<1440){const f=document.createElement('i');f.className='fut';f.style.left=(R.endM/1440*100)+'%';f.style.right='0';f.style.background='var(--panel)';tr.appendChild(f)}
   const ul=_g('rpTotals');ul.innerHTML='';
   Object.entries(R.tot).sort((x,y)=>y[1]-x[1]).forEach(([id,m])=>{const a=actById(id),li=document.createElement('li');li.innerHTML='<span class="dia"></span><span class="lb"></span><span class="tm"></span>';
-    li.querySelector('.dia').style.background=a.color;li.querySelector('.lb').textContent=`${a.em} ${a.name}`;li.querySelector('.tm').textContent=dur(m);ul.appendChild(li)});
+    li.querySelector('.dia').style.background=a.color;li.querySelector('.lb').textContent=actLabel(a);li.querySelector('.tm').textContent=dur(m);ul.appendChild(li)});
   {const li=document.createElement('li');li.innerHTML='<span class="dia" style="background:#8a8d96"></span><span class="lb">⬜ Not logged</span><span class="tm"></span>';li.querySelector('.tm').textContent=dur(R.gap);ul.appendChild(li)}
   const head=R.d.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   let txt=`🗓 ${head}\n`;
-  R.segs.forEach(g=>{const a=g.gap?null:actById(g.a);txt+=`\n${mm2t(g.s)}–${mm2t(g.e)}  ${g.gap?'⬜ Not logged':`${a.em} ${a.name}`}${g.n?' · '+g.n:''} (${dur(g.e-g.s)})`});
-  txt+=`\n\nTotals\n`;Object.entries(R.tot).sort((x,y)=>y[1]-x[1]).forEach(([id,m])=>{const a=actById(id);txt+=`${a.em} ${a.name}: ${dur(m)}\n`});
+  R.segs.forEach(g=>{const a=g.gap?null:actById(g.a);txt+=`\n${mm2t(g.s)}–${mm2t(g.e)}  ${g.gap?'⬜ Not logged':actLabel(a)}${g.n?' · '+g.n:''} (${dur(g.e-g.s)})`});
+  txt+=`\n\nTotals\n`;Object.entries(R.tot).sort((x,y)=>y[1]-x[1]).forEach(([id,m])=>{const a=actById(id);txt+=`${actLabel(a)}: ${dur(m)}\n`});
+  {const ct={};Object.entries(R.tot).forEach(([id,m])=>{const a=actById(id),k=a.catName||'Other';ct[k]=ct[k]||{m:0,em:a.catEm};ct[k].m+=m});const ks=Object.keys(ct);if(ks.length>1){txt+=`\nBy category\n`;ks.sort((x,y)=>ct[y].m-ct[x].m).forEach(k=>{txt+=`${ct[k].em?ct[k].em+' ':''}${k}: ${dur(ct[k].m)}\n`})}}
   txt+=`⬜ Not logged: ${dur(R.gap)}\n`;if(R.segs.some((g,i,a)=>!g.gap&&a.some(h=>h!==g&&!h.gap&&h.s<g.e&&h.e>g.s)))txt+=`(Activities that share a half hour each count the full time.)\n`;
   _g('rpText').textContent=txt;_g('rpMsg').textContent='';return txt}
 function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.day===0)));renderReport();_g('repPanel').hidden=false;setTimeout(()=>_g('rpCopy').focus(),30)}
@@ -1419,7 +1449,7 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
   _g('rpIcs').addEventListener('click',()=>{const R=report(LG.day),d=R.d,ymd=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`,stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
     const tm=m=>{m=Math.min(m,1439);return `${ymd}T${pad(Math.floor(m/60))}${pad(m%60)}00`},esc=t=>String(t).replace(/[\\,;]/g,x=>'\\'+x);
     let ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//My Day//EN\r\n';
-    R.segs.filter(g=>!g.gap).forEach((g,i)=>{const a=actById(g.a);ics+=`BEGIN:VEVENT\r\nUID:${ymd}-${g.s}-${i}@myday\r\nDTSTAMP:${stamp}\r\nDTSTART:${tm(g.s)}\r\nDTEND:${g.e>=1440?`${ymd}T235900`:tm(g.e)}\r\nSUMMARY:${esc(a.em+' '+a.name)}\r\n${g.n?`DESCRIPTION:${esc(g.n)}\r\n`:''}CATEGORIES:${esc(a.name)}\r\nEND:VEVENT\r\n`});
+    R.segs.filter(g=>!g.gap).forEach((g,i)=>{const a=actById(g.a);ics+=`BEGIN:VEVENT\r\nUID:${ymd}-${g.s}-${i}@myday\r\nDTSTAMP:${stamp}\r\nDTSTART:${tm(g.s)}\r\nDTEND:${g.e>=1440?`${ymd}T235900`:tm(g.e)}\r\nSUMMARY:${esc(actLabel(a))}\r\n${g.n?`DESCRIPTION:${esc(g.n)}\r\n`:''}CATEGORIES:${esc(a.name)}\r\nEND:VEVENT\r\n`});
     ics+='END:VCALENDAR\r\n';
     if(!R.segs.some(g=>!g.gap)){_g('rpMsg').textContent='Nothing logged to add yet.';return}
     const file=new File([ics],`my-day-${ymd}.ics`,{type:'text/calendar'});
@@ -1438,8 +1468,7 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
     const k=dayKey(new Date());(logs[k]=logs[k]||[]).push({s:s0,e:e0,a:LG.sel,n:_g('logNote').value.trim()||undefined});saveLogs();renderLogList();refreshSlice();
     _g('logErr').textContent='';_g('logNote').value='';_g('logFrom').value=mm2t(e0);toast(`Logged ${actById(LG.sel).name}, ${mm2t(s0)}–${mm2t(e0)}`)});
   _g('actManage').addEventListener('click',()=>{const m=_g('actMan');m.hidden=!m.hidden;if(!m.hidden){renderActMan();m.scrollIntoView({block:'start',behavior:'smooth'})}});
-  _g('actAdd').addEventListener('click',()=>{const pal=['#d85a30','#639922','#378add','#ba7517','#d4537e','#5f5e5a'];acts.push({id:'u'+Date.now().toString(36),em:'⭐',name:'New activity',color:pal[acts.length%pal.length]});saveActs();renderActMan();renderActs();
-    const last=_g('actManList').lastElementChild;if(last){const t=last.querySelectorAll('input[type=text]')[1];t.focus();t.select()}});
+  _g('actAdd').addEventListener('click',()=>{const pal=['#3d7bf2','#2e8b2e','#e8442a','#f0922e','#8a3fd6','#e85ad8','#5fe0e8','#8b5a2b'];const c={id:'c'+Date.now().toString(36),em:'◆',name:'New category',color:pal[cats.length%pal.length]};cats.push(c);saveActs();renderActMan();renderActs();const t=_g('cmn-'+c.id);if(t){t.focus();t.select()}});
   document.querySelectorAll('.rpday button').forEach(b=>b.addEventListener('click',()=>{LG.day=+b.dataset.day;document.querySelectorAll('.rpday button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderReport()}));
   _g('rpCopy').addEventListener('click',()=>{const txt=renderReport(),ok=()=>{_g('rpMsg').textContent='Copied. Paste it into today’s note in Notes.'},
     fb=()=>{const r=document.createRange();r.selectNodeContents(_g('rpText'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);_g('rpMsg').textContent='Text selected. Tap Copy to copy it.'};

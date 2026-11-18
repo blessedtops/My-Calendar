@@ -401,11 +401,11 @@ html.focus.z1h .bezel{overflow:visible}
 .dbead{fill:#2ec4b6;stroke:#d6fff9;stroke-width:1px;filter:drop-shadow(0 0 3px #2ec4b6) drop-shadow(0 0 8px rgba(46,196,182,.7))}
 .dream{filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
 .eagle{filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
-.focusmoon{position:fixed;z-index:25;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:clamp(120px,17vmin,190px);aspect-ratio:1;border-radius:50%;pointer-events:none;
+.focusmoon{position:fixed;z-index:25;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:clamp(160px,25vmin,270px);aspect-ratio:1;border-radius:50%;pointer-events:none;
   box-shadow:0 0 0 1px rgba(220,228,245,.35),0 0 22px 5px rgba(200,215,255,.4),0 0 60px 14px rgba(160,185,255,.15),0 10px 24px -8px rgba(0,0,0,.5)}
 .focusmoon svg{display:block;width:100%;height:100%;border-radius:50%}
 .focusmoon svg text{paint-order:stroke;stroke-linejoin:round}
-@media (max-width:560px){.focusmoon{width:96px}}
+@media (max-width:560px){.focusmoon{width:124px}}
 
 /* Activity log + day report */
 .logbar{position:fixed;z-index:26;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;align-items:flex-end}
@@ -460,6 +460,7 @@ html.focus.z1h .bezel{overflow:visible}
 .runpill button{font:inherit;font-size:13px;font-weight:700;color:#fff;background:#d03b3b;border:0;border-radius:999px;padding:8px 14px;min-height:36px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.runpill .dia{animation:none}}
 .tenblk{fill:#fff;fill-opacity:.06;stroke:#ffd34d;stroke-opacity:.38;stroke-width:1px;stroke-linejoin:round}
+.sunday{filter:drop-shadow(0 0 3px rgba(255,190,60,.95)) drop-shadow(0 0 7px rgba(255,160,30,.6))}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -838,7 +839,12 @@ function buildHub(s,now,off,total,mon){
   s.setAttribute('aria-label',`${first.toLocaleDateString(undefined,{month:'long',year:'numeric'})} calendar`);
   el('text',{x:cx,y:44,'text-anchor':'middle','font-size':15,'font-weight':700,fill:'#10131b',stroke:'rgba(255,255,255,.55)','stroke-width':2,'font-family':F},s).textContent=first.toLocaleDateString(undefined,{month:'long'});
   el('text',{x:cx,y:55,'text-anchor':'middle','font-size':9,fill:'#242a38',stroke:'rgba(255,255,255,.5)','stroke-width':1.6,'font-family':'JetBrains Mono,monospace'},s).textContent=String(Y);
-  ['S','M','T','W','T','F','S'].forEach((l,i)=>el('text',{x:x0+i*colW,y:70,'text-anchor':'middle','font-size':9.5,'font-weight':700,fill:'#2a3142',stroke:'rgba(255,255,255,.5)','stroke-width':1.6,'font-family':F},s).textContent=l);
+  {const wd=(now.getFullYear()===Y&&now.getMonth()===M)?now.getDay():-1;
+  if(wd>=0){const sg=el('g',{class:'sunday',transform:`translate(${x0+wd*colW} 66.6)`},s);
+    el('circle',{r:12.5,fill:'#ffb21e','fill-opacity':.28},sg);
+    for(let k=0;k<12;k++){const a=k*30*Math.PI/180,r0=7.6,r1=k%2?10.2:11.8,w=.38;el('path',{d:`M${(r0*Math.cos(a-w)).toFixed(2)} ${(r0*Math.sin(a-w)).toFixed(2)}L${(r1*Math.cos(a)).toFixed(2)} ${(r1*Math.sin(a)).toFixed(2)}L${(r0*Math.cos(a+w)).toFixed(2)} ${(r0*Math.sin(a+w)).toFixed(2)}Z`,fill:'#ffb21e'},sg)}
+    el('circle',{r:7.4,fill:'#ffc93d',stroke:'#fff3c2','stroke-width':1},sg)}
+  ['S','M','T','W','T','F','S'].forEach((l,i)=>el('text',{x:x0+i*colW,y:70,'text-anchor':'middle','font-size':9.5,'font-weight':700,fill:i===wd?'#5a2a00':'#2a3142',stroke:i===wd?'none':'rgba(255,255,255,.5)','stroke-width':1.6,'font-family':F},s).textContent=l);}
   const rows=Math.ceil((lead+days)/7);
   for(let r=0;r<rows;r++){
     const rowStart=new Date(Y,M,1-lead+r*7);

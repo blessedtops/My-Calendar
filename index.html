@@ -508,6 +508,18 @@ html.focus header{position:fixed;z-index:29;top:calc(12px + env(safe-area-inset-
 html.focus .todaytitle{font-size:clamp(15px,2.4vw,22px);text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.6)}
 html.focus .zoomcrumb{top:calc(50px + env(safe-area-inset-top,0px))}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
+.tlog{transition:opacity .6s}
+.tlog.up{filter:drop-shadow(0 0 2.5px rgba(255,170,80,.55))}
+.tlog.past{opacity:.42;filter:saturate(.35)}
+.tlog.past .tendf,.tlog.cur .tend.l .tendf{fill:#2a1a14}
+.tlog.past .tendr,.tlog.cur .tend.l .tendr{stroke:#5a2a12}
+.tlog:not(.cur) .tlfront{display:none}
+.tlfront{stroke:#ff9a3a;stroke-width:1.6px;stroke-linecap:round;filter:drop-shadow(0 0 2px #ff6a00) drop-shadow(0 0 5px #ffae3d)}
+.tflame{pointer-events:none;filter:drop-shadow(0 0 3px #ff7a00) drop-shadow(0 0 7px rgba(255,140,0,.6))}
+.tflame path{transform-box:fill-box;transform-origin:50% 100%;animation:flick .45s ease-in-out infinite alternate}
+.tflame .fi{animation-duration:.33s}
+@keyframes flick{0%{transform:scale(1,1) skewX(0)}50%{transform:scale(.9,1.14) skewX(-5deg)}100%{transform:scale(1.06,.9) skewX(4deg)}}
+@media (prefers-reduced-motion:reduce){.tflame path{animation:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1273,10 +1285,30 @@ function drawSlice(svg,Z,sched){
   const body=[sqP(0,0),sqP(1,0),sqP(1,1),sqP(0,1)];
   el('polygon',{points:body.map(q=>q.join(',')).join(' '),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
   const colors=[],cells=[];
-  if(SQ.round)for(let r=0;r<SQ.rows;r++){const a=sqV(r,-.16),b=sqV(r,1.16),q=[sqP(.012,a),sqP(.988,a),sqP(.988,b),sqP(.012,b)];
-    el('polygon',{points:q.map(z=>z[0].toFixed(1)+','+z[1].toFixed(1)).join(' '),class:'tenblk'},G)}
+  /* each 10-minute row is a log: fresh wood ahead, burning at the current minute, charred behind */
+  const logs=[];
+  if(SQ.round){const gd=(id,stops,v)=>{const g=el('linearGradient',Object.assign({id},v?{x1:0,x2:0,y1:0,y2:1}:{x1:0,x2:1,y1:0,y2:0}),df);stops.forEach(([o,c,op])=>el('stop',{offset:o,'stop-color':c,'stop-opacity':op==null?1:op},g))};
+    gd('lgWood',[[0,'#4a2610'],[.22,'#a8662c'],[.45,'#e0a660'],[.62,'#c4823f'],[.85,'#7a4518'],[1,'#3a1d0a']],1);
+    gd('lgChar',[[0,'#0d0806'],[.4,'#2b1d18'],[.6,'#231713'],[1,'#080504']],1);
+    gd('lgEmber',[[0,'#ff5a00',0],[.7,'#ff6a10',.55],[1,'#ffb43d',.95]],0);
+    const rg=el('radialGradient',{id:'lgEnd'},df);[[0,'#f6d29a'],[.55,'#d39550'],[1,'#7a4518']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},rg));
+    const f1=z=>z[0].toFixed(1)+','+z[1].toFixed(1);
+    for(let r=0;r<SQ.rows;r++){const a=sqV(r,-.13),b=sqV(r,1.13),quad=(u0,u1)=>[sqP(u0,a),sqP(u1,a),sqP(u1,b),sqP(u0,b)].map(f1).join(' '),g=el('g',{class:'tlog up'},G);
+      el('polygon',{points:quad(0,1),fill:'url(#lgWood)',class:'twood'},g);
+      [.28,.52,.74].forEach(t=>{const v=a+(b-a)*t,p0=sqP(.02,v),p1=sqP(.98,v);el('line',{x1:p0[0],y1:p0[1],x2:p1[0],y2:p1[1],stroke:'#3a1c08','stroke-opacity':.35,'stroke-width':.6,'stroke-dasharray':'14 5 22 4'},g)});
+      const ch=el('polygon',{points:quad(0,0),fill:'url(#lgChar)',class:'tchar'},g),em=el('polygon',{points:quad(0,0),fill:'url(#lgEmber)',class:'tember'},g);
+      [0,1].forEach(u=>{const p0=sqP(u,a),p1=sqP(u,b),cx=(p0[0]+p1[0])/2,cy=(p0[1]+p1[1])/2,ry=Math.hypot(p1[0]-p0[0],p1[1]-p0[1])/2,ang=Math.atan2(p1[1]-p0[1],p1[0]-p0[0])*180/Math.PI-90,
+        e=el('g',{transform:`translate(${cx.toFixed(1)} ${cy.toFixed(1)}) rotate(${ang.toFixed(1)})`,class:'tend'+(u?' r':' l')},g);
+        el('ellipse',{rx:(ry*.42).toFixed(1),ry:ry.toFixed(1),fill:'url(#lgEnd)',stroke:'#4a2610','stroke-width':.7,class:'tendf'},e);
+        [.62,.3].forEach(k=>el('ellipse',{rx:(ry*.42*k).toFixed(1),ry:(ry*k).toFixed(1),fill:'none',stroke:'#8a5426','stroke-width':.5,class:'tendr'},e))});
+      const fr=el('line',{class:'tlfront'},g);
+      logs.push({g,ch,em,fr,quad,a,b})}}
   for(let i=0;i<N;i++){const t=Z.w0+(i+.5)*UM/60,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(b&&b.color||FREE_COLOR);
     cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},G))}
+  const logUpd=(m,frc)=>{if(!logs.length)return;const cr=Math.floor(m/10),uf=Math.min(1,((m%10)+frc)/10);
+    logs.forEach((L,r)=>{const st=r<cr?'past':r===cr?'cur':'up';if(L.st!==st){L.st=st;L.g.setAttribute('class','tlog '+st)}
+      const u=st==='past'?1:st==='cur'?uf:0;L.ch.setAttribute('points',L.quad(0,u));L.em.setAttribute('points',st==='cur'?L.quad(Math.max(0,u-.09),u):L.quad(0,0));
+      if(st==='cur'){const p0=sqP(u,L.a),p1=sqP(u,L.b);L.fr.setAttribute('x1',p0[0]);L.fr.setAttribute('y1',p0[1]);L.fr.setAttribute('x2',p1[0]);L.fr.setAttribute('y2',p1[1]);}})};
   const logOv=el('g',{class:'logov'},G);
   const prog=el('polygon',{points:sqPoly(0,0),fill:colors[0],class:'mprog'},G);
   if(!three){const hv=sqHalf(),[x1,y1]=sqP(0,hv),[x2,y2]=sqP(1,hv);el('line',{x1:x1+1,y1,x2:x2-1,y2,class:'halfmark'},G);}
@@ -1293,7 +1325,7 @@ function drawSlice(svg,Z,sched){
   if(three){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
-  return {kind:'slice',Z,cells,colors,prog,curOut,nums,needle:ndl,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,nums,needle:ndl,logUpd,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 function zoomTick(now,h){
   if(!(zoomLevel>0)||!zsvg)return;
@@ -1306,7 +1338,7 @@ function zoomTick(now,h){
         P.cells.forEach((c,i)=>{const cs=loggedAll(now,P.Z.w0*60+i*P.UM+Math.floor(P.UM/2)),k=cs.length;P.logC[i]=cs[0]||null;if(!k)return;
           cs.forEach((col,j)=>{const e=P.mk(P.logOv);P.shape(e,i,(j+1)/k,j/k);e.setAttribute('fill',col);e.setAttribute('fill-opacity',i<m?'.62':'.95')})});
         if(P.logC[m])P.prog.setAttribute('fill',P.logC[m])}if(P.nums)P.nums.forEach((t,i)=>{t.setAttribute('fill',i<m?'var(--muted)':i===m?'#ffffff':textOn(P.colors[i]));t.setAttribute('fill-opacity',i<m?'.55':'1');t.classList.toggle('mnow',i===m)});P.prog.setAttribute('fill',P.colors[m])}
-    P.shape(P.prog,m,1,Math.min(.985,fr));if(P.needle)P.needle(h%24);
+    P.shape(P.prog,m,1,Math.min(.985,fr));if(P.needle)P.needle(h%24);if(P.logUpd)P.logUpd(m,fr);
     const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});if(P.TG&&P.lastTxt!==A+B){P.lastTxt=A+B;try{const bb=P.TG.getBBox();if(bb.width>0)P.TG.setAttribute('transform',`translate(${(P.ccx-(bb.x+bb.width/2)).toFixed(1)} ${(P.ccy-(bb.y+bb.height/2)).toFixed(1)})`)}catch(e){}}
     const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;
     return}

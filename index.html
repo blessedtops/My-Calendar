@@ -1107,6 +1107,10 @@ function sqPoly(i,frac,s0){const c=i%SQ.cols,r=Math.floor(i/SQ.cols),gu=SQ.round
     return pts.map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
   return [sqP(us,v0),sqP(ue,v0),sqP(ue,v1),sqP(us,v1)].map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
 
+/* small 24h needle on a zoom ring: pos(r,h)->[x,y] */
+function miniNeedle(g,pos,r0,r1,tr){const ln=el('line',{class:'bighand','stroke':'#ff2d55','stroke-width':3.4,'stroke-linecap':'round'},g),co=el('line',{stroke:'#fff','stroke-opacity':.85,'stroke-width':1,'stroke-linecap':'round'},g),
+  tp=el('circle',{class:'bighand',display:tr?'inline':'none',r:tr||0,fill:'#ff2d55',stroke:'#fff','stroke-width':1.4},g);
+  return h=>{const [a,b]=pos(r0,h),[c,d]=pos(r1,h);[ln,co].forEach(l=>{l.setAttribute('x1',a);l.setAttribute('y1',b);l.setAttribute('x2',c);l.setAttribute('y2',d)});tp.setAttribute('cx',c);tp.setAttribute('cy',d)}}
 /* 3-hour view: the current 3-hour sector, cut from the 24 h dial at its true angle and enlarged */
 function drawSector(svg,Z,sched){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
@@ -1160,11 +1164,12 @@ function drawSector(svg,Z,sched){
   const a=mk(CX-9,'end'),b=mk(CX+9,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr3'));
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=`${pad(dn.getMonth()+1)}/${pad(dn.getDate())}/${dn.getFullYear()}`;
-  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+  const needle=miniNeedle(el('g',{'aria-hidden':'true'},svg),(r,t)=>P(r,deg(t)),R-9,R+1,0);
+  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,needle,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
-  const three=Z.level===1,N=three?18:60,UM=three?10:1;SQ.cols=three?3:10;SQ.rows=three?6:6;SQ.round=!three;
+  const three=Z.level===1,N=three?18:60,UM=three?10:1;SQ.cols=three?3:10;SQ.rows=three?6:6;SQ.round=!three;let ndl=null;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   const h0=Z.w0%24,dusk=h0===6||h0===17||h0===18,night=!dusk&&(h0>18||h0<6);
   const rc=night?['#ffffff','#c9d6ff','#7f97d8']:dusk?['#fff3e8','#ffb9a0','#9a86d8']:['#fff5cf','#ffc93d','#ff8a00'];
@@ -1203,7 +1208,8 @@ function drawSlice(svg,Z,sched){
       const dA=`M${x0.toFixed(2)} ${y0.toFixed(2)}A${RR} ${RR} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
       if(cur){el('path',{d:dA,class:'ringneon-tube',filter:'url(#neonGlow)'},S);el('path',{d:dA,class:'ringneon-core'},S)}
       else el('path',{d:dA,fill:'none',stroke:rayCol(k),'stroke-width':6.5,'stroke-linecap':'round','stroke-opacity':.9},S)}
-    for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S)}}
+    for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S)}
+    ndl=miniNeedle(S,(r,t)=>H(r,t*15),RR-6,RR+6,0);}
    /* strands with beads and feathers, hanging beside the slice */
    if(!document.getElementById('eagleG')){const eg=el('linearGradient',{id:'eagleG',x1:'0',x2:'0',y1:'0',y2:'1'},df);
      [['0','#fbf7ee'],['.5','#f1e9d8'],['.6','#7a5634'],['.72','#3b2414'],['1','#1c120a']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},eg))}
@@ -1250,7 +1256,7 @@ function drawSlice(svg,Z,sched){
   if(three){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
-  return {kind:'slice',Z,cells,colors,prog,curOut,nums,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
+  return {kind:'slice',Z,cells,colors,prog,curOut,nums,needle:ndl,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 function zoomTick(now,h){
   if(!(zoomLevel>0)||!zsvg)return;
@@ -1263,7 +1269,7 @@ function zoomTick(now,h){
         P.cells.forEach((c,i)=>{const cs=loggedAll(now,P.Z.w0*60+i*P.UM+Math.floor(P.UM/2)),k=cs.length;P.logC[i]=cs[0]||null;if(!k)return;
           cs.forEach((col,j)=>{const e=P.mk(P.logOv);P.shape(e,i,(j+1)/k,j/k);e.setAttribute('fill',col);e.setAttribute('fill-opacity',i<m?'.62':'.95')})});
         if(P.logC[m])P.prog.setAttribute('fill',P.logC[m])}if(P.nums)P.nums.forEach((t,i)=>{t.setAttribute('fill',i<m?'var(--muted)':i===m?'#ffffff':textOn(P.colors[i]));t.setAttribute('fill-opacity',i<m?'.55':'1');t.classList.toggle('mnow',i===m)});P.prog.setAttribute('fill',P.colors[m])}
-    P.shape(P.prog,m,1,Math.min(.985,fr));
+    P.shape(P.prog,m,1,Math.min(.985,fr));if(P.needle)P.needle(h%24);
     const A=pad(now.getHours()),B=pad(now.getMinutes());P.a.forEach(e=>{if(e.textContent!==A)e.textContent=A});P.b.forEach(e=>{if(e.textContent!==B)e.textContent=B});if(P.TG&&P.lastTxt!==A+B){P.lastTxt=A+B;try{const bb=P.TG.getBBox();if(bb.width>0)P.TG.setAttribute('transform',`translate(${(P.ccx-(bb.x+bb.width/2)).toFixed(1)} ${(P.ccy-(bb.y+bb.height/2)).toFixed(1)})`)}catch(e){}}
     const left=Math.max(0,Math.round((Z.w0+Z.span-h)*3600)),fe=document.getElementById('focusLeftV');if(fe)fe.textContent=Z.level===2?`${pad(Math.floor(left/60))}:${pad(left%60)}`:`${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}`;
     return}

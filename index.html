@@ -1109,9 +1109,9 @@ function sqPoly(i,frac,s0){const c=i%SQ.cols,r=Math.floor(i/SQ.cols),gu=SQ.round
     return pts.map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
   return [sqP(us,v0),sqP(ue,v0),sqP(ue,v1),sqP(us,v1)].map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' ')}
 
-/* hour segment: a plain ring arc with flat ends */
-function chevD(pos,r,w,a0,a1){const ro=r+w/2,ri=r-w/2,t=0,q=v=>v[0].toFixed(2)+' '+v[1].toFixed(2);
-  return `M${q(pos(ro,a0))}A${ro} ${ro} 0 0 1 ${q(pos(ro,a1))}L${q(pos(r,a1+t))}L${q(pos(ri,a1))}A${ri} ${ri} 0 0 0 ${q(pos(ri,a0))}L${q(pos(r,a0+t))}Z`}
+/* hour segment: a ring arc with rounded, pill-like ends (loading-bar style) */
+function chevD(pos,r,w,a0,a1){const ro=r+w/2,ri=r-w/2,cr=w/2,c=cr/r*180/Math.PI,b0=a0+c,b1=Math.max(b0+.01,a1-c),q=v=>v[0].toFixed(2)+' '+v[1].toFixed(2);
+  return `M${q(pos(ro,b0))}A${ro} ${ro} 0 0 1 ${q(pos(ro,b1))}A${cr} ${cr} 0 0 1 ${q(pos(ri,b1))}A${ri} ${ri} 0 0 0 ${q(pos(ri,b0))}A${cr} ${cr} 0 0 1 ${q(pos(ro,b0))}Z`}
 /* small 24h needle on a zoom ring: pos(r,h)->[x,y] */
 function miniNeedle(g,pos,r0,r1,tr){const ln=el('line',{class:'bighand','stroke':'#ff2d55','stroke-width':3.4,'stroke-linecap':'round'},g),co=el('line',{stroke:'#fff','stroke-opacity':.85,'stroke-width':1,'stroke-linecap':'round'},g),
   tp=el('circle',{class:'bighand',display:tr?'inline':'none',r:tr||0,fill:'#ff2d55',stroke:'#fff','stroke-width':1.4},g);
@@ -1142,7 +1142,7 @@ function drawSector(svg,Z,sched){
   el('circle',{cx:CX,cy:CYY,r:R,fill:'#0b0f1a','fill-opacity':.3},S);
   el('circle',{cx:CX,cy:CYY,r:R-11,fill:'none',stroke:'var(--tick-soft)','stroke-width':.6,'stroke-opacity':.4},S);
   const rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
-  const ringSegs=[],segD=(k,w)=>chevD(P,R-4,w,deg(k)+.8,deg(k+1)-.8);for(let k=0;k<24;k++){ringSegs.push(el('path',{d:segD(k,4.5)},S))}const curCore=el('path',{class:'ringneon-core rn-soft'},S);let topG=null;
+  const ringSegs=[],segD=(k,w)=>chevD(P,R-4,w,deg(k)+.35,deg(k+1)-.35);for(let k=0;k<24;k++){ringSegs.push(el('path',{d:segD(k,4.5)},S))}const curCore=el('path',{class:'ringneon-core rn-soft'},S);let topG=null;
   const mk3=[];for(let k=0;k<24;k+=3){mk3[k]=el('line',{x1:P(R-11,deg(k))[0],y1:P(R-11,deg(k))[1],x2:P(R+(k%6?4:7),deg(k))[0],y2:P(R+(k%6?4:7),deg(k))[1],class:'hr3mark'+(k%6?'':' hr6')},S)}
   const ringUpd=hn=>{mk3.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k<=Math.floor(hn)));ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk;
     e.setAttribute('fill',rayCol(k));e.setAttribute('fill-opacity',inBlk?'1':'.85');e.style.display=past?'none':'';e.setAttribute('d',segD(k,inBlk?7.5:4.5));const isCur=k===Math.floor(hn);e.classList.toggle('srccur',inBlk&&!isCur);e.classList.toggle('ringneon-tube',isCur);e.classList.toggle('rn-soft',isCur);if(isCur){e.setAttribute('d',segD(k,8));curCore.setAttribute('d',segD(k,2.6));if(topG){topG.appendChild(e);topG.appendChild(curCore)}}})};
@@ -1207,7 +1207,7 @@ function drawSlice(svg,Z,sched){
    {const hn=new Date().getHours(),RR=R+11,rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
     el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'#000','stroke-opacity':.25,'stroke-width':9,filter:'url(#slBlur)'},S);
     el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'var(--tick-soft)','stroke-width':.7,'stroke-opacity':.45},S);
-    const seg=(k,w)=>chevD(H,RR,w,k*15+.9,(k+1)*15-.9);for(let k=0;k<hn;k++){el('path',{d:seg(k,6.5),fill:'#c8d2ea','fill-opacity':.14},S)}
+    const seg=(k,w)=>chevD(H,RR,w,k*15+.4,(k+1)*15-.4);for(let k=0;k<hn;k++){el('path',{d:seg(k,6.5),fill:'#c8d2ea','fill-opacity':.14},S)}
     for(let k=hn;k<24;k++){if(k===hn){el('path',{d:seg(k,8),class:'ringneon-tube rn-soft'},S);el('path',{d:seg(k,2.6),class:'ringneon-core rn-soft'},S)}
       else el('path',{d:seg(k,6.5),fill:rayCol(k),'fill-opacity':.9},S)}
     for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S)}

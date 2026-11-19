@@ -483,6 +483,27 @@ html.focus.zlv2 .bezel{padding:0}
 .hr3mark.past{stroke:#8a8f9c;stroke-opacity:.35;filter:none}
 .ringneon-tube.rn-soft{fill-opacity:.7;stroke-opacity:.6;filter:drop-shadow(0 0 2px var(--neon));animation:none}
 .ringneon-core.rn-soft{fill-opacity:.55}
+.bankbtn{position:relative;width:62px;height:62px;border-radius:20px;border:1px solid rgba(255,214,130,.45);padding:7px;cursor:pointer;background:radial-gradient(circle at 50% 30%,rgba(255,226,160,.22),rgba(20,24,44,.82) 70%);box-shadow:0 6px 18px rgba(0,0,0,.4),0 0 14px rgba(255,200,90,.25),inset 0 1px 0 rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.bankbtn .bankico{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.bankbtn:focus-visible{outline:2px solid var(--glow);outline-offset:3px}
+.bankbtn:active{transform:scale(.94)}
+.bankbtn.gulp{animation:gulp .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes gulp{0%{transform:scale(1)}35%{transform:scale(1.18)}100%{transform:scale(1)}}
+.banknow{position:absolute;top:-8px;left:-10px;min-width:28px;height:28px;border-radius:999px;display:grid;place-items:center;font-size:15px;line-height:1;background:#10142a;border:2.5px solid var(--c,#5aa2ec);box-shadow:0 0 10px var(--c,#5aa2ec)}
+.banknow[data-more]:not([data-more=""])::after{content:attr(data-more);position:absolute;right:-8px;bottom:-6px;font:700 10px/1 system-ui,sans-serif;color:#fff;background:#2a78d6;border-radius:999px;padding:2px 4px}
+.bankhint{margin:0;font-size:13px;color:var(--muted)}
+#lgCustom{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px dashed var(--line);border-radius:14px}
+#lgCustom[hidden]{display:none}
+.snapflash{position:fixed;inset:0;z-index:90;background:#fff;pointer-events:none;animation:snapfl .5s ease-out forwards}
+@keyframes snapfl{0%{opacity:.85}100%{opacity:0}}
+.snapcard{position:fixed;z-index:91;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 14px 12px;background:#fdfbf5;color:#1a1a1a;border-radius:6px;border-top:5px solid var(--c);box-shadow:0 10px 28px rgba(0,0,0,.45);transform-origin:center;min-width:96px}
+.snapcard .em{font-size:28px;line-height:1.1}.snapcard .nm{font:700 13px/1.2 system-ui,sans-serif}.snapcard .tm{font:500 11px/1.2 system-ui,sans-serif;color:#666}
+@media (prefers-reduced-motion:reduce){.snapflash{animation-duration:.2s}.bankbtn.gulp{animation:none}}
+.hr3num{fill:#fff3d6;font-family:system-ui,-apple-system,sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:central;filter:drop-shadow(0 0 2px rgba(255,200,90,.7))}
+.hr3num.past{fill:#8a8f9c;fill-opacity:.5;filter:none}
+.sechr.sechr-glow{fill:#fff3d6;stroke:none;font-size:19px;font-weight:800;filter:drop-shadow(0 0 2px #ffd27a) drop-shadow(0 0 7px rgba(255,200,90,.65));transform-box:fill-box;transform-origin:center;animation:sechrIn .9s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes sechrIn{0%{transform:scale(.4);opacity:.3}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.sechr.sechr-glow{animation:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -491,14 +512,22 @@ html.focus.zlv2 .bezel{padding:0}
 
 <nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button></nav>
 <div class="focusmoon" id="focusMoon" hidden><svg viewBox="0 0 200 200" role="img" aria-label="This month"></svg></div>
-<div class="logbar" id="logBar" hidden>
-  <button type="button" class="logbtn cartbtn" id="logOpen" aria-label="Activity Cart" title="Activity Cart"><span aria-hidden="true">➕🛒🕰️</span></button>
-  <button type="button" class="logbtn ghost" id="repOpen">Day report</button>
+<div class="logbar" id="logBar">
+  <button type="button" class="bankbtn" id="logOpen" aria-label="Activity Bank" title="Activity Bank"><svg class="bankico" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="bkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3cf"/><stop offset="1" stop-color="#e8b64c"/></linearGradient></defs>
+<path d="M4 17 24 5l20 12z" fill="url(#bkG)" stroke="#7a4f12" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="24" cy="13.2" r="5.6" fill="#fffaf0" stroke="#7a4f12" stroke-width="1.3"/><path d="M24 9.8v3.6l2.4 1.5" fill="none" stroke="#7a4f12" stroke-width="1.4" stroke-linecap="round"/>
+<rect x="6" y="18.5" width="36" height="3" rx="1" fill="url(#bkG)" stroke="#7a4f12" stroke-width="1.2"/>
+<g fill="url(#bkG)" stroke="#7a4f12" stroke-width="1.1"><rect x="9" y="22.5" width="5" height="15" rx="1"/><rect x="34" y="22.5" width="5" height="15" rx="1"/></g>
+<circle cx="24" cy="30" r="7" fill="#2fbf71" stroke="#0f6b3a" stroke-width="1.3"/><text x="24" y="34.2" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">$</text>
+<rect x="5" y="38.5" width="38" height="4.5" rx="1.4" fill="url(#bkG)" stroke="#7a4f12" stroke-width="1.3"/></svg><span class="banknow" id="bankNow" hidden></span></button>
 </div>
 <div class="lpwrap" id="logPanel" hidden>
   <section class="lpanel" role="dialog" aria-modal="true" aria-labelledby="lpTitle">
-    <div class="lphead"><h2 id="lpTitle">Activity Cart</h2><button type="button" class="lpx" data-close aria-label="Close">×</button></div>
-    <div class="actcats" id="actGrid" role="radiogroup" aria-label="Activity"></div>
+    <div class="lphead"><h2 id="lpTitle">Activity Bank</h2><button type="button" class="lpx" data-close aria-label="Close">×</button></div>
+    <div class="actcats" id="actGrid" aria-label="Activities"></div>
+    <p class="bankhint" id="bankHint">Tap an activity to snap it into <b id="bankHalf"></b>.</p>
+    <div id="lgCustom" hidden>
+    <p class="bankhint">Pick an activity, then set the time.</p>
     <div class="lprow">
       <label>From <input type="time" id="logFrom" step="60"></label>
       <label>To <input type="time" id="logTo" step="60"></label>
@@ -508,7 +537,9 @@ html.focus.zlv2 .bezel{padding:0}
     </div>
     <label class="lpnote">Note <input type="text" id="logNote" maxlength="80" placeholder="Optional"></label>
     <p class="lperr" id="logErr" role="alert"></p>
-    <div class="lpfoot"><button type="button" class="edsmall ghost" id="actManage">Edit categories</button><span class="spacer"></span><button type="button" class="edsmall" id="logSave">Save time block</button><button type="button" class="edsave" id="logStart">＋ Add to this half hour</button></div>
+    <div class="lpfoot"><span class="spacer"></span><button type="button" class="edsmall" id="logSave">Save time block</button></div>
+    </div>
+    <div class="lpfoot"><button type="button" class="edsmall ghost" id="actManage">Edit categories</button><span class="spacer"></span><button type="button" class="edsmall ghost" id="repOpen">📋 Day report</button><button type="button" class="edsmall ghost" id="logOther" aria-expanded="false">🕘 Another time</button><button type="button" id="logStart" hidden></button></div>
     <h3 class="lpsub">Today</h3>
     <ul class="loglist" id="logList"></ul>
     <div class="actman" id="actMan" hidden>
@@ -1143,8 +1174,8 @@ function drawSector(svg,Z,sched){
   el('circle',{cx:CX,cy:CYY,r:R-11,fill:'none',stroke:'var(--tick-soft)','stroke-width':.6,'stroke-opacity':.4},S);
   const rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
   const ringSegs=[],segD=(k,w)=>chevD(P,R-4,w,deg(k)+.35,deg(k+1)-.35);for(let k=0;k<24;k++){ringSegs.push(el('path',{d:segD(k,4.5)},S))}const curCore=el('path',{class:'ringneon-core rn-soft'},S);let topG=null;
-  const mk3=[];for(let k=0;k<24;k+=3){mk3[k]=el('line',{x1:P(R-11,deg(k))[0],y1:P(R-11,deg(k))[1],x2:P(R+(k%6?4:7),deg(k))[0],y2:P(R+(k%6?4:7),deg(k))[1],class:'hr3mark'+(k%6?'':' hr6')},S)}
-  const ringUpd=hn=>{mk3.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k<=Math.floor(hn)));ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk;
+  const mk3=[],nm3=[];for(let k=0;k<24;k+=3){mk3[k]=el('line',{x1:P(R-11,deg(k))[0],y1:P(R-11,deg(k))[1],x2:P(R+(k%6?4:7),deg(k))[0],y2:P(R+(k%6?4:7),deg(k))[1],class:'hr3mark'+(k%6?'':' hr6')},S);const [tx,ty]=P(R+(k%6?11:14),deg(k));nm3[k]=el('text',{x:tx,y:ty,class:'hr3num','font-size':7.5},S);nm3[k].textContent=k}
+  const ringUpd=hn=>{[mk3,nm3].forEach(A=>A.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k<=Math.floor(hn))));nm3.forEach((e,k)=>{if(e)e.style.display=(k===Z.w0||k===(Z.w0+3)%24)?'none':''});ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk;
     e.setAttribute('fill',rayCol(k));e.setAttribute('fill-opacity',inBlk?'1':'.85');e.style.display=past?'none':'';e.setAttribute('d',segD(k,inBlk?7.5:4.5));const isCur=k===Math.floor(hn);e.classList.toggle('srccur',inBlk&&!isCur);e.classList.toggle('ringneon-tube',isCur);e.classList.toggle('rn-soft',isCur);if(isCur){e.setAttribute('d',segD(k,8));curCore.setAttribute('d',segD(k,2.6));if(topG){topG.appendChild(e);topG.appendChild(curCore)}}})};
   /* sector body: 3 hour columns (angle) x 6 ten-minute rows (outward) */
   const G=el('g',{class:'slice'},svg);
@@ -1160,7 +1191,7 @@ function drawSector(svg,Z,sched){
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
   const curHr=i=>{const k=Math.floor(i/6),q=P(RO-27,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=String((Z.w0+k)%24)};
-  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr'},G).textContent=String((Z.w0+k)%24||(k?24:0))}
+  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=String((Z.w0+k)%24||(k?24:0))}
   for(let r=0;r<6;r++){const q=P(RI+(r+.5)*band,a1-4.5);el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G).textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
   const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;
@@ -1210,7 +1241,7 @@ function drawSlice(svg,Z,sched){
     const seg=(k,w)=>chevD(H,RR,w,k*15+.4,(k+1)*15-.4);for(let k=0;k<hn;k++){el('path',{d:seg(k,6.5),fill:'#c8d2ea','fill-opacity':.14},S)}
     for(let k=hn;k<24;k++){if(k===hn){el('path',{d:seg(k,8),class:'ringneon-tube rn-soft'},S);el('path',{d:seg(k,2.6),class:'ringneon-core rn-soft'},S)}
       else el('path',{d:seg(k,6.5),fill:rayCol(k),'fill-opacity':.9},S)}
-    for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S)}
+    for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S);const [tx,ty]=H(RR+21,k*15);el('text',{x:tx,y:ty,class:'hr3num'+(k&&k<=hn?' past':''),'font-size':9},S).textContent=k}
     ndl=miniNeedle(S,(r,t)=>H(r,t*15),RR-6,RR+6,0);}
    /* strands with beads and feathers, hanging beside the slice */
    if(!document.getElementById('eagleG')){const eg=el('linearGradient',{id:'eagleG',x1:'0',x2:'0',y1:'0',y2:'1'},df);
@@ -1291,7 +1322,7 @@ function drawFocusMoon(){const fm=document.getElementById('focusMoon');if(!fm)re
 function updateZoomUI(){
   document.querySelectorAll('#zoomCrumb button').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.z===zoomLevel)));
   const ex=document.getElementById('exitFocus'),lab=zoomLevel>0?'Zoom out':'Exit full clock';ex.setAttribute('aria-label',lab);ex.title=lab;
-  {const lb=document.getElementById('logBar');if(lb)lb.hidden=!(zoomLevel===2&&document.documentElement.classList.contains('focus'))}
+  {const lb=document.getElementById('logBar');if(lb)lb.hidden=false}
   const k=document.querySelector('#focusLeft .dl-k');if(k)k.textContent=['Hours of day left','Left in these 3 hours','Left this hour'][zoomLevel];
 }
 function setZoom(lv,instant){
@@ -1389,10 +1420,10 @@ function stopRun(sw){if(!running)return;const n=new Date(),k=dayKey(n);let endM=
   endM=sw?Math.floor(endM/30)*30:Math.min(1440,Math.max(Math.ceil(endM/30)*30,running.s+30));if(endM>running.s)(logs[k]=logs[k]||[]).push({s:running.s,e:endM,a:running.a});
   const a=actById(running.a);running=null;saveRun();saveLogs();refreshSlice();renderRun();if(!sw)toast(`Stopped ${a.name}`)}
 function addHalf(id){const n=new Date(),k=dayKey(n),nm=n.getHours()*60+n.getMinutes(),bs=Math.floor(nm/30)*30,be=bs+30,L=(logs[k]=logs[k]||[]),a=actById(id);
-  if(L.some(e=>e.a===id&&e.s<be&&e.e>bs)){toast(`${a.name} is already in ${mm2t(bs)}–${mm2t(be)}`);return}
+  if(L.some(e=>e.a===id&&e.s<be&&e.e>bs)){toast(`${a.name} is already in ${mm2t(bs)}–${mm2t(be)}`);return false}
   const prev=L.find(e=>e.a===id&&e.e===bs);
   if(prev){prev.e=be;toast(`Extended ${a.name} to ${mm2t(prev.s)}–${mm2t(be)}`)}else{L.push({s:bs,e:be,a:id});toast(`Added ${a.name}, ${mm2t(bs)}–${mm2t(be)}`)}
-  saveLogs();refreshSlice()}
+  saveLogs();refreshSlice();renderBankNow();return true}
 function halfLabel(){const nm=nowMin(),bs=Math.floor(nm/30)*30;return `＋ Add to ${mm2t(bs)}–${mm2t(bs+30)}`}
 function startRun(id){if(running){if(running.a===id)return;stopRun(true)}const n=new Date(),k=dayKey(n),nm=n.getHours()*60+n.getMinutes(),bs=Math.floor(nm/30)*30;
   logs[k]=(logs[k]||[]).filter(e=>!(e.s>=bs&&e.s<bs+30));logs[k].forEach(e=>{if(e.s<bs&&e.e>bs)e.e=bs});saveLogs();
@@ -1403,11 +1434,26 @@ function renderRun(){const pill=_g('runPill');if(!pill)return;pill.hidden=!runni
 function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
 function openLog(){const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce((a,e)=>Math.max(a,e.e),-1);
   _g('logFrom').value=mm2t(last>=0&&last<n?last:Math.max(0,n-15));_g('logTo').value=mm2t(n);_g('logNote').value='';_g('logErr').textContent='';
-  if(!LG.sel&&acts[0])LG.sel=acts[0].id;_g('logStart').textContent=halfLabel();renderActs();renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip[aria-checked="true"]');c&&c.focus()},30)}
+  if(!LG.sel&&acts[0])LG.sel=acts[0].id;setCustom(false);renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip');c&&c.focus()},30)}
+function setCustom(on){LG.custom=on;_g('lgCustom').hidden=!on;_g('bankHint').hidden=on;const o=_g('logOther');o.setAttribute('aria-expanded',String(on));o.textContent=on?'⚡ Snap mode':'🕘 Another time';
+  const bs=Math.floor(nowMin()/30)*30;_g('bankHalf').textContent=`${mm2t(bs)}–${mm2t(bs+30)}`;renderActs()}
+/* snapshot: flash + a little polaroid of the activity flies into the bank */
+function snapAct(id,from){const a=actById(id),r0=from.getBoundingClientRect(),ok=addHalf(id);renderLogList();if(!ok)return;
+  const fl=document.createElement('div');fl.className='snapflash';document.body.appendChild(fl);setTimeout(()=>fl.remove(),520);
+  const bs=Math.floor(nowMin()/30)*30,cd=document.createElement('div');cd.className='snapcard';cd.innerHTML='<span class="em"></span><span class="nm"></span><span class="tm"></span>';
+  cd.style.setProperty('--c',a.color);cd.querySelector('.em').textContent=a.em;cd.querySelector('.nm').textContent=a.name;cd.querySelector('.tm').textContent=`${mm2t(bs)}–${mm2t(bs+30)}`;
+  cd.style.left=r0.left+'px';cd.style.top=r0.top+'px';document.body.appendChild(cd);closePanels();
+  const btn=_g('logOpen'),r1=btn.getBoundingClientRect(),cw=cd.offsetWidth,ch=cd.offsetHeight,dx=r1.left+r1.width/2-(r0.left+cw/2),dy=r1.top+r1.height/2-(r0.top+ch/2);
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const an=cd.animate(reduce?[{opacity:1},{opacity:0}]:[{transform:'scale(1) rotate(0deg)',opacity:1,offset:0},{transform:'scale(1.12) rotate(-4deg)',opacity:1,offset:.22},{transform:'scale(1.12) rotate(-4deg)',opacity:1,offset:.42},{transform:`translate(${dx}px,${dy}px) scale(.18) rotate(8deg)`,opacity:.2,offset:1}],{duration:reduce?300:900,easing:'cubic-bezier(.5,0,.2,1)'});
+  an.onfinish=()=>{cd.remove();btn.classList.remove('gulp');void btn.offsetWidth;btn.classList.add('gulp')}}
+function renderBankNow(){const b=_g('bankNow');if(!b)return;const nm=nowMin(),L=(logs[dayKey(new Date())]||[]).filter(e=>e.s<=nm&&e.e>nm);
+  if(!L.length){b.hidden=true;return}const a=actById(L[L.length-1].a);b.hidden=false;b.textContent=a.em||'•';b.style.setProperty('--c',a.color);
+  b.title=`Now: ${L.map(e=>actById(e.a).name).join(', ')}`;b.dataset.more=L.length>1?'+'+(L.length-1):'';_g('logOpen').setAttribute('aria-label',`Activity Bank. Now: ${L.map(e=>actById(e.a).name).join(', ')}`)}
 function closePanels(){_g('logPanel').hidden=true;_g('repPanel').hidden=true}
 function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(!acts.some(a=>a.id===LG.sel))LG.sel=acts[0]&&acts[0].id;
-  if(!cats.length){g.innerHTML='<p class="edhint">Your cart is empty. Tap Edit categories to add your first category and activities.</p>';return}
+  if(!cats.length){g.innerHTML='<p class="edhint">Your bank is empty. Tap Edit categories to add your first category and activities.</p>';return}
   const groups=cats.map(c=>({c,items:acts.filter(a=>a.cat===c.id)}));const orphan=acts.filter(a=>!catById(a.cat));if(orphan.length)groups.push({c:{id:'_',em:'',name:'Other',color:'#8a8d96'},items:orphan});
   groups.forEach(({c,items})=>{const sec=document.createElement('div');sec.className='actsec';
     const h=document.createElement('div');h.className='acthead';h.innerHTML='<span class="dia"></span><span class="em"></span><span class="nm"></span>';
@@ -1416,7 +1462,8 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
     if(!items.length){const p=document.createElement('p');p.className='edhint';p.textContent='No activities yet. Add some under Edit categories.';gr.appendChild(p)}
     items.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='actchip';b.setAttribute('role','radio');b.setAttribute('aria-checked',String(a.id===LG.sel));
       b.innerHTML='<span class="dia"></span><span class="em"></span><span class="nm"></span>';b.querySelector('.dia').style.background=c.color;b.querySelector('.em').textContent=a.em;b.querySelector('.nm').textContent=a.name;
-      const pick=()=>{if(LG.sel===a.id)return;LG.sel=a.id;setTimeout(renderActs,0)};b.addEventListener('pointerdown',pick);b.addEventListener('click',pick);gr.appendChild(b)});
+      if(!LG.custom){b.setAttribute('role','button');b.removeAttribute('aria-checked');b.setAttribute('aria-label',`Snap ${a.name} into this half hour`);b.addEventListener('click',()=>snapAct(a.id,b))}
+      else{const pick=()=>{if(LG.sel===a.id)return;LG.sel=a.id;setTimeout(renderActs,0)};b.addEventListener('pointerdown',pick);b.addEventListener('click',pick)}gr.appendChild(b)});
     sec.appendChild(gr);g.appendChild(sec)})}
 function renderLogList(){const ul=_g('logList'),L=(logs[dayKey(new Date())]||[]).slice().sort((x,y)=>x.s-y.s);ul.innerHTML='';
   if(!L.length){ul.innerHTML='<li class="empty">Nothing logged yet today.</li>';return}
@@ -1469,7 +1516,7 @@ function renderReport(){const R=report(LG.day),tr=_g('rpTrack');tr.innerHTML='';
   _g('rpText').textContent=txt;_g('rpMsg').textContent='';return txt}
 function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.day===0)));renderReport();_g('repPanel').hidden=false;setTimeout(()=>_g('rpCopy').focus(),30)}
 (function(){
-  _g('logOpen').addEventListener('click',openLog);
+  _g('logOpen').addEventListener('click',openLog);_g('logOther').addEventListener('click',()=>setCustom(!LG.custom));renderBankNow();setInterval(renderBankNow,30000);
   if(running)stopRun();
   _g('logStart').addEventListener('click',()=>{if(!LG.sel){_g('logErr').textContent='Pick an activity first.';return}addHalf(LG.sel);renderLogList()});
   setInterval(renderRun,1000);renderRun();
@@ -1481,7 +1528,7 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
     if(!R.segs.some(g=>!g.gap)){_g('rpMsg').textContent='Nothing logged to add yet.';return}
     const file=new File([ics],`my-day-${ymd}.ics`,{type:'text/calendar'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Day log'}).catch(()=>{});_g('rpMsg').textContent='Choose Calendar to add the events.';return}
-    try{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);_g('rpMsg').textContent='Calendar file created. Open it and tap Add All.'}catch(e){_g('rpMsg').textContent='Adding to Calendar works in the home-screen version.'}});_g('repOpen').addEventListener('click',openReport);
+    try{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);_g('rpMsg').textContent='Calendar file created. Open it and tap Add All.'}catch(e){_g('rpMsg').textContent='Adding to Calendar works in the home-screen version.'}});_g('repOpen').addEventListener('click',()=>{closePanels();openReport()});
   document.querySelectorAll('.lpwrap').forEach(w=>{w.addEventListener('click',e=>{if(e.target===w||e.target.closest('[data-close]'))closePanels()})});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(!_g('logPanel').hidden||!_g('repPanel').hidden)){e.stopImmediatePropagation();closePanels()}},true);
   _g('logQuick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const n=nowMin(),q=b.dataset.q;let s0;

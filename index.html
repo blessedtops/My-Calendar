@@ -331,11 +331,11 @@ header{align-items:center}
 .expandbtn:focus-visible,.exitfocus:focus-visible{outline:2px solid var(--glow);outline-offset:2px;opacity:1;pointer-events:auto}
 .exitfocus{position:fixed;z-index:30;top:calc(14px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px))}
 html.focus,html.focus body{overflow:hidden;height:100%}
-html.focus header,html.focus .weekhead,html.focus .weeknav,html.focus .weeks,html.focus .dots,html.focus .legend,
+html.focus .weekhead,html.focus .weeknav,html.focus .weeks,html.focus .dots,html.focus .legend,
 html.focus .setfoot,html.focus .settings,html.focus .editor,html.focus .earthcard,html.focus .stats{display:none!important}
 html.focus .wrap{max-width:none;height:100%;justify-content:center;align-items:center;gap:0}
 html.focus .top{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:100%;height:100%}
-html.focus .sunwrap{width:min(calc(100vw - 24px),calc(100dvh - 110px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));max-width:1100px;padding:8%;box-sizing:border-box;animation:grow .45s cubic-bezier(.2,.8,.2,1)}
+html.focus .sunwrap{width:min(calc(100vw - 24px),calc(100dvh - 140px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));max-width:1100px;padding:8%;box-sizing:border-box;animation:grow .45s cubic-bezier(.2,.8,.2,1)}
 html.focus .side{width:auto;min-width:0}
 html.focus .status{flex-direction:row;align-items:center;gap:16px;padding:10px 18px;border-radius:999px}
 html.focus .status .row{gap:16px;flex-wrap:nowrap}
@@ -474,7 +474,7 @@ html.focus.z1h .bezel{overflow:visible}
 .catcard input[type=text]{flex:1 1 140px;min-width:0;font:inherit;font-size:14px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px}
 .catcard input[type=color]{width:40px;height:38px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
 .srccur{filter:drop-shadow(0 0 3px rgba(255,205,70,.9)) drop-shadow(0 0 8px rgba(255,180,40,.5))}
-html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 118px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.845));padding:0;max-width:none}
+html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 148px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.845));padding:0;max-width:none}
 html.focus.zlv2 .bezel{padding:0}
 .ringneon-tube{fill:var(--neon);stroke:var(--neon);stroke-width:.8px;stroke-linejoin:round;filter:drop-shadow(0 0 3px var(--neon)) drop-shadow(0 0 9px var(--neon));animation:hrglow 3.2s ease-in-out infinite}
 .ringneon-core{fill:var(--neon-core);stroke:none}
@@ -504,6 +504,10 @@ html.focus.zlv2 .bezel{padding:0}
 .sechr.sechr-glow{fill:#fff3d6;stroke:none;font-size:19px;font-weight:800;filter:drop-shadow(0 0 2px #ffd27a) drop-shadow(0 0 7px rgba(255,200,90,.65));transform-box:fill-box;transform-origin:center;animation:sechrIn .9s cubic-bezier(.3,1.4,.5,1) both}
 @keyframes sechrIn{0%{transform:scale(.4);opacity:.3}100%{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.sechr.sechr-glow{animation:none}}
+html.focus header{position:fixed;z-index:29;top:calc(12px + env(safe-area-inset-top,0px));left:0;right:0;justify-content:center;pointer-events:none}
+html.focus .todaytitle{font-size:clamp(15px,2.4vw,22px);text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+html.focus .zoomcrumb{top:calc(50px + env(safe-area-inset-top,0px))}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>

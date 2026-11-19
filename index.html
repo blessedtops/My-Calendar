@@ -478,6 +478,9 @@ html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 118px - env
 html.focus.zlv2 .bezel{padding:0}
 .ringneon-tube{fill:none;stroke:var(--neon);stroke-width:8px;stroke-linecap:round;filter:drop-shadow(0 0 3px var(--neon)) drop-shadow(0 0 9px var(--neon));animation:hrglow 3.2s ease-in-out infinite}
 .ringneon-core{fill:none;stroke:var(--neon-core);stroke-width:2.6px;stroke-linecap:round}
+.hr3mark{stroke:#fff3d6;stroke-width:1.8px;stroke-linecap:round;filter:drop-shadow(0 0 2px #ffd27a) drop-shadow(0 0 5px rgba(255,200,90,.6))}
+.hr3mark.hr6{stroke-width:2.6px}
+.hr3mark.past{stroke:#8a8f9c;stroke-opacity:.35;filter:none}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1132,7 +1135,8 @@ function drawSector(svg,Z,sched){
   const rayCol=k=>(k===6||k===18)?'#d9a3d0':(k>18||k<6)?'#aebdf0':'#ffb52e';
   const ringSegs=[];for(let k=0;k<24;k++){const g=.9,rr=R-4;
     ringSegs.push(el('path',{d:`M${f(P(rr,deg(k)+g))}A${rr} ${rr} 0 0 1 ${f(P(rr,deg(k+1)-g))}`,fill:'none','stroke-linecap':'round'},S))}
-  const ringUpd=hn=>{ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk;
+  const mk3=[];for(let k=0;k<24;k+=3){mk3[k]=el('line',{x1:P(R-11,deg(k))[0],y1:P(R-11,deg(k))[1],x2:P(R+(k%6?4:7),deg(k))[0],y2:P(R+(k%6?4:7),deg(k))[1],class:'hr3mark'+(k%6?'':' hr6')},S)}
+  const ringUpd=hn=>{mk3.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k<=Math.floor(hn)));ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk;
     e.setAttribute('stroke',rayCol(k));e.setAttribute('stroke-opacity',inBlk?'1':'.85');e.style.display=past?'none':'';e.setAttribute('stroke-width',inBlk?'7.5':'4.5');e.classList.toggle('srccur',inBlk)})};
   /* sector body: 3 hour columns (angle) x 6 ten-minute rows (outward) */
   const G=el('g',{class:'slice'},svg);
@@ -1199,7 +1203,7 @@ function drawSlice(svg,Z,sched){
       const dA=`M${x0.toFixed(2)} ${y0.toFixed(2)}A${RR} ${RR} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
       if(cur){el('path',{d:dA,class:'ringneon-tube',filter:'url(#neonGlow)'},S);el('path',{d:dA,class:'ringneon-core'},S)}
       else el('path',{d:dA,fill:'none',stroke:rayCol(k),'stroke-width':6.5,'stroke-linecap':'round','stroke-opacity':.9},S)}
-    for(let k=0;k<24;k+=3){const [x0,y0]=H(RR+5.5,k*15),[x1,y1]=H(RR+9,k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,stroke:'#f0d2a0','stroke-opacity':.6,'stroke-width':1.2,'stroke-linecap':'round'},S)}}
+    for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S)}}
    /* strands with beads and feathers, hanging beside the slice */
    if(!document.getElementById('eagleG')){const eg=el('linearGradient',{id:'eagleG',x1:'0',x2:'0',y1:'0',y2:'1'},df);
      [['0','#fbf7ee'],['.5','#f1e9d8'],['.6','#7a5634'],['.72','#3b2414'],['1','#1c120a']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},eg))}

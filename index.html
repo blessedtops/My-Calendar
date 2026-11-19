@@ -501,7 +501,7 @@ html.focus.zlv2 .bezel{padding:0}
 @media (prefers-reduced-motion:reduce){.snapflash{animation-duration:.2s}.bankbtn.gulp{animation:none}}
 .hr3num{fill:#fff3d6;font-family:system-ui,-apple-system,sans-serif;font-weight:700;text-anchor:middle;dominant-baseline:central;filter:drop-shadow(0 0 2px rgba(255,200,90,.7))}
 .hr3num.past{fill:#8a8f9c;fill-opacity:.5;filter:none}
-.sechr.sechr-glow{fill:#fff3d6;stroke:none;font-size:19px;font-weight:800;filter:drop-shadow(0 0 2px #ffd27a) drop-shadow(0 0 7px rgba(255,200,90,.65));transform-box:fill-box;transform-origin:center;animation:sechrIn .9s cubic-bezier(.3,1.4,.5,1) both}
+.sechr.sechr-glow{font-size:19px;transform-box:fill-box;transform-origin:center;animation:sechrIn .9s cubic-bezier(.3,1.4,.5,1) both}
 @keyframes sechrIn{0%{transform:scale(.4);opacity:.3}100%{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.sechr.sechr-glow{animation:none}}
 html.focus header{position:fixed;z-index:29;top:calc(12px + env(safe-area-inset-top,0px));left:0;right:0;justify-content:center;pointer-events:none}
@@ -542,6 +542,9 @@ html.focus .zoomcrumb{top:calc(50px + env(safe-area-inset-top,0px))}
 .tlog.past .tendf,.tlog.cur .tend.l .tendf{fill:#07090f;fill-opacity:.5;stroke:none}
 .tlog .tchar{opacity:.7}
 .tlfront{stroke:#ffb050;stroke-width:1px;filter:drop-shadow(0 0 2px rgba(255,140,40,.7))}
+.skyico.skybig{stroke-width:1.8}
+.skyico.skybig>*{transform-box:fill-box;transform-origin:center;animation:sechrIn .9s cubic-bezier(.3,1.4,.5,1) both}
+@media (prefers-reduced-motion:reduce){.skyico.skybig>*{animation:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1243,7 +1246,7 @@ function drawSector(svg,Z,sched){
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
   const curHr=i=>{const k=Math.floor(i/6),q=P(RO-27,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=String((Z.w0+k)%24)};
-  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=String((Z.w0+k)%24||(k?24:0))}
+  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=String((Z.w0+k)%24||(k?24:0));const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));skyIcon(G,hh,ix,iy,20,'skybig')}}
   for(let r=0;r<6;r++){const q=P(RI+(r+.5)*band,a1-4.5);el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G).textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
   const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;

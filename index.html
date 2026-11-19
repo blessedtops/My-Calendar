@@ -535,6 +535,13 @@ html.focus .zoomcrumb{top:calc(50px + env(safe-area-inset-top,0px))}
 .tlog.past{opacity:.3;filter:none}
 .tlog.past .tendf,.tlog.cur .tend.l .tendf{fill:#07090f;stroke:#ffb050;stroke-opacity:.3}
 .tlfront{stroke:#ffc060;stroke-width:1.1px;filter:drop-shadow(0 0 2px #ff8a20) drop-shadow(0 0 4px rgba(255,150,40,.7))}
+.tlog .twood{stroke:none;opacity:.6}
+.tlog .tendf{fill:#a8784a;fill-opacity:.6;stroke:none}
+.tlog.up{filter:none}
+.tlog.past{opacity:.35}
+.tlog.past .tendf,.tlog.cur .tend.l .tendf{fill:#07090f;fill-opacity:.5;stroke:none}
+.tlog .tchar{opacity:.7}
+.tlfront{stroke:#ffb050;stroke-width:1px;filter:drop-shadow(0 0 2px rgba(255,140,40,.7))}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1318,12 +1325,12 @@ function drawSlice(svg,Z,sched){
   /* each 10-minute row is a log: fresh wood ahead, burning at the current minute, charred behind */
   const logs=[];
   if(SQ.round){const gd=(id,stops,v)=>{const g=el('linearGradient',Object.assign({id},v?{x1:0,x2:0,y1:0,y2:1}:{x1:0,x2:1,y1:0,y2:0}),df);stops.forEach(([o,c,op])=>el('stop',{offset:o,'stop-color':c,'stop-opacity':op==null?1:op},g))};
-    gd('lgWood',[[0,'#3a2414',.9],[.5,'#24160c',.9],[1,'#140c06',.9]],1);
+    gd('lgWood',[[0,'#8a5a32'],[.5,'#b07a48'],[1,'#6a4224']],1);
     gd('lgChar',[[0,'#07090f',.92],[1,'#07090f',.92]],1);
     gd('lgEmber',[[0,'#ff6a10',0],[1,'#ffb43d',.55]],0);
     const rg=el('radialGradient',{id:'lgEnd'},df);[[0,'#f6d29a'],[.55,'#d39550'],[1,'#7a4518']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},rg));
     const f1=z=>z[0].toFixed(1)+','+z[1].toFixed(1);
-    for(let r=0;r<SQ.rows;r++){const a=sqV(r,-.13),b=sqV(r,1.13),quad=(u0,u1)=>[sqP(u0,a),sqP(u1,a),sqP(u1,b),sqP(u0,b)].map(f1).join(' '),g=el('g',{class:'tlog up'},G);
+    for(let r=0;r<SQ.rows;r++){const a=sqV(r,.3),b=sqV(r,.7),quad=(u0,u1)=>[sqP(u0,a),sqP(u1,a),sqP(u1,b),sqP(u0,b)].map(f1).join(' '),g=el('g',{class:'tlog up'},G);
       el('polygon',{points:quad(0,1),fill:'url(#lgWood)',class:'twood'},g);
       const ch=el('polygon',{points:quad(0,0),fill:'url(#lgChar)',class:'tchar'},g),em=el('polygon',{points:quad(0,0),fill:'url(#lgEmber)',class:'tember'},g);
       [0,1].forEach(u=>{const p0=sqP(u,a),p1=sqP(u,b),cx=(p0[0]+p1[0])/2,cy=(p0[1]+p1[1])/2,ry=Math.hypot(p1[0]-p0[0],p1[1]-p0[1])/2,ang=Math.atan2(p1[1]-p0[1],p1[0]-p0[0])*180/Math.PI-90,

@@ -885,9 +885,9 @@ function drawClock(svg,sched,opts){
   el('circle',{cx:C,cy:CY,r:88,fill:'#000','fill-opacity':.12},svg);
   el('circle',{cx:C,cy:CY,r:86,fill:'url(#face)'},svg);
   let hg=null,hh=null,mm=null,dateTP=null;
-  if(big&&live){
+  let T=null;if(big&&live){
     /* neon time: glow tube + hot core */
-    const T=el('g',{class:'bigtime',transform:'translate(0 -7)'},svg);
+    T=el('g',{class:'bigtime',transform:'translate(0 -7)'},svg);
     const mk2=(x,anchor)=>{const g=el('text',{x,y:CY,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T);
       const c=el('text',{x,y:CY,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T);return [g,c]};
     hh=mk2(C-10,'end');mm=mk2(C+10,'start');mm.forEach(x=>x.classList.add('neon-min'));
@@ -899,7 +899,7 @@ function drawClock(svg,sched,opts){
   const t=el('text',{x:C,y:CY+(big?4:14),'text-anchor':'middle','font-size':big?34:40,'font-weight':500,fill:'var(--fg)','font-family':'JetBrains Mono,monospace'},svg);
   t.textContent=big?'--:--':(work?`${work}/24`:'Off');
   if(big)t.setAttribute('visibility','hidden');
-  return {done,doneHr:-1,logG:typeof logG!=='undefined'?logG:null,cur,hrNum,hrShown:-1,hg,hh,mm,majors,skys,hand,tip,text:t,core:typeof core!=='undefined'?core:null,halo:typeof halo!=='undefined'?halo:null,len:big?166:160};
+  return {T:typeof T!=='undefined'?T:null,done,doneHr:-1,logG:typeof logG!=='undefined'?logG:null,cur,hrNum,hrShown:-1,hg,hh,mm,majors,skys,hand,tip,text:t,core:typeof core!=='undefined'?core:null,halo:typeof halo!=='undefined'?halo:null,len:big?166:160};
 }
 
 const bigSvg=document.getElementById('clock');
@@ -937,7 +937,7 @@ function build(now){
       sv.setAttribute('aria-label',`${d.toLocaleDateString(undefined,{weekday:'long'})} ${fmt(d)} clock`);
       if(isToday){const w=document.createElement('div');w.className='minisun';w.appendChild(miniRays());w.appendChild(sv);card.appendChild(w)}else card.appendChild(sv);wk.appendChild(card);
       const sc=schedFor(d);total+=workedIn(sc,0,24);
-      const parts=drawClock(sv,sc,{live:isToday});parts.text.textContent=isPast?(CLK12?'12:00am':'24:00'):isToday?tShort(now):(CLK12?'12:00am':'00:00');if(!isToday)parts.text.setAttribute('fill-opacity',isPast?.75:.9);
+      const parts=drawClock(sv,sc,{live:isToday});parts.text.textContent=isPast?(CLK12?'11:59pm':'23:59'):isToday?tShort(now):(CLK12?'12:00am':'00:00');if(!isToday)parts.text.setAttribute('fill-opacity',isPast?.75:.9);
       minis.push({d,sched:sc,parts,isToday,isPast});
     }
     hubs.push(buildHub(panel.querySelector('.hub svg'),now,off,total,mon));
@@ -1121,7 +1121,7 @@ function tick(){
   safe(()=>earthTick(now));
   safe(()=>{
     setHand(big,h);
-    if(big&&big.text){const tt=`${hDig(now)}:${pad(now.getMinutes())}`;big.text.textContent=tt;{const ds=dateStr(now);document.querySelectorAll('text.tday').forEach(e=>{if(e.textContent!==ds)e.textContent=ds})}if(big.hh){const a=hDig(now),b=pad(now.getMinutes());big.hh.forEach(x=>{if(x.textContent!==a)x.textContent=a});big.mm.forEach(x=>{if(x.textContent!==b)x.textContent=b})}}
+    if(big&&big.text){const tt=`${hDig(now)}:${pad(now.getMinutes())}`;big.text.textContent=tt;{const ds=dateStr(now);document.querySelectorAll('text.tday').forEach(e=>{if(e.textContent!==ds)e.textContent=ds})}if(big.hh){const a=hDig(now),b=pad(now.getMinutes());if(big.hh[0].textContent!==a){big.hh.forEach(x=>x.textContent=a);if(big.T){try{const dx=a.length<2?-big.hh[1].getComputedTextLength()/2:0;big.T.setAttribute('transform',`translate(${dx.toFixed(1)} -7)`)}catch(e){}}}big.mm.forEach(x=>{if(x.textContent!==b)x.textContent=b})}}
     minis.forEach(m=>{if(m.isToday){setHand(m.parts,h);m.parts.text.textContent=tShort(now)}});
   });
   safe(()=>zoomTick(now,h));

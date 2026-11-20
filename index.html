@@ -545,13 +545,34 @@ html.focus .zoomcrumb{top:calc(50px + env(safe-area-inset-top,0px))}
 .skyico.skybig{stroke-width:1.8}
 .skyico.skybig>*{transform-box:fill-box;transform-origin:center;animation:sechrIn .9s cubic-bezier(.3,1.4,.5,1) both}
 @media (prefers-reduced-motion:reduce){.skyico.skybig>*{animation:none}}
+html.zday .sunwrap,html.zday #rays,html.zday #focusMoon{visibility:hidden}
+.dayview{position:fixed;z-index:22;left:50%;transform:translateX(-50%);top:calc(100px + env(safe-area-inset-top,0px));bottom:calc(158px + env(safe-area-inset-bottom,0px));width:min(760px,calc(100vw - 32px));overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
+.dayview[hidden]{display:none}
+.dayview.dvin,.dvin{animation:dvin .35s ease-out}
+@keyframes dvin{from{opacity:0;transform:translateX(-50%) scale(.97)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+svg.dvin{animation:fadein2 .35s ease-out}@keyframes fadein2{from{opacity:0}to{opacity:1}}
+.dv-row{display:grid;grid-template-columns:56px 1fr;gap:8px;flex:1 0 30px;min-height:30px}
+.dv-h{display:flex;align-items:center;justify-content:flex-end;gap:5px;font:700 13px/1 Manrope,system-ui,sans-serif;color:var(--fg);font-variant-numeric:tabular-nums}
+.dv-sky{width:17px;height:17px;overflow:visible}
+.dv-track{position:relative;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-left:3px solid var(--hc);
+  background-image:linear-gradient(90deg,transparent calc(50% - .5px),rgba(255,255,255,.14) calc(50% - .5px),rgba(255,255,255,.14) calc(50% + .5px),transparent calc(50% + .5px)),repeating-linear-gradient(90deg,transparent 0 calc(16.6667% - 1px),rgba(255,255,255,.05) calc(16.6667% - 1px) 16.6667%)}
+.dv-row.past .dv-h{opacity:.45}
+.dv-row.past .dv-track{background-color:rgba(140,145,160,.16);border-left-color:rgba(140,145,160,.5)}
+.dv-row.past .dv-bar{opacity:.72}
+.dv-row.cur .dv-h span{color:var(--neon);text-shadow:0 0 6px var(--neon)}
+.dv-row.cur .dv-track{border-color:color-mix(in srgb,var(--neon) 55%,transparent);border-left-color:var(--hc);box-shadow:0 0 10px color-mix(in srgb,var(--neon) 35%,transparent)}
+.dv-used{position:absolute;left:0;top:0;bottom:0;background:rgba(140,145,160,.2);pointer-events:none}
+.dv-now{position:absolute;top:-1px;bottom:-1px;width:2.5px;margin-left:-1.25px;border-radius:2px;background:#ff2d55;box-shadow:0 0 6px #ff2d55;z-index:2;pointer-events:none}
+.dv-bar{position:absolute;box-sizing:border-box;border-radius:6px;background:var(--c);font:600 12px/1 system-ui,-apple-system,sans-serif;display:flex;align-items:center;gap:4px;padding:0 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);z-index:1}
+:root[data-theme="light"] .dv-track{background-color:rgba(20,24,44,.05);border-color:rgba(20,24,44,.1)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
 
 
-<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button></nav>
+<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button><span aria-hidden="true">›</span><button type="button" data-z="3">Day</button></nav>
+<section class="dayview" id="dayView" aria-label="Today's activities by hour" hidden></section>
 <div class="focusmoon" id="focusMoon" hidden><svg viewBox="0 0 200 200" role="img" aria-label="This month"></svg></div>
 <div class="logbar" id="logBar">
   <button type="button" class="bankbtn" id="logOpen" aria-label="Activity Bank" title="Activity Bank"><svg class="bankico" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="bkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3cf"/><stop offset="1" stop-color="#e8b64c"/></linearGradient></defs>
@@ -1365,7 +1386,30 @@ function drawSlice(svg,Z,sched){
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
   return {kind:'slice',Z,cells,colors,prog,curOut,nums,needle:ndl,dimUpd:dimU,logUpd,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
+/* ---------- Day view: 24 hour bars with logged activities, like a calendar ---------- */
+var dayM=-1;
+function dvInk(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return '#fff';const n=parseInt(m[1],16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>150?'#141824':'#fff'}
+function dayTick(now,h){const m=Math.floor(h*60);if(m!==dayM){dayM=m;renderDay(now,h)}
+  const dv=document.getElementById('dayView'),nl=dv&&dv.querySelector('.dv-now'),us=dv&&dv.querySelector('.dv-used');if(nl){const f=(h%1)*100;nl.style.left=f+'%';if(us)us.style.width=f+'%'}}
+function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)return;const hn=Math.floor(h),L=(typeof dayEntries==='function'?dayEntries(now):[]).filter(e=>e.e>e.s);
+  const hc=k=>(k===6||k===18)?'#ff8a45':(k>18||k<6)?'#aebdf0':'#ffb52e',keep=dv.scrollTop;dv.innerHTML='';
+  for(let k=0;k<24;k++){const row=document.createElement('div');row.className='dv-row'+(k<hn?' past':k===hn?' cur':'');row.style.setProperty('--hc',hc(k));
+    const lab=document.createElement('div');lab.className='dv-h';const t=document.createElement('span');t.textContent=pad(k);lab.appendChild(t);
+    if(k%6===0){const sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 24 24');sv.setAttribute('class','dv-sky');lab.prepend(sv);skyIcon(sv,k,12,12,22,k&&k+1<=hn?'past':'')}
+    const tr=document.createElement('div');tr.className='dv-track';
+    if(k===hn){const u=document.createElement('div');u.className='dv-used';u.style.width=((h%1)*100)+'%';tr.appendChild(u)}
+    const a0=k*60,a1=a0+60,seg=L.map(e=>({e,s:Math.max(e.s,a0),t:Math.min(e.e,a1)})).filter(x=>x.t>x.s).sort((x,y)=>x.s-y.s||y.t-x.t),lanes=[];
+    seg.forEach(x=>{let i=lanes.findIndex(end=>end<=x.s);if(i<0){i=lanes.length;lanes.push(0)}lanes[i]=x.t;x.l=i});
+    const nl=Math.max(1,lanes.length);
+    seg.forEach(x=>{const a=actById(x.e.a),b=document.createElement('div');b.className='dv-bar';b.style.left=((x.s-a0)/60*100)+'%';b.style.width=((x.t-x.s)/60*100)+'%';
+      b.style.top=(x.l/nl*100)+'%';b.style.height=`calc(${100/nl}% - ${nl>1?2:0}px)`;b.style.setProperty('--c',a.color);b.style.color=dvInk(a.color);
+      const wide=(x.t-x.s)>=12;b.textContent=wide?`${a.em} ${a.name}`:a.em;b.title=`${a.em} ${a.name} · ${mm2t(x.e.s)}–${mm2t(x.e.e)}`;tr.appendChild(b)});
+    if(k===hn){const n=document.createElement('div');n.className='dv-now';n.style.left=((h%1)*100)+'%';tr.appendChild(n)}
+    tr.setAttribute('aria-label',`${pad(k)}:00 – ${seg.length?seg.map(x=>actById(x.e.a).name).join(', '):'nothing logged'}`);tr.setAttribute('role','img');
+    row.appendChild(lab);row.appendChild(tr);dv.appendChild(row)}
+  dv.scrollTop=keep}
 function zoomTick(now,h){
+  if(zoomLevel===3){dayTick(now,h);return}
   if(!(zoomLevel>0)||!zsvg)return;
   const Z=zWin(zoomLevel,h);
   if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -72 448 530':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
@@ -1397,10 +1441,15 @@ function updateZoomUI(){
   document.querySelectorAll('#zoomCrumb button').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.z===zoomLevel)));
   const ex=document.getElementById('exitFocus'),lab=zoomLevel>0?'Zoom out':'Exit full clock';ex.setAttribute('aria-label',lab);ex.title=lab;
   {const lb=document.getElementById('logBar');if(lb)lb.hidden=false}
-  const k=document.querySelector('#focusLeft .dl-k');if(k)k.textContent=['Hours of day left','Left in these 3 hours','Left this hour'][zoomLevel];
+  const k=document.querySelector('#focusLeft .dl-k');if(k)k.textContent=['Hours of day left','Left in these 3 hours','Left this hour','Hours of day left'][zoomLevel];
 }
 function setZoom(lv,instant){
-  lv=Math.max(0,Math.min(2,lv));if(lv===zoomLevel||!zsvg)return;
+  lv=Math.max(0,Math.min(3,lv));if(lv===zoomLevel||!zsvg)return;
+  if(lv===3||zoomLevel===3){const day=lv===3,root=document.documentElement,dv=document.getElementById('dayView'),now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+    zoomLevel=lv;zparts=null;root.classList.toggle('zday',day);dv.hidden=!day;root.classList.toggle('z1h',lv>=1);root.classList.toggle('zlv2',lv===2);
+    if(day){dayM=-1;dayTick(now,h);const c=dv.querySelector('.dv-row.cur');if(c)c.scrollIntoView({block:'center'})}
+    else{const showMain=lv===0;bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);if(showMain)buildRaysFor({w0:0,span:24,level:0});else zoomTick(now,h)}
+    updateZoomUI();if(!instant&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const t=day?dv:(lv===0?bigSvg:zsvg);t.classList.remove('dvin');void t.getBoundingClientRect();t.classList.add('dvin')}return}
   const now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600,prev=zoomLevel,inward=lv>prev;
   const small=zWin(Math.max(lv,prev),h),outer=zWin(Math.min(lv,prev),h),[ox,oy]=zpt(outer,small.w0+small.span/2,125);
   zoomLevel=lv;zparts=null;
@@ -1545,7 +1594,7 @@ function renderLogList(){const ul=_g('logList'),L=(logs[dayKey(new Date())]||[])
     li.innerHTML=`<span class="dia"></span><span class="tm"></span><span class="lb"></span><button type="button" class="edx" aria-label="Delete entry">×</button>`;
     li.querySelector('.dia').style.background=a.color;li.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)}`;li.querySelector('.lb').textContent=`${actLabel(a)}${e.n?' · '+e.n:''}`;
     li.querySelector('button').addEventListener('click',()=>{const k=dayKey(new Date());logs[k]=(logs[k]||[]).filter(x=>x!==e);saveLogs();renderLogList();refreshSlice()});ul.appendChild(li)})}
-function refreshSlice(){if(typeof zparts!=='undefined'&&zparts)zparts.lastM=-1;if(typeof big!=='undefined'&&big)big.doneHr=-1;if(typeof minis!=='undefined')minis.forEach(x=>{if(x.parts)x.parts.doneHr=-1})}
+function refreshSlice(){dayM=-1;if(typeof zparts!=='undefined'&&zparts)zparts.lastM=-1;if(typeof big!=='undefined'&&big)big.doneHr=-1;if(typeof minis!=='undefined')minis.forEach(x=>{if(x.parts)x.parts.doneHr=-1})}
 function renderActMan(){const box=_g('actManList');box.innerHTML='';
   const inp=(type,val,id,label,cls)=>{const x=document.createElement('input');x.type=type;x.value=val;x.id=id;x.setAttribute('aria-label',label);if(cls)x.className=cls;if(type==='text')x.maxLength=28;return x};
   const xbtn=label=>{const b=document.createElement('button');b.type='button';b.className='edx';b.textContent='×';b.setAttribute('aria-label',label);return b};

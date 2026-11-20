@@ -382,7 +382,10 @@ html.focus.z1h .bezel{overflow:visible}
 .slbody{filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)) drop-shadow(0 0 6px rgba(255,200,60,.35))}
 .mcur{stroke:#ffd34d;stroke-width:1.8px;stroke-linejoin:round;filter:drop-shadow(0 0 3px rgba(255,205,70,.95)) drop-shadow(0 0 8px rgba(255,180,40,.6));animation:mpulse 2s ease-in-out infinite}
 @keyframes mpulse{0%,100%{stroke-opacity:.75}50%{stroke-opacity:1}}
-.sqlab{font-family:var(--mono);font-size:9px;white-space:pre;fill:var(--muted)}
+.sqlab{font-family:Manrope,system-ui,sans-serif;font-size:8.5px;font-weight:600;white-space:pre;fill:var(--fg);fill-opacity:.7;paint-order:stroke;stroke:rgba(5,8,20,.7);stroke-width:2px;stroke-linejoin:round}
+.sqlab.past{fill-opacity:.3}
+.sqlab.cur{fill:var(--neon-core);fill-opacity:1;font-size:9.5px;font-weight:700;filter:drop-shadow(0 0 2px var(--neon))}
+.sqtick{stroke:var(--fg);stroke-opacity:.3;stroke-width:.8px;stroke-linecap:round}
 .slray{filter:drop-shadow(0 0 6px rgba(255,190,80,.45))}
 @media (prefers-reduced-motion:reduce){.mcur{animation:none}}
 .neon-tube.neon-hr,.neon-core.neon-hr{font-size:60px}
@@ -565,13 +568,23 @@ svg.dvin{animation:fadein2 .35s ease-out}@keyframes fadein2{from{opacity:0}to{op
 .dv-now{position:absolute;top:-1px;bottom:-1px;width:2.5px;margin-left:-1.25px;border-radius:2px;background:#ff2d55;box-shadow:0 0 6px #ff2d55;z-index:2;pointer-events:none}
 .dv-bar{position:absolute;box-sizing:border-box;border-radius:6px;background:var(--c);font:600 12px/1 system-ui,-apple-system,sans-serif;display:flex;align-items:center;gap:4px;padding:0 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);z-index:1}
 :root[data-theme="light"] .dv-track{background-color:rgba(20,24,44,.05);border-color:rgba(20,24,44,.1)}
+.syncbox{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.syncst{margin:0;font-size:13px;color:var(--muted)}.syncst.err{color:#e0805a}
+.syncf{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.syncf input{font:inherit;font-size:15px;font-weight:500;color:var(--fg);background:rgba(127,127,127,.12);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;box-sizing:border-box}
+.syncf input:focus-visible{outline:2px solid var(--glow);outline-offset:1px}
+.syncerr{margin:0;font-size:13px;color:#e0805a}.syncerr:empty{display:none}
+.syncrec{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px dashed var(--glow)}.syncrec p{margin:0;font-size:13px}
+.syncrec code{font:700 16px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.04em;user-select:all;word-break:break-all}
+.editbtn:disabled{opacity:.5;cursor:wait}
+.zoomcrumb span.zsep{width:1px;height:20px;margin:0 8px;background:var(--muted);opacity:.45;border-radius:1px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
 
 
-<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button><span aria-hidden="true">›</span><button type="button" data-z="3">Day</button></nav>
+<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button><span class="zsep" aria-hidden="true"></span><button type="button" data-z="3">Day</button></nav>
 <section class="dayview" id="dayView" aria-label="Today's activities by hour" hidden></section>
 <div class="focusmoon" id="focusMoon" hidden><svg viewBox="0 0 200 200" role="img" aria-label="This month"></svg></div>
 <div class="logbar" id="logBar">
@@ -731,6 +744,22 @@ svg.dvin{animation:fadein2 .35s ease-out}@keyframes fadein2{from{opacity:0}to{op
     <div class="setrow">
       <button type="button" class="editbtn" id="editToggle" aria-expanded="false" aria-controls="editor">Edit schedule &amp; colors</button>
       <button type="button" class="editbtn" id="bgToggle" aria-pressed="true">Galaxy background: on</button>
+    </div>
+    <div class="syncbox" id="syncBox">
+      <h3 class="sethead">Sync across devices</h3>
+      <p class="syncst" id="syncStatus" role="status">Off</p>
+      <div id="syncSetup">
+        <label class="syncf">Sync server address<input id="syncUrl" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://astro-day-sync.yourname.workers.dev"></label>
+        <label class="syncf">Passphrase (or recovery key)<input id="syncPass" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false"></label>
+        <div class="setrow"><button type="button" class="editbtn" id="syncNew">Set up sync (first device)</button><button type="button" class="editbtn" id="syncJoin">Connect this device</button></div>
+      </div>
+      <div id="syncOn" hidden><div class="setrow"><button type="button" class="editbtn" id="syncNow">Sync now</button><button type="button" class="editbtn" id="syncOff">Disconnect this device</button></div></div>
+      <p class="syncerr" id="syncErr" role="alert"></p>
+      <div class="syncrec" id="syncRec" hidden>
+        <p><b>Your recovery key.</b> Save it in your password manager now. It is shown only once, and it is the only way back in if you forget your passphrase.</p>
+        <code id="syncRecKey"></code>
+        <div class="setrow"><button type="button" class="editbtn" id="syncRecCopy">Copy</button><button type="button" class="editbtn" id="syncRecDone">I saved it</button></div>
+      </div>
     </div>
   </section>
   <section class="editor" id="editor" hidden aria-label="Edit schedule and activity colors">
@@ -1266,9 +1295,10 @@ function drawSector(svg,Z,sched){
   {const rh=RI+3*band;el('path',{d:`M${f(P(rh,a1+.3))}A${rh} ${rh} 0 0 1 ${f(P(rh,a2-.3))}`,fill:'none',class:'halfmark'},G);}
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
-  const curHr=i=>{const k=Math.floor(i/6),q=P(RO-27,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=String((Z.w0+k)%24)};
+  const curHr=i=>{mlabs.forEach((t,j)=>t.setAttribute('class','sqlab'+(j<i%6?' past':j===i%6?' cur':'')));const k=Math.floor(i/6),q=P(RO-27,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=String((Z.w0+k)%24)};
   for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=String((Z.w0+k)%24||(k?24:0));const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
-  for(let r=0;r<6;r++){const q=P(RI+(r+.5)*band,a1-4.5);el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G).textContent=':'+pad(r*10)}
+  const mlabs=[];for(let r=0;r<6;r++){const rr=RI+(r+.5)*band,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
+    mlabs.push(el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G));mlabs[r].textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
   const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;
   const mk=(x,anchor)=>[el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
@@ -1755,6 +1785,107 @@ let timer=null;
 function start(){if(timer)clearInterval(timer);builtFor='';lastType=null;tick();timer=setInterval(tick,1000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+
+/* ---------- Sync across devices (end-to-end encrypted, Cloudflare Worker + D1) ---------- */
+var SYNC=(function(){
+  const LS='astroSync',enc=new TextEncoder(),dec=new TextDecoder(),SALT=enc.encode('astro-day-sync/v1'),B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  let cfg=null,busy=false,again=false,timer=null,K=null;
+  try{cfg=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){cfg=null}
+  const save=()=>{try{cfg?localStorage.setItem(LS,JSON.stringify(cfg)):localStorage.removeItem(LS)}catch(e){}};
+  const hex=u=>[...new Uint8Array(u)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  const b64=u=>{u=new Uint8Array(u);let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)};
+  const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+  const shaHex=async s=>hex(await crypto.subtle.digest('SHA-256',enc.encode(s)));
+  const normPass=s=>s.normalize('NFKC').trim().replace(/\s+/g,' ');
+  const REC_RE=/^\s*[0-9a-z]{4}(-[0-9a-z]{4}){7}\s*$/i;
+  const normRec=s=>s.toUpperCase().replace(/[^0-9A-Z]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1');
+  const uid=()=>hex(crypto.getRandomValues(new Uint8Array(9)));
+  function makeRecovery(){const b=crypto.getRandomValues(new Uint8Array(20));let bits=0,v=0,out='';for(const x of b){v=(v<<8)|x;bits+=8;while(bits>=5){out+=B32[(v>>(bits-5))&31];bits-=5}}
+    return out.match(/.{4}/g).join('-')}
+  async function derive(secret,iters){const base=await crypto.subtle.importKey('raw',enc.encode(secret),'PBKDF2',false,['deriveBits']);
+    const bits=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:SALT,iterations:iters},base,512));
+    const kek=await crypto.subtle.importKey('raw',bits.slice(0,32),'AES-GCM',false,['encrypt','decrypt']),b=hex(bits.slice(32));
+    return {kek,lookup:await shaHex('lookup:'+b),token:await shaHex('token:'+b)}}
+  const fromSecret=s=>REC_RE.test(s)?derive(normRec(s),100000):derive(normPass(s),600000);
+  async function seal(key,bytes){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,bytes));const o=new Uint8Array(12+ct.length);o.set(iv);o.set(ct,12);return b64(o)}
+  async function unseal(key,s){const u=unb64(s);return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},key,u.slice(12)))}
+  async function keys(){if(K&&K.for===cfg.dek)return K;const raw=unb64(cfg.dek);
+    K={for:cfg.dek,aes:await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt']),mac:await crypto.subtle.importKey('raw',raw,{name:'HMAC',hash:'SHA-256'},false,['sign'])};return K}
+  const sidOf=async id=>hex(await crypto.subtle.sign('HMAC',(await keys()).mac,enc.encode(id))).slice(0,32);
+  async function api(method,path,bodyObj,c){c=c||cfg;const r=await fetch(c.url+path,{method,headers:Object.assign({'Content-Type':'application/json'},c.lookup?{Authorization:'Bearer '+c.lookup+'.'+c.token}:{}),body:bodyObj?JSON.stringify(bodyObj):undefined});
+    if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e}return r.json()}
+  const cleanUrl=u=>{u=(u||'').trim().replace(/\/+$/,'');if(!/^(https:\/\/[^\s/]+|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)/.test(u))throw new Error('Paste your sync server address, starting with https://');return u};
+  /* every category, activity and log entry is one record */
+  const fnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return (h>>>0).toString(36)+s.length};
+  const recHash=r=>fnv(JSON.stringify([r.k,r.day||'',r.d]));
+  function localRecords(){const R={};let fixed=false;
+    cats.forEach(c=>{R['cat:'+c.id]={k:'cat',d:c}});acts.forEach(a=>{R['act:'+a.id]={k:'act',d:a}});
+    for(const day in logs)(logs[day]||[]).forEach(e=>{if(!e.id){e.id=uid();fixed=true}R['log:'+e.id]={k:'log',day,d:e}});
+    if(fixed)rawSave();return R}
+  function rawSave(){try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts));localStorage.setItem('activityLog',JSON.stringify(logs))}catch(e){}}
+  function apply(id,rec,del){const kind=id.slice(0,3),key=id.slice(4);
+    if(kind==='cat'||kind==='act'){const A=kind==='cat'?cats:acts,i=A.findIndex(x=>x.id===key);if(del){if(i>=0)A.splice(i,1)}else if(i>=0)A[i]=rec.d;else A.push(rec.d)}
+    else if(kind==='log'){for(const d in logs){const L=logs[d],i=L.findIndex(x=>x.id===key);if(i>=0){L.splice(i,1);if(!L.length)delete logs[d]}}if(!del)(logs[rec.day]=logs[rec.day]||[]).push(rec.d)}}
+  function rerender(){try{refreshSlice()}catch(e){}try{renderBankNow()}catch(e){}try{if(!_g('logPanel').hidden){renderActs();renderLogList()}}catch(e){}try{if(!_g('repPanel').hidden)renderReport()}catch(e){}}
+  function status(t,err){const s=document.getElementById('syncStatus');if(s){s.textContent=t;s.classList.toggle('err',!!err)}}
+  function stamp(){const d=new Date(cfg.last||0);return cfg.last?`Synced ${pad(d.getHours())}:${pad(d.getMinutes())}`:'Connected'}
+  async function sync(){if(!cfg||!cfg.dek)return;if(busy){again=true;return}busy=true;status('Syncing…');
+    try{const k=await keys();let changed=false;
+      for(;;){const r=await api('GET','/v1/pull?since='+(cfg.cursor||0));
+        for(const it of r.items){cfg.cursor=Math.max(cfg.cursor||0,it.seq);let rec;try{rec=JSON.parse(dec.decode(await unseal(k.aes,it.blob)))}catch(e){continue}
+          if(!rec||typeof rec.id!=='string'||it.ts<=(cfg.ts[rec.id]||0))continue;
+          apply(rec.id,rec,!!it.deleted);cfg.ts[rec.id]=it.ts;changed=true;if(it.deleted)delete cfg.snap[rec.id];else cfg.snap[rec.id]=recHash(rec)}
+        if(!r.more)break}
+      if(changed){rawSave();rerender()}
+      const R=localRecords(),now=Date.now(),out=[];
+      for(const id in R){const h=recHash(R[id]);if(cfg.snap[id]!==h)out.push({id,h,rec:Object.assign({id},R[id]),del:0})}
+      for(const id in cfg.snap)if(!R[id])out.push({id,h:null,rec:{id},del:1});
+      for(let i=0;i<out.length;i+=100){const ch=out.slice(i,i+100);
+        const items=await Promise.all(ch.map(async o=>({sid:await sidOf(o.id),blob:await seal(k.aes,enc.encode(JSON.stringify(o.rec))),ts:now,deleted:o.del})));
+        await api('POST','/v1/push',{items});ch.forEach(o=>{cfg.ts[o.id]=now;if(o.del)delete cfg.snap[o.id];else cfg.snap[o.id]=o.h});save()}
+      cfg.last=Date.now();save();status(stamp())}
+    catch(e){status(e.status===401?'This device was disconnected from sync. Connect it again.':navigator.onLine===false?'Offline — will sync when you\'re back online':'Couldn\'t reach the sync server. Will retry.',true)}
+    finally{busy=false;if(again){again=false;soon(1500)}}}
+  function soon(ms){if(!cfg)return;clearTimeout(timer);timer=setTimeout(sync,ms==null?2500:ms)}
+  async function create(url,pass){url=cleanUrl(url);const p=normPass(pass);if(REC_RE.test(pass))throw new Error('That looks like a recovery key. Use "Connect this device" instead.');
+    if(p.length<12)throw new Error('Use a passphrase of at least 12 characters. Four random words works well.');
+    status('Setting up… this takes a few seconds');
+    const P=await derive(p,600000),dek=crypto.getRandomValues(new Uint8Array(32)),rk=makeRecovery(),Rk=await derive(normRec(rk),100000);
+    try{await api('POST','/v1/create',{keys:[{lookup:P.lookup,token:P.token,wrapped:await seal(P.kek,dek)},{lookup:Rk.lookup,token:Rk.token,wrapped:await seal(Rk.kek,dek)}]},{url})}
+    catch(e){if(e.status===409)throw new Error('Sync already exists for this passphrase. Use "Connect this device" instead.');throw new Error('Couldn\'t reach the sync server. Check the address.')}
+    cfg={url,lookup:P.lookup,token:P.token,dek:b64(dek),cursor:0,snap:{},ts:{}};K=null;save();await sync();return rk}
+  async function join(url,secret){url=cleanUrl(url);if(!secret.trim())throw new Error('Enter your passphrase or recovery key.');status('Connecting… this takes a few seconds');
+    const S=await fromSecret(secret);let j;
+    try{j=await api('POST','/v1/open',{lookup:S.lookup,token:S.token},{url})}
+    catch(e){if(e.status===404)throw new Error('No sync found for that passphrase on this server.');throw new Error('Couldn\'t reach the sync server. Check the address.')}
+    let dek;try{dek=await unseal(S.kek,j.wrapped)}catch(e){throw new Error('That passphrase didn\'t unlock the sync data.')}
+    /* a fresh device with nothing logged adopts the synced categories instead of re-adding its defaults */
+    if(!Object.keys(logs).some(d=>(logs[d]||[]).length)){cats.length=0;acts.length=0;rawSave()}
+    cfg={url,lookup:S.lookup,token:S.token,dek:b64(dek),cursor:0,snap:{},ts:{}};K=null;save();await sync()}
+  async function setPass(pass){const p=normPass(pass);if(p.length<12)throw new Error('Use a passphrase of at least 12 characters.');const P=await derive(p,600000);
+    await api('POST','/v1/addkey',{lookup:P.lookup,token:P.token,wrapped:await seal(P.kek,unb64(cfg.dek))})}
+  function off(){cfg=null;K=null;save();status('Off')}
+  return {sync,soon,create,join,setPass,off,on:()=>!!cfg,stamp:()=>cfg?stamp():'Off',url:()=>cfg?cfg.url:''}
+})();
+(function(){const _sl=saveLogs,_sa=saveActs;saveLogs=function(){_sl();SYNC.soon()};saveActs=function(){_sa();SYNC.soon()};
+  const box=document.getElementById('syncBox');if(!box)return;
+  const st=document.getElementById('syncStatus'),url=document.getElementById('syncUrl'),pass=document.getElementById('syncPass'),err=document.getElementById('syncErr'),
+    setupEl=document.getElementById('syncSetup'),onEl=document.getElementById('syncOn'),recEl=document.getElementById('syncRec');
+  try{const u=localStorage.getItem('astroSyncUrl');if(u)url.value=u}catch(e){}
+  const ui=()=>{const on=SYNC.on();setupEl.hidden=on;onEl.hidden=!on;st.textContent=SYNC.stamp();st.classList.remove('err')};
+  const run=async(btn,fn)=>{err.textContent='';btn.disabled=true;try{try{localStorage.setItem('astroSyncUrl',url.value.trim())}catch(e){}await fn()}catch(e){err.textContent=e.message||String(e);st.textContent=SYNC.on()?SYNC.stamp():'Off'}finally{btn.disabled=false}};
+  document.getElementById('syncNew').addEventListener('click',e=>run(e.currentTarget,async()=>{const rk=await SYNC.create(url.value,pass.value);pass.value='';ui();
+    document.getElementById('syncRecKey').textContent=rk;recEl.hidden=false;document.getElementById('syncRecDone').focus()}));
+  document.getElementById('syncJoin').addEventListener('click',e=>run(e.currentTarget,async()=>{await SYNC.join(url.value,pass.value);pass.value='';ui()}));
+  document.getElementById('syncNow').addEventListener('click',()=>SYNC.sync());
+  document.getElementById('syncOff').addEventListener('click',()=>{SYNC.off();ui()});
+  document.getElementById('syncRecCopy').addEventListener('click',async e=>{try{await navigator.clipboard.writeText(document.getElementById('syncRecKey').textContent);e.currentTarget.textContent='Copied'}catch(x){}});
+  document.getElementById('syncRecDone').addEventListener('click',()=>{recEl.hidden=true;document.getElementById('syncRecKey').textContent=''});
+  ui();if(SYNC.on())SYNC.sync();
+  setInterval(()=>{if(SYNC.on()&&document.visibilityState==='visible')SYNC.sync()},180000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')SYNC.soon(300)});window.addEventListener('online',()=>SYNC.soon(300))
+})();
+
 </script>
 
 </body>

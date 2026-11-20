@@ -477,7 +477,7 @@ html.focus.z1h .bezel{overflow:visible}
 .catcard input[type=text]{flex:1 1 140px;min-width:0;font:inherit;font-size:14px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px}
 .catcard input[type=color]{width:40px;height:38px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
 .srccur{filter:drop-shadow(0 0 3px rgba(255,205,70,.9)) drop-shadow(0 0 8px rgba(255,180,40,.5))}
-html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 148px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.836));padding:0;max-width:none}
+html.focus.zlv2 .sunwrap{width:min(calc(100vw - 24px),calc((100dvh - 148px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.806));padding:0;max-width:none}
 html.focus.zlv2 .bezel{padding:0}
 .ringneon-tube{fill:var(--neon);stroke:var(--neon);stroke-width:.8px;stroke-linejoin:round;filter:drop-shadow(0 0 3px var(--neon)) drop-shadow(0 0 9px var(--neon));animation:hrglow 3.2s ease-in-out infinite}
 .ringneon-core{fill:var(--neon-core);stroke:none}
@@ -1450,7 +1450,7 @@ function zoomTick(now,h){
   if(zoomLevel===3){dayTick(now,h);return}
   if(!(zoomLevel>0)||!zsvg)return;
   const Z=zWin(zoomLevel,h);
-  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -72 448 536':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
+  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -92 448 556':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
       P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.ringUpd)P.ringUpd(h);

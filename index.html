@@ -746,6 +746,13 @@ html.focus .vmrow{display:none!important}
 .catcard .edrow input[type=text]:not(.emo):not(.pickin){flex:2 1 160px}
 .actchip .em{white-space:normal;overflow-wrap:anywhere;max-width:9em}
 .bankttl .em,.cattile .em{overflow-wrap:anywhere}
+.catcard{gap:12px}
+.catcard .actrow{display:flex;flex-wrap:wrap;gap:8px;padding:12px;margin:0;border-radius:12px;border:1px solid var(--line);border-left:4px solid var(--cc,var(--glow));background:rgba(127,127,127,.07);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.catcard .actrow+.actrow{margin-top:4px}
+.catcard .actrow textarea.actdet,.catcard .actrow input.pickin{font-size:13.5px;background:rgba(0,0,0,.18)}
+.catcard .addact{align-self:flex-start;margin:2px 0 4px}
+.catcard>.edrow:first-child{padding-bottom:10px;border-bottom:1px solid var(--line)}
+@media (max-width:560px){.catcard .actrow{padding:10px}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1956,7 +1963,7 @@ function renderActMan(){const box=_g('actManList');box.innerHTML='';
   {const bk=document.createElement('button');bk.type='button';bk.className='bankback';bk.textContent='‹ All categories';bk.style.setProperty('--cc',(catById(LG.manCat)||{}).color||'var(--glow)');bk.addEventListener('click',()=>{LG.manCat=null;renderActMan();_g('actMan').closest('.lpanel').scrollTop=0});box.appendChild(bk)}
   const inp=(type,val,id,label,cls)=>{const x=document.createElement('input');x.type=type;x.value=val;x.id=id;x.setAttribute('aria-label',label);if(cls)x.className=cls;if(type==='text')x.maxLength=cls==='emo'?60:80;return x};
   const xbtn=label=>{const b=document.createElement('button');b.type='button';b.className='edx';b.textContent='×';b.setAttribute('aria-label',label);return b};
-  cats.forEach((c,ci)=>{if(c.id!==LG.manCat)return;const card=document.createElement('div');card.className='catcard';
+  cats.forEach((c,ci)=>{if(c.id!==LG.manCat)return;const card=document.createElement('div');card.className='catcard';card.style.setProperty('--cc',c.color);
     const r=document.createElement('div');r.className='edrow cathead';
     const em=inp('text',c.em,'cme-'+c.id,'Category emoji','emo'),nm=inp('text',c.name,'cmn-'+c.id,'Category name'),co=inp('color',c.color,'cmc-'+c.id,'Category color'),del=xbtn('Remove category '+c.name);
     em.addEventListener('change',()=>{c.em=em.value.trim();saveActs();renderActs()});nm.addEventListener('change',()=>{c.name=nm.value.trim()||'Category';saveActs();renderActs();const ab=card.querySelector('.addact');if(ab)ab.textContent=`+ Add activity to ${c.name}`});

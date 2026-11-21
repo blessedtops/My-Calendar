@@ -688,6 +688,59 @@ svg.dvin{animation:fadein2 .35s ease-out}@keyframes fadein2{from{opacity:0}to{op
 .snapbtn{min-height:50px;border-radius:12px;border:0;background:var(--cc);color:#fff;font:700 16px/1 system-ui,sans-serif;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.4)}
 .actcats{align-items:stretch}.actcats>*{width:100%;box-sizing:border-box}
 .actgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+.manrow{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);border-left:4px solid var(--cc);background:var(--bg);color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.manrow .dia{display:none}.manrow .em{font-size:20px}.manrow .nm{flex:1;font-weight:700;font-size:15px}.manrow .ct{font-size:12.5px;color:var(--muted)}.manrow .go{font-size:20px;color:var(--muted)}
+.manrow:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.catlist{display:flex;flex-direction:column;gap:8px}
+.addcat{align-self:flex-start;min-height:44px}
+.catcard .addact{margin-left:0}
+.lpanel.managing>*:not(.lphead):not(#actMan){display:none!important}
+.lpanel.managing #actMan{display:flex;flex-direction:column;gap:10px;border-top:0;padding-top:0;margin-top:0}
+.mandone{--cc:var(--glow)}
+.cathome{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.catcard .edrow{flex-wrap:wrap;align-items:center}
+.catcard input[type=text]{flex:1 1 120px}
+.catcard input[type=text].emo{width:3.8em}
+.catcard input.pickin,.catcard .subrow input{flex:1 1 100%}
+@media (max-width:560px){.catcard .actrow{padding-left:0}.catcard{padding:10px}}
+.extbtn{flex:0 0 auto;min-height:32px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:600 12px/1 system-ui,sans-serif;cursor:pointer}
+.extbtn:focus-visible,.contbtn:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.contstrip{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.contlab{margin:0;font-size:12.5px;font-weight:600;color:var(--muted)}
+.contbtn{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);border-left:4px solid var(--cc);background:color-mix(in srgb,var(--cc) 12%,var(--bg));color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.contbtn .go{font-size:16px}.contbtn .tx{flex:1;min-width:0;font-size:13.5px;font-weight:600;overflow-wrap:anywhere}.contbtn .tm{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.dv-track{cursor:copy}
+.dv-track:active{background-color:rgba(255,255,255,.1)}
+.slotbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:10px;border-radius:12px;background:color-mix(in srgb,var(--glow) 18%,transparent);border:1px solid color-mix(in srgb,var(--glow) 50%,transparent)}
+.slotbar .tx{font-weight:700;font-size:14px}
+.slotx{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;font-size:13px;cursor:pointer}
+.slotx:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.durrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.quickzoom{display:flex;justify-content:center;align-items:center;gap:6px;margin:4px auto 10px;padding:4px;border-radius:999px;background:rgba(127,127,127,.12);border:1px solid var(--line);width:max-content;max-width:100%}
+.quickzoom button{min-height:36px;padding:4px 14px;border-radius:999px;border:0;background:transparent;color:var(--fg);font:600 13.5px/1 Manrope,system-ui,sans-serif;cursor:pointer}
+.quickzoom button:hover{background:rgba(127,127,127,.18)}
+.quickzoom button:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.quickzoom .zsep{width:1px;height:18px;background:var(--muted);opacity:.45}
+html.focus .quickzoom{display:none}
+.zoomcrumb button{white-space:nowrap}
+.sunwrap .quickzoom{position:absolute;left:50%;top:100%;transform:translate(-50%,8px);z-index:3;margin:0;background:rgba(10,13,28,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.quickzoom button[aria-pressed="true"]{background:var(--glow);color:#fff}
+.quickzoom.vmode{padding:0;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.vmbtn{display:flex;align-items:center;gap:6px;min-height:40px;padding:6px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(10,13,28,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--fg);font:600 13.5px/1 Manrope,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.vmbtn b{color:var(--glow)}.vmbtn .car{font-size:11px;opacity:.7}
+.vmbtn:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.vmmenu{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);min-width:240px;display:flex;flex-direction:column;padding:6px;border-radius:14px;background:rgba(14,18,36,.96);border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:20}
+.vmmenu[hidden]{display:none}
+.vmmenu button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:8px 12px;border-radius:10px;border:0;background:transparent;color:#eef1fb;font:600 14px/1.2 Manrope,system-ui,sans-serif;text-align:left;cursor:pointer}
+.vmmenu button small{font-size:11.5px;font-weight:500;color:#aab2cc}
+.vmmenu button:hover,.vmmenu button:focus-visible{background:rgba(255,255,255,.08);outline:none}
+.vmmenu button[aria-pressed="true"]{background:color-mix(in srgb,var(--glow) 35%,transparent)}
+.vmmenu hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:4px 6px}
+.side .quickzoom.vmode{position:relative;align-self:flex-start;margin:0 0 2px;z-index:20;width:auto}
+.side .vmmenu{left:0;transform:none}
+.vmrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:relative;z-index:20}
+.vmrow .quickzoom.vmode{margin:0}
+.fsbtn{padding:6px 12px;font-size:15px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -728,10 +781,11 @@ svg.dvin{animation:fadein2 .35s ease-out}@keyframes fadein2{from{opacity:0}to{op
     <h3 class="lpsub">Today</h3>
     <ul class="loglist" id="logList"></ul>
     <div class="actman" id="actMan" hidden>
+      <button type="button" class="bankback mandone" id="actManDone">‹ Back to Activity Bank</button>
       <h3 class="lpsub">Categories &amp; activities</h3>
-      <p class="edhint">Make a category heading with an emoji and a color, then add the activities that belong under it. Activities take their category's color.</p>
+      <p class="edhint" id="actManHint">Tap a category to edit it and its activities, or add a new one.</p>
+      <button type="button" class="edsmall addcat" id="actAdd">+ Add category</button>
       <div id="actManList" class="catlist"></div>
-      <button type="button" class="edsmall" id="actAdd">+ Add category</button>
     </div>
   </section>
 </div>
@@ -796,8 +850,10 @@ svg.dvin{animation:fadein2 .35s ease-out}@keyframes fadein2{from{opacity:0}to{op
         <g class="rl" id="raysLong"></g><g class="rs" id="raysShort"></g>
       </svg>
       <div class="bezel"><svg id="clock" viewBox="-20 -10 400 400" role="img" aria-label="Live 24-hour clock for today"></svg><svg id="zclock" viewBox="-20 -10 400 400" role="img" aria-label="Zoomed clock" hidden></svg><div class="hit" id="clockHit" aria-hidden="true"></div><button type="button" class="expandbtn" id="expandBtn" aria-label="Enlarge clock" title="Enlarge clock"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div>
+      
     </div>
     <div class="side">
+      <div class="vmrow"><div class="quickzoom vmode"><button type="button" class="vmbtn" id="vmBtn" aria-haspopup="true" aria-expanded="false" aria-controls="vmMenu"><span aria-hidden="true">◐</span> View Mode <b id="vmCur" hidden></b> <span class="car" aria-hidden="true">▾</span></button><div class="vmmenu" id="vmMenu" role="menu" hidden><button type="button" role="menuitemradio" data-qz="0" aria-pressed="true"><span>24 h</span><small>Whole day</small></button><button type="button" role="menuitemradio" data-qz="1" aria-pressed="false"><span>3 h</span><small>Current 3-hour block</small></button><button type="button" role="menuitemradio" data-qz="2" aria-pressed="false"><span>1 h</span><small>Current hour</small></button></div></div><button type="button" class="vmbtn daybtn" data-qz="3"><span aria-hidden="true">▤</span> Day</button><button type="button" class="vmbtn fsbtn" data-qz="fs" aria-label="Full screen" title="Full screen">⤢</button></div>
       <section class="earthcard" aria-label="Earth's rotation toward the sun, live">
         <svg id="earth" viewBox="0 0 240 150" role="img" aria-label="Earth orbiting the sun and spinning, seen from south of the solar system so both turn clockwise">
           <defs>
@@ -1545,7 +1601,7 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
   {const box=document.createElement('div');box.className='dv-ribbon';
     const top=document.createElement('div');top.className='dv-rtop';top.innerHTML='<span class="dv-rtt">Today at a glance</span><button type="button" class="dv-artbtn">✨ Day art</button>';top.querySelector('button').addEventListener('click',()=>openDayArt(now));box.appendChild(top);
     const rb=document.createElement('div');rb.className='dv-rbar';rb.setAttribute('role','img');
-    const segs=L.slice().sort((x,y)=>x.s-y.s||y.e-x.e),ln=[];segs.forEach(x=>{let i=ln.findIndex(end=>end<=x.s);if(i<0){i=ln.length;ln.push(0)}ln[i]=x.e;x._l=i});const nl=Math.min(3,Math.max(1,ln.length));
+    const segs=L.map(x=>Object.assign({},x)).sort((x,y)=>x.s-y.s||y.e-x.e),ln=[];segs.forEach(x=>{let i=ln.findIndex(end=>end<=x.s);if(i<0){i=ln.length;ln.push(0)}ln[i]=x.e;x._l=i});const nl=Math.min(3,Math.max(1,ln.length));
     const past=document.createElement('div');past.className='dv-rpast';past.style.width=(h/24*100)+'%';rb.appendChild(past);
     segs.forEach(x=>{if(x._l>=nl)return;const a=actById(x.a),sg=document.createElement('button');sg.type='button';sg.className='dv-rseg';sg.style.left=(x.s/14.4)+'%';sg.style.width=`max(3px,${((x.e-x.s)/14.4).toFixed(3)}%)`;
       sg.style.top=(x._l/nl*100)+'%';sg.style.height=(100/nl)+'%';sg.style.background=a.color;sg.setAttribute('aria-label',`${a.name}, ${mm2t(x.s)} to ${mm2t(x.e)}`);sg.title=`${a.em} ${a.name} · ${mm2t(x.s)}–${mm2t(x.e)}`;
@@ -1559,7 +1615,7 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
   for(let k=0;k<24;k++){const row=document.createElement('div');row.className='dv-row'+(k<hn?' past':k===hn?' cur':'');row.style.setProperty('--hc',hc(k));
     const lab=document.createElement('div');lab.className='dv-h';const t=document.createElement('span');t.textContent=hLabAP(k);lab.appendChild(t);
     if(k%6===0){const sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 24 24');sv.setAttribute('class','dv-sky');lab.prepend(sv);skyIcon(sv,k,12,12,22,k&&k+1<=hn?'past':'')}
-    const tr=document.createElement('div');tr.className='dv-track';
+    const tr=document.createElement('div');tr.className='dv-track';tr.addEventListener('click',ev=>{if(ev.target.closest('.dv-bar'))return;const r=tr.getBoundingClientRect(),fr=Math.max(0,Math.min(.999,(ev.clientX-r.left)/r.width)),st=k*60+(fr<.5?0:30);openLogAt(st,st+30)});
     if(k===hn){const u=document.createElement('div');u.className='dv-used';u.style.width=((h%1)*100)+'%';tr.appendChild(u)}
     const a0=k*60,a1=a0+60,seg=L.map(e=>({e,s:Math.max(e.s,a0),t:Math.min(e.e,a1)})).filter(x=>x.t>x.s).sort((x,y)=>x.s-y.s||y.t-x.t),lanes=[];
     seg.forEach(x=>{let i=lanes.findIndex(end=>end<=x.s);if(i<0){i=lanes.length;lanes.push(0)}lanes[i]=x.t;x.l=i});
@@ -1647,7 +1703,7 @@ function zoomTick(now,h){
 }
 function drawFocusMoon(){const fm=document.getElementById('focusMoon');if(!fm)return;const now=new Date();fm.dataset.d=now.toDateString();
   buildHub(fm.querySelector('svg'),now,0,0,monday(now))}
-function updateZoomUI(){
+function updateZoomUI(){{const vc=document.getElementById('vmCur');if(vc&&zoomLevel<3)vc.textContent=['24 h','3 h','1 h'][zoomLevel]}document.querySelectorAll('.quickzoom [aria-pressed]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.qz===zoomLevel)));
   document.querySelectorAll('#zoomCrumb button').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.z===zoomLevel)));
   const ex=document.getElementById('exitFocus'),lab=zoomLevel>0?'Zoom out':'Exit full clock';ex.setAttribute('aria-label',lab);ex.title=lab;
   {const lb=document.getElementById('logBar');if(lb)lb.hidden=false}
@@ -1702,6 +1758,10 @@ function setZoom(lv,instant){
   document.addEventListener('gesturechange',e=>{if(inFocus())e.preventDefault()},{passive:false});
   document.addEventListener('gestureend',e=>{if(!inFocus())return;e.preventDefault();if(e.scale>1.2&&zoomLevel<2)setZoom(zoomLevel+1);else if(e.scale<.83)back()},{passive:false});
   btn.addEventListener('click',()=>setFocus(!root.classList.contains('focus')));
+  {const vb=document.getElementById('vmBtn'),vm=document.getElementById('vmMenu'),openM=on=>{vm.hidden=!on;vb.setAttribute('aria-expanded',String(on));if(on){const c=vm.querySelector('[aria-pressed="true"]')||vm.querySelector('button');c.focus()}};
+    vb.addEventListener('click',()=>openM(vm.hidden));document.addEventListener('click',e=>{if(!vm.hidden&&!e.target.closest('.vmode'))openM(false)});
+    vm.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();openM(false);vb.focus()}});vm.addEventListener('click',e=>{if(e.target.closest('button'))openM(false)})}
+  document.querySelectorAll('.vmmenu button,.vmrow>[data-qz]').forEach(b=>b.addEventListener('click',()=>{const q=b.dataset.qz;if(q==='fs'){const lv=zoomLevel;if(lv)setZoom(0,true);setFocus(true);if(lv)setZoom(lv,true);return}const lv=+q;if(lv===3){setFocus(true);setZoom(3,true);return}setZoom(lv,true)}));
   exit.addEventListener('click',back);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&inFocus())back()});
   document.addEventListener('visibilitychange',()=>{if(root.classList.contains('focus')&&document.visibilityState==='visible')wake(true)});
@@ -1742,7 +1802,7 @@ if(cats.length===1&&cats[0].id==='phone'&&cats[0].name==='Phone'&&acts.every(a=>
   try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts))}catch(e){}}}
 var logs=(function(){try{const l=JSON.parse(localStorage.getItem('activityLog')||'null');if(l&&typeof l==='object')return l}catch(e){}return {}})();
 function saveActs(){try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts))}catch(e){}}
-function saveLogs(){try{localStorage.setItem('activityLog',JSON.stringify(logs))}catch(e){}}
+function saveLogs(){for(const k in logs)(logs[k]||[]).forEach(e=>{delete e._l;delete e.l});try{localStorage.setItem('activityLog',JSON.stringify(logs))}catch(e){}}
 function dayKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function mm2t(m){m=Math.max(0,Math.min(1440,Math.round(m)));if(CLK12){const H=Math.floor(m/60)%24;return `${H%12||12}:${pad(m%60)} ${H<12?'AM':'PM'}`}return `${pad(Math.floor(m/60)%24===0&&m===1440?24:Math.floor(m/60))}:${pad(m%60)}`}
 function t2mm(v,end){if(!v)return NaN;const [H,M]=v.split(':').map(Number);let x=H*60+M;if(end&&x===0)x=1440;return x}
@@ -1781,7 +1841,7 @@ function renderRun(){const pill=_g('runPill');if(!pill)return;pill.hidden=!runni
 function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
 function openLog(){const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce((a,e)=>Math.max(a,e.e),-1);
   _g('logFrom').value=mm2t(last>=0&&last<n?last:Math.max(0,n-15));_g('logTo').value=mm2t(n);_g('logNote').value='';_g('logErr').textContent='';
-  if(!LG.sel&&acts[0])LG.sel=acts[0].id;LG.view='home';LG.pend=null;setCustom(false);renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip');c&&c.focus()},30)}
+  if(!LG.sel&&acts[0])LG.sel=acts[0].id;LG.view='home';LG.pend=null;LG.slot=null;{const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}setCustom(false);renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip');c&&c.focus()},30)}
 function setCustom(on){LG.custom=on;_g('lgCustom').hidden=!on;_g('bankHint').hidden=on;const o=_g('logOther');o.setAttribute('aria-expanded',String(on));o.textContent=on?'⚡ Snap mode':'🕘 Another time';
   const bs=Math.floor(nowMin()/30)*30;_g('bankHalf').textContent=`${mm2t(bs)}–${mm2t(bs+30)}`;renderActs()}
 /* snapshot: flash + a little polaroid of the activity flies into the bank */
@@ -1797,18 +1857,32 @@ function snapAct(id,from,ex){const a=actById(id),r0=from.getBoundingClientRect()
 function renderBankNow(){const b=_g('bankNow');if(!b)return;const nm=nowMin(),L=(logs[dayKey(new Date())]||[]).filter(e=>e.s<=nm&&e.e>nm);
   if(!L.length){b.hidden=true;return}const a=actById(L[L.length-1].a);b.hidden=false;b.textContent=a.em||'•';b.style.setProperty('--c',a.color);
   b.title=`Now: ${L.map(e=>actById(e.a).name).join(', ')}`;b.dataset.more=L.length>1?'+'+(L.length-1):'';_g('logOpen').setAttribute('aria-label',`Activity Bank. Now: ${L.map(e=>actById(e.a).name).join(', ')}`)}
-function closePanels(){_g('logPanel').hidden=true;_g('repPanel').hidden=true}
+function openLogAt(s0,e0){openLog();LG.slot={s:s0,e:e0};LG.view='home';renderActs()}
+function addAt(id,ex,s0,e0){const k=dayKey(new Date()),L=(logs[k]=logs[k]||[]),a=actById(id),same=e=>e.a===id&&(e.d||'')===(ex.d||'')&&(e.p||'')===(ex.p||'')&&(e.n||'')===(ex.n||'');
+  if(L.some(e=>same(e)&&e.s<e0&&e.e>s0)){const o=L.find(e=>same(e)&&e.s<e0&&e.e>s0);o.s=Math.min(o.s,s0);o.e=Math.max(o.e,e0)}
+  else{const prev=L.find(e=>same(e)&&e.e===s0),next=L.find(e=>same(e)&&e.s===e0);
+    if(prev&&next){prev.e=next.e;L.splice(L.indexOf(next),1)}else if(prev)prev.e=e0;else if(next)next.s=s0;
+    else{const ne={s:s0,e:e0,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;L.push(ne)}}
+  saveLogs();refreshSlice();try{renderBankNow()}catch(x){}toast(`Added ${a.name}, ${mm2t(s0)}–${mm2t(e0)}`)}
+function closePanels(){LG.slot=null;_g('logPanel').hidden=true;_g('repPanel').hidden=true}
 function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(!acts.some(a=>a.id===LG.sel))LG.sel=acts[0]&&acts[0].id;
   if(!cats.length){g.innerHTML='<p class="edhint">Your bank is empty. Tap Edit categories to add your first category and activities.</p>';return}
   const groups=cats.map(c=>({c,items:acts.filter(a=>a.cat===c.id)}));const orphan=acts.filter(a=>!catById(a.cat));if(orphan.length)groups.push({c:{id:'_',em:'',name:'Other',color:'#8a8d96'},items:orphan});
   LG.dev=LG.dev||(()=>{try{return JSON.parse(localStorage.getItem('bankDev')||'{}')}catch(e){return {}}})();
   const E=(t,cls,txt)=>{const x=document.createElement(t);if(cls)x.className=cls;if(txt!=null)x.textContent=txt;return x};
-  const bs=Math.floor(nowMin()/30)*30,half=`${mm2t(bs)}–${mm2t(bs+30)}`;
+  const slot=LG.slot,bs=slot?slot.s:Math.floor(nowMin()/30)*30,half=slot?`${mm2t(slot.s)}–${mm2t(slot.e)}`:`${mm2t(bs)}–${mm2t(bs+30)}`;
+  {const bh=_g('bankHint');if(bh&&!LG.custom)bh.hidden=!!slot}
+  if(slot){const sb=E('div','slotbar');sb.appendChild(E('span','tx',`Adding to ${half}`));const cx=E('button','slotx','Cancel');cx.type='button';cx.addEventListener('click',()=>{LG.slot=null;renderActs()});sb.appendChild(cx);g.appendChild(sb)}
   const go=(v,extra)=>{Object.assign(LG,{view:v},extra||{});renderActs();const f=g.querySelector('[data-focus]');if(f)setTimeout(()=>f.focus(),30)};
   const grp=groups.find(x=>x.c.id===LG.tab);if(LG.view!=='home'&&!grp)LG.view='home';
   /* ---- home: category tiles ---- */
-  if(!LG.view||LG.view==='home'){const grid=E('div','cathome');
+  if(!LG.view||LG.view==='home'){
+    {const L=slot?[]:(logs[dayKey(new Date())]||[]).filter(e=>e.e===bs);if(L.length){const cs=E('div','contstrip');cs.appendChild(E('p','contlab',`Still going? Carry into ${half}`));
+      L.forEach(e=>{const a=actById(e.a),b=E('button','contbtn');b.type='button';b.style.setProperty('--cc',a.color);b.innerHTML='<span class="go" aria-hidden="true">⏩</span><span class="tx"></span><span class="tm"></span>';
+        b.querySelector('.tx').textContent=entLabel(e)+(e.n?' · '+e.n:'');b.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)} → ${mm2t(bs+30)}`;b.setAttribute('aria-label',`Extend ${a.name} to ${mm2t(bs+30)}`);
+        b.addEventListener('click',()=>extendEntry(e));cs.appendChild(b)});g.appendChild(cs)}}
+    const grid=E('div','cathome');
     groups.forEach(({c,items})=>{const t=E('button','cattile');t.type='button';t.style.setProperty('--cc',c.color);
       t.innerHTML='<span class="em"></span><span class="nm"></span><span class="ct"></span>';t.querySelector('.em').textContent=c.em||'◆';t.querySelector('.nm').textContent=c.name;t.querySelector('.ct').textContent=`${items.length} ${items.length===1?'activity':'activities'}`;
       t.addEventListener('click',()=>go('cat',{tab:c.id}));grid.appendChild(t)});
@@ -1842,29 +1916,46 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   inp.value=LG.pend.n||'';inp.addEventListener('input',()=>{LG.pend.n=inp.value});lab.appendChild(inp);card.appendChild(lab);
   const rec=[];Object.keys(logs).sort().reverse().forEach(k=>(logs[k]||[]).slice().reverse().forEach(e=>{if(e.a===a.id&&e.n&&!rec.includes(e.n)&&rec.length<6)rec.push(e.n)}));
   if(rec.length){const rr=E('div','recrow');rr.appendChild(E('span','reclab','Recent'));rec.forEach(t=>{const q=E('button','recchip',t);q.type='button';q.addEventListener('click',()=>{inp.value=t;LG.pend.n=t;inp.focus()});rr.appendChild(q)});card.appendChild(rr)}
-  const snap=E('button','snapbtn',`Snap into ${half}`);snap.type='button';
-  const doSnap=()=>{const p=LG.pend;LG.view='cat';snapAct(a.id,snap,{d:dev,p:p.p,n:(inp.value||'').trim()});LG.pend=null};
+  if(slot){const dr=E('div','durrow');dr.appendChild(E('span','reclab','Length'));[30,60,90,120,180].forEach(m=>{const q=E('button','pickchip',m<60?m+'m':(m/60)+'h');q.type='button';q.setAttribute('role','radio');q.setAttribute('aria-checked',String(slot.e-slot.s===m));q.style.setProperty('--cc',c.color);
+      q.addEventListener('click',()=>{slot.e=Math.min(1440,slot.s+m);renderActs();const fi=g.querySelector('.addin');if(fi)fi.focus()});dr.appendChild(q)});card.insertBefore(dr,lab)}
+  const snap=E('button','snapbtn',slot?`Add to ${half}`:`Snap into ${half}`);snap.type='button';
+  const doSnap=()=>{const p=LG.pend,ex={d:dev,p:p.p,n:(inp.value||'').trim()};LG.view='cat';LG.pend=null;
+    if(slot){addAt(a.id,ex,slot.s,slot.e);closePanels();return}snapAct(a.id,snap,ex)};
   snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}
+/* extend an entry into the next half-hour block (no new entry) */
+function extendEntry(e){const bs=Math.floor(nowMin()/30)*30,be=bs+30,a=actById(e.a),old=e.e;
+  if(e.e>=bs&&e.e<be)e.e=be;else e.e=Math.min(1440,e.e+30);
+  const L=logs[dayKey(new Date())]||[],twin=L.find(x=>x!==e&&x.a===e.a&&(x.d||'')===(e.d||'')&&(x.p||'')===(e.p||'')&&(x.n||'')===(e.n||'')&&x.s>=old&&x.s<=e.e);
+  if(twin){e.e=Math.max(e.e,twin.e);L.splice(L.indexOf(twin),1)}
+  saveLogs();refreshSlice();renderLogList();try{renderActs();renderBankNow()}catch(x){}toast(`${a.name} now runs ${mm2t(e.s)}–${mm2t(e.e)}`)}
 function renderLogList(){const ul=_g('logList'),L=(logs[dayKey(new Date())]||[]).slice().sort((x,y)=>x.s-y.s);ul.innerHTML='';
   if(!L.length){ul.innerHTML='<li class="empty">Nothing logged yet today.</li>';return}
   L.forEach(e=>{const a=actById(e.a),li=document.createElement('li');
-    li.innerHTML=`<span class="dia"></span><span class="tm"></span><span class="lbw"><span class="lb"></span><input type="text" class="lnote" maxlength="200" placeholder="Add a note…"></span><span class="hrs"></span><button type="button" class="edx" aria-label="Delete entry">×</button>`;
+    li.innerHTML=`<span class="dia"></span><span class="tm"></span><span class="lbw"><span class="lb"></span><input type="text" class="lnote" maxlength="200" placeholder="Add a note…"></span><span class="hrs"></span><button type="button" class="extbtn">+30m</button><button type="button" class="edx" aria-label="Delete entry">×</button>`;
     li.querySelector('.dia').style.background=a.color;li.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)}`;li.querySelector('.lb').textContent=entLabel(e);
     li.querySelector('.hrs').textContent='='+(+((e.e-e.s)/60).toFixed(2));
     const ni=li.querySelector('.lnote');ni.value=e.n||'';ni.setAttribute('aria-label',`Note for ${a.name} at ${mm2t(e.s)}`);
     const keep=()=>{const v=ni.value.trim();if(v!==(e.n||'')){if(v)e.n=v;else delete e.n;saveLogs()}};ni.addEventListener('change',keep);ni.addEventListener('blur',keep);
     ni.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();ni.blur()}});
-    li.querySelector('button').addEventListener('click',()=>{const k=dayKey(new Date());logs[k]=(logs[k]||[]).filter(x=>x!==e);saveLogs();renderLogList();refreshSlice()});ul.appendChild(li)})}
+    const xb=li.querySelector('.extbtn');xb.setAttribute('aria-label',`Extend ${a.name} by half an hour`);if(e.e>=1440)xb.hidden=true;xb.addEventListener('click',()=>extendEntry(e));
+    li.querySelector('.edx').addEventListener('click',()=>{const k=dayKey(new Date());logs[k]=(logs[k]||[]).filter(x=>x!==e);saveLogs();renderLogList();refreshSlice()});ul.appendChild(li)})}
 function refreshSlice(){dayM=-1;if(typeof zparts!=='undefined'&&zparts)zparts.lastM=-1;if(typeof big!=='undefined'&&big)big.doneHr=-1;if(typeof minis!=='undefined')minis.forEach(x=>{if(x.parts)x.parts.doneHr=-1})}
 function renderActMan(){const box=_g('actManList');box.innerHTML='';
+  if(LG.manCat&&!cats.some(c=>c.id===LG.manCat))LG.manCat=null;
+  _g('actAdd').hidden=!!LG.manCat;_g('actManHint').hidden=!!LG.manCat;
+  if(!LG.manCat){cats.forEach(c=>{const n=acts.filter(a=>a.cat===c.id).length,b=document.createElement('button');b.type='button';b.className='manrow';b.style.setProperty('--cc',c.color);
+      b.innerHTML='<span class="dia"></span><span class="em"></span><span class="nm"></span><span class="ct"></span><span class="go" aria-hidden="true">›</span>';b.querySelector('.em').textContent=c.em;b.querySelector('.nm').textContent=c.name;b.querySelector('.ct').textContent=`${n} ${n===1?'activity':'activities'}`;
+      b.addEventListener('click',()=>{LG.manCat=c.id;renderActMan();_g('actMan').closest('.lpanel').scrollTop=0});box.appendChild(b)});
+    if(!cats.length)box.innerHTML='<p class="edhint">No categories yet.</p>';return}
+  {const bk=document.createElement('button');bk.type='button';bk.className='bankback';bk.textContent='‹ All categories';bk.style.setProperty('--cc',(catById(LG.manCat)||{}).color||'var(--glow)');bk.addEventListener('click',()=>{LG.manCat=null;renderActMan();_g('actMan').closest('.lpanel').scrollTop=0});box.appendChild(bk)}
   const inp=(type,val,id,label,cls)=>{const x=document.createElement('input');x.type=type;x.value=val;x.id=id;x.setAttribute('aria-label',label);if(cls)x.className=cls;if(type==='text')x.maxLength=cls==='emo'?24:80;return x};
   const xbtn=label=>{const b=document.createElement('button');b.type='button';b.className='edx';b.textContent='×';b.setAttribute('aria-label',label);return b};
-  cats.forEach((c,ci)=>{const card=document.createElement('div');card.className='catcard';
+  cats.forEach((c,ci)=>{if(c.id!==LG.manCat)return;const card=document.createElement('div');card.className='catcard';
     const r=document.createElement('div');r.className='edrow cathead';
     const em=inp('text',c.em,'cme-'+c.id,'Category emoji','emo'),nm=inp('text',c.name,'cmn-'+c.id,'Category name'),co=inp('color',c.color,'cmc-'+c.id,'Category color'),del=xbtn('Remove category '+c.name);
-    em.addEventListener('change',()=>{c.em=em.value.trim();saveActs();renderActs()});nm.addEventListener('change',()=>{c.name=nm.value.trim()||'Category';saveActs();renderActs()});
+    em.addEventListener('change',()=>{c.em=em.value.trim();saveActs();renderActs()});nm.addEventListener('change',()=>{c.name=nm.value.trim()||'Category';saveActs();renderActs();const ab=card.querySelector('.addact');if(ab)ab.textContent=`+ Add activity to ${c.name}`});
     co.addEventListener('input',()=>{c.color=co.value;saveActs();renderActs();refreshSlice()});
-    del.addEventListener('click',()=>{cats.splice(ci,1);acts=acts.filter(a=>a.cat!==c.id);saveActs();renderActMan();renderActs();refreshSlice()});
+    del.addEventListener('click',()=>{if(!confirmDel(card,`Remove ${c.name} and its activities?`))return;cats.splice(ci,1);acts=acts.filter(a=>a.cat!==c.id);LG.manCat=null;saveActs();renderActMan();renderActs();refreshSlice()});
     r.append(em,nm,co,del);card.appendChild(r);
     {const sr=document.createElement('div');sr.className='edrow subrow';const si=inp('text',(c.subs||[]).join(', '),'cms-'+c.id,'Devices or sub-groups for '+c.name);si.maxLength=200;si.placeholder='Devices / sub-groups (optional), e.g. 📱 Phone, 📲 iPad, 💻 Laptop';
       si.addEventListener('change',()=>{const v=si.value.split(',').map(x=>x.trim()).filter(Boolean);if(v.length)c.subs=v;else delete c.subs;saveActs();renderActs()});sr.appendChild(si);card.appendChild(sr)}
@@ -1878,8 +1969,9 @@ function renderActMan(){const box=_g('actManList');box.innerHTML='';
       pi.addEventListener('change',()=>{const v=pi.value.split(',').map(x=>x.trim()).filter(Boolean);if(v.length)a.picks=v;else delete a.picks;saveActs();renderActs()});
       ar.append(ae,an,ad,dt,pi);card.appendChild(ar)});
     const add=document.createElement('button');add.type='button';add.className='edsmall addact';add.textContent=`+ Add activity to ${c.name}`;
-    add.addEventListener('click',()=>{const a={id:'a'+Date.now().toString(36),cat:c.id,em:'⭐',name:'New activity'};acts.push(a);saveActs();renderActMan();renderActs();const t=_g('amn-'+a.id);if(t){t.focus();t.select()}});
-    card.appendChild(add);box.appendChild(card)})}
+    add.addEventListener('click',()=>{const a={id:'a'+Date.now().toString(36),cat:c.id,em:'⭐',name:'New activity'};acts.unshift(a);saveActs();renderActMan();renderActs();const t=_g('amn-'+a.id);if(t){t.focus();t.select()}});
+    const firstAct=card.querySelector('.actrow');card.insertBefore(add,firstAct||null);box.appendChild(card)})}
+function confirmDel(){return true}
 function report(off){const d=new Date();d.setDate(d.getDate()+off);const L=dayEntries(d).filter(e=>e.e>e.s).sort((x,y)=>x.s-y.s||x.e-y.e);
   const endM=off===0?nowMin():1440,gaps=[];let t=0;
   L.forEach(e=>{if(e.s>t&&t<endM)gaps.push({s:t,e:Math.min(e.s,endM),gap:true});t=Math.max(t,e.e)});if(t<endM)gaps.push({s:t,e:endM,gap:true});
@@ -1931,8 +2023,10 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
     if(e0<=s0){_g('logErr').textContent='The end time needs to be after the start time.';return}
     const k=dayKey(new Date());{const ne={s:s0,e:e0,a:LG.sel,n:_g('logNote').value.trim()||undefined},sa=acts.find(x=>x.id===LG.sel),sc=sa&&catById(sa.cat);if(sc&&sc.subs&&sc.subs.length&&LG.dev&&LG.dev[sc.id])ne.d=LG.dev[sc.id];(logs[k]=logs[k]||[]).push(ne)}saveLogs();renderLogList();refreshSlice();
     _g('logErr').textContent='';_g('logNote').value='';_g('logFrom').value=mm2t(e0);toast(`Logged ${actById(LG.sel).name}, ${mm2t(s0)}–${mm2t(e0)}`)});
-  _g('actManage').addEventListener('click',()=>{const m=_g('actMan');m.hidden=!m.hidden;if(!m.hidden){renderActMan();m.scrollIntoView({block:'start',behavior:'smooth'})}});
-  _g('actAdd').addEventListener('click',()=>{const pal=['#3d7bf2','#2e8b2e','#e8442a','#f0922e','#8a3fd6','#e85ad8','#5fe0e8','#8b5a2b'];const c={id:'c'+Date.now().toString(36),em:'◆',name:'New category',color:pal[cats.length%pal.length]};cats.push(c);saveActs();renderActMan();renderActs();const t=_g('cmn-'+c.id);if(t){t.focus();t.select()}});
+  const setMan=on=>{const m=_g('actMan');m.hidden=!on;m.closest('.lpanel').classList.toggle('managing',on);m.closest('.lpanel').scrollTop=0;if(on){LG.manCat=null;renderActMan()}else renderActs()};
+  _g('actManDone').addEventListener('click',()=>setMan(false));
+  _g('actManage').addEventListener('click',()=>{const m=_g('actMan');setMan(m.hidden)});
+  _g('actAdd').addEventListener('click',()=>{const pal=['#3d7bf2','#2e8b2e','#e8442a','#f0922e','#8a3fd6','#e85ad8','#5fe0e8','#8b5a2b'];const c={id:'c'+Date.now().toString(36),em:'◆',name:'New category',color:pal[cats.length%pal.length]};cats.push(c);LG.manCat=c.id;saveActs();renderActMan();renderActs();_g('actMan').closest('.lpanel').scrollTop=0;const t=_g('cmn-'+c.id);if(t){t.focus();t.select()}});
   document.querySelectorAll('.rpday button').forEach(b=>b.addEventListener('click',()=>{LG.day=+b.dataset.day;document.querySelectorAll('.rpday button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderReport()}));
   _g('rpCopy').addEventListener('click',()=>{const txt=renderReport(),ok=()=>{_g('rpMsg').textContent='Copied. Paste it into today’s note in Notes.'},
     fb=()=>{const r=document.createRange();r.selectNodeContents(_g('rpText'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);_g('rpMsg').textContent='Text selected. Tap Copy to copy it.'};

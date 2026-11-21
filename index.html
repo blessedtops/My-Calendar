@@ -1775,7 +1775,7 @@ function setZoom(lv,instant){
     vb.addEventListener('click',()=>openM(vm.hidden));document.addEventListener('click',e=>{if(!vm.hidden&&!e.target.closest('.vmode'))openM(false)});
     vm.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();openM(false);vb.focus()}});vm.addEventListener('click',e=>{if(e.target.closest('button'))openM(false)})}
   document.querySelectorAll('.vmmenu button,.vmrow>[data-qz]').forEach(b=>b.addEventListener('click',()=>{const q=b.dataset.qz;if(q==='fs'){const lv=zoomLevel;if(lv)setZoom(0,true);setFocus(true);if(lv)setZoom(lv,true);return}const lv=+q;if(lv===3){setFocus(true);setZoom(3,true);return}setZoom(lv,true)}));
-  exit.addEventListener('click',back);
+  exit.addEventListener('click',()=>setFocus(false));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&inFocus())back()});
   document.addEventListener('visibilitychange',()=>{if(root.classList.contains('focus')&&document.visibilityState==='visible')wake(true)});
 })();

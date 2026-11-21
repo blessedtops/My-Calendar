@@ -741,6 +741,7 @@ html.focus .quickzoom{display:none}
 .vmrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:relative;z-index:20}
 .vmrow .quickzoom.vmode{margin:0}
 .fsbtn{padding:6px 12px;font-size:15px}
+html.focus .vmrow{display:none!important}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1739,11 +1740,12 @@ function setZoom(lv,instant){
         else if(!on&&lock){await lock.release();lock=null}}catch(e){lock=null}
   }
   function setFocus(on){
+    const keep=on&&zoomLevel>0&&zoomLevel<3?zoomLevel:0;if(keep)setZoom(0,true);
     if(!on&&zoomLevel>0)setZoom(0,true);root.classList.remove('z1h');root.classList.remove('zlv2');
     root.classList.toggle('focus',on);exit.hidden=!on;const fm=document.getElementById('focusMoon');fm.hidden=!on;if(on){fm.dataset.d='';drawFocusMoon()}document.getElementById('zoomCrumb').hidden=!on;updateZoomUI();btn.classList.remove('show');
     btn.setAttribute('aria-label',on?'Exit full clock':'Enlarge clock');
     if(on){window.scrollTo(0,0);exit.focus({preventScroll:true})}else{btn.focus({preventScroll:true})}
-    wake(on);
+    wake(on);if(keep)setZoom(keep,true);
   }
   let lastTap=0,tapT=null;
   const inFocus=()=>root.classList.contains('focus');

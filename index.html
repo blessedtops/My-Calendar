@@ -803,6 +803,22 @@ button.dv-rtt:hover{background:rgba(255,255,255,.08)}button.dv-rtt:focus-visible
 .calday.today{box-shadow:inset 0 0 0 1.5px var(--glow)}.calday[aria-current]{background:var(--glow);color:#fff}
 .calday:focus-visible,.calrange button:focus-visible,.calhd button:focus-visible,.caltoday:focus-visible{outline:2px solid #fff;outline-offset:1px}
 .caltoday{align-self:flex-end;min-height:34px;padding:4px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#eef1fb;font:600 13px/1 system-ui,sans-serif;cursor:pointer}
+.pathbox{display:flex;flex-direction:column;gap:8px}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px}
+.crumb{min-height:34px;padding:4px 8px;border-radius:8px;border:0;background:transparent;color:var(--muted);font:600 14px/1.1 system-ui,sans-serif;cursor:pointer}
+.crumb[aria-current]{color:var(--fg);background:color-mix(in srgb,var(--cc) 25%,transparent)}.crumb:hover{color:var(--fg)}
+.crumb:focus-visible,.newbtn:focus-visible,.subkids:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.csep{color:var(--muted);opacity:.6;padding:0 1px}
+.newsub{display:flex;gap:6px}.newsub .newin{min-height:40px;font-size:14px;padding:8px 10px;flex:1}.newbtn{white-space:nowrap}
+.subnode{display:flex;flex-direction:column;gap:6px}
+.subinner{display:flex;flex-direction:column;gap:6px;margin-left:16px;padding-left:10px;border-left:2px solid color-mix(in srgb,var(--cc,var(--glow)) 55%,transparent)}
+.subinner[hidden]{display:none}
+.subkids{min-height:36px;white-space:nowrap}
+.manbar{position:sticky;top:-1px;z-index:6;display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:4px;background:var(--panel);border-bottom:1px solid var(--line)}
+.manbar .mansave{flex:0 0 auto;min-height:44px;padding:0 22px;--cc:var(--glow)}.manbar .mansave:disabled{opacity:.4;cursor:default}
+.mancancel{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--fg);font:600 14px/1 system-ui,sans-serif;cursor:pointer}
+.manst{flex:1;text-align:center;font-size:13px;color:var(--muted)}.manst.dirty{color:#ffb52e;font-weight:700}
+.mancancel:focus-visible,.mansave:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -843,7 +859,7 @@ button.dv-rtt:hover{background:rgba(255,255,255,.08)}button.dv-rtt:focus-visible
     <h3 class="lpsub" hidden>Today</h3>
     <ul class="loglist" id="logList" hidden></ul>
     <div class="actman" id="actMan" hidden>
-      <button type="button" class="bankback mandone" id="actManDone">‹ Back to Activity Bank</button>
+      <div class="manbar"><button type="button" class="mancancel" id="actManDone">Cancel</button><span class="manst" id="manSt" role="status">No changes</span><button type="button" class="snapbtn mansave" id="actManSave">Save</button></div>
       <h3 class="lpsub">Categories &amp; activities</h3>
       <p class="edhint" id="actManHint">Tap a category to edit it and its activities, or add a new one.</p>
       <button type="button" class="edsmall addcat" id="actAdd">+ Add category</button>
@@ -1953,13 +1969,15 @@ if(cats.length===1&&cats[0].id==='phone'&&cats[0].name==='Phone'&&acts.every(a=>
   ACT_DEFAULTS.filter(a=>a.cat==='phone'&&!acts.some(x=>x.id===a.id)).forEach(a=>acts.push(JSON.parse(JSON.stringify(a))));
   try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts))}catch(e){}}}
 var logs=(function(){try{const l=JSON.parse(localStorage.getItem('activityLog')||'null');if(l&&typeof l==='object')return l}catch(e){}return {}})();
-function saveActs(){try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts))}catch(e){}}
+var MAN_DRAFT=null;
+function manBar(){const st=document.getElementById('manSt'),sv=document.getElementById('actManSave');if(!st)return;const d=!!(MAN_DRAFT&&MAN_DRAFT.dirty);st.textContent=d?'Unsaved changes':'No changes';st.classList.toggle('dirty',d);sv.disabled=!d}
+function saveActs(){if(MAN_DRAFT){MAN_DRAFT.dirty=true;manBar();return}try{localStorage.setItem('activityCats',JSON.stringify(cats));localStorage.setItem('activityItems',JSON.stringify(acts))}catch(e){}}
 function saveLogs(){for(const k in logs)(logs[k]||[]).forEach(e=>{delete e._l;delete e.l});try{localStorage.setItem('activityLog',JSON.stringify(logs))}catch(e){}}
 function dayKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function mm2t(m){m=Math.max(0,Math.min(1440,Math.round(m)));if(CLK12){const H=Math.floor(m/60)%24;return `${H%12||12}:${pad(m%60)} ${H<12?'AM':'PM'}`}return `${pad(Math.floor(m/60)%24===0&&m===1440?24:Math.floor(m/60))}:${pad(m%60)}`}
 function t2mm(v,end){if(!v)return NaN;const [H,M]=v.split(':').map(Number);let x=H*60+M;if(end&&x===0)x=1440;return x}
 function catById(id){return cats.find(c=>c.id===id)}
-function pickList(a){return (a&&a.picks||[]).map(x=>typeof x==='string'?{t:x,d:''}:x).filter(x=>x&&x.t)}
+function pickList(a){const n=l=>(l||[]).map(x=>typeof x==='string'?{t:x,d:''}:x).filter(x=>x&&x.t).map(x=>{if(x.kids)x.kids=n(x.kids);return x});const r=n(a&&a.picks);if(a)a.picks=r;return r}
 function actById(id){const a=acts.find(x=>x.id===id);if(!a)return {id,em:'❔',name:'Removed activity',color:'#8a8d96',catEm:'',catName:''};const c=catById(a.cat)||{em:'',name:'Other',color:'#8a8d96'};return Object.assign({},a,{name:a.name||a.em||'Untitled',color:c.color,catEm:c.em,catName:c.name||c.em||'Untitled'})}
 function actLabel(a){return (a.catEm?a.catEm+' › ':'')+a.em+' '+a.name}
 function entLabel(e){const a=actById(e.a);return (a.catEm?a.catEm+' › ':'')+(e.d?e.d+' › ':'')+a.em+' '+a.name+(e.p?' · '+e.p:'')}
@@ -2017,7 +2035,7 @@ function addAt(id,ex,s0,e0,kk){const before=snapState();const k=kk||dayKey(new D
     if(prev&&next){prev.e=next.e;L.splice(L.indexOf(next),1)}else if(prev)prev.e=e0;else if(next)next.s=s0;
     else{const ne={s:s0,e:e0,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;L.push(ne)}}
   saveLogs();refreshSlice();dayM=-1;try{renderBankNow()}catch(x){}undoToast(`Added ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)}
-function closePanels(){LG.slot=null;_g('logPanel').hidden=true;_g('repPanel').hidden=true}
+function closePanels(){LG.slot=null;if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a)}manBar();const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}_g('logPanel').hidden=true;_g('repPanel').hidden=true}
 function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(!acts.some(a=>a.id===LG.sel))LG.sel=acts[0]&&acts[0].id;
   if(!cats.length){g.innerHTML='<p class="edhint">Your bank is empty. Tap Edit categories to add your first category and activities.</p>';return}
@@ -2059,32 +2077,42 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
     g.appendChild(gr);return}
   /* ---- add page: details before snapping ---- */
   const a=acts.find(x=>x.id===(LG.pend&&LG.pend.id));if(!a){go('cat');return}
-  head(a.name,{label:c.name,fn:()=>go('cat')},a.em);
+  head(a.name,{label:c.name||c.em||'Back',fn:()=>go('cat')},a.em);
   const card=E('div','addcard');card.style.setProperty('--cc',c.color);
   const where=E('p','addwhere');where.textContent=[c.em+' '+c.name,dev,half].filter(Boolean).join('  ·  ');card.appendChild(where);
-  const pk=pickList(a);if(pk.length){const pl=E('p','reclab','Sub-activity');pl.style.margin='0';card.appendChild(pl);const pr=E('div','pickrow');pr.setAttribute('role','radiogroup');pr.setAttribute('aria-label','Sub-activity');
-    pk.forEach(it=>{const t=it.t,q=E('button','pickchip');q.type='button';q.setAttribute('role','radio');q.dataset.t=t;q.setAttribute('aria-checked',String(LG.pend.p===t));q.style.setProperty('--cc',c.color);
-      q.appendChild(E('span','pt',t));if(it.d)q.appendChild(E('small','pd',it.d));
-      q.addEventListener('click',()=>{const on=LG.pend.p!==t;LG.pend.p=on?t:'';pr.querySelectorAll('.pickchip').forEach(z=>z.setAttribute('aria-checked',String(z.dataset.t===LG.pend.p)));
-        const fi=card.querySelector('.addin');if(fi){if(on&&it.d&&(!fi.value.trim()||fi.dataset.auto==='1')){fi.value=it.d;fi.dataset.auto='1';LG.pend.n=it.d}else if(!on&&fi.dataset.auto==='1'){fi.value='';fi.dataset.auto='';LG.pend.n=''}fi.focus();if(fi._upd)fi._upd()}});pr.appendChild(q)});card.appendChild(pr)}
+  /* ---- nested sub-activities: drill down as deep as you like, stop at any level ---- */
+  const SEP=' / ',tree=pickList(a);LG.pend.path=LG.pend.path||(LG.pend.p?LG.pend.p.split(SEP):[]);
+  const nodeAt=path=>{let lst=tree,nd=null;for(const t of path){nd=lst.find(x=>x.t===t);if(!nd)return null;nd.kids=nd.kids||[];lst=nd.kids}return {lst,nd}};
+  const pathBox=E('div','pathbox');card.appendChild(pathBox);
+  const drawPath=()=>{pathBox.innerHTML='';let at=nodeAt(LG.pend.path);if(!at){LG.pend.path=[];at=nodeAt([])}LG.pend.p=LG.pend.path.join(SEP);
+    const bc=E('div','crumbs');bc.setAttribute('aria-label','Selected path');const seg=(label,i)=>{const b=E('button','crumb',label);b.type='button';b.addEventListener('click',()=>{LG.pend.path=LG.pend.path.slice(0,i);drawPath();svUpd()});return b};
+    bc.appendChild(seg([a.em,a.name].filter(Boolean).join(' ')||'Activity',0));LG.pend.path.forEach((t,i)=>{bc.appendChild(E('span','csep','/'));const b=seg(t,i+1);if(i===LG.pend.path.length-1)b.setAttribute('aria-current','true');bc.appendChild(b)});pathBox.appendChild(bc);
+    if(at.lst.length){const pr=E('div','pickrow');pr.setAttribute('aria-label','Go deeper');at.lst.filter(x=>x.t).forEach(it=>{const q=E('button','pickchip');q.type='button';q.style.setProperty('--cc',c.color);
+        q.appendChild(E('span','pt',it.t+((it.kids||[]).length?'  ›':'')));if(it.d)q.appendChild(E('small','pd',it.d));
+        q.addEventListener('click',()=>{LG.pend.path=LG.pend.path.concat(it.t);const fi=card.querySelector('.addin');if(fi&&it.d&&(!fi.value.trim()||fi.dataset.auto==='1')){fi.value=it.d;fi.dataset.auto='1';LG.pend.n=it.d}
+          drawPath();if(fi){fi.focus();if(fi._upd)fi._upd()}});pr.appendChild(q)});pathBox.appendChild(pr)}
+    const nr=E('div','newsub'),ni=document.createElement('input');ni.type='text';ni.maxLength=80;ni.className='addin newin';const here=LG.pend.path.length?LG.pend.path[LG.pend.path.length-1]:(a.name||a.em);
+    ni.placeholder=`New under ${here}…`;ni.setAttribute('aria-label',`Add a new item under ${here}`);const nb=E('button','pickchip newbtn','+ Add');nb.type='button';nb.style.setProperty('--cc',c.color);
+    const addNew=()=>{const v=ni.value.trim();if(!v)return;const at2=nodeAt(LG.pend.path);if(!at2.lst.some(x=>x.t===v))at2.lst.push({t:v,d:''});a.picks=tree;saveActs();LG.pend.path=LG.pend.path.concat(v);drawPath();toast(`Saved “${v}” under ${here}`);const fi=card.querySelector('.addin:not(.newin)');if(fi)fi.focus()};
+    nb.addEventListener('click',addNew);ni.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addNew()}});nr.append(ni,nb);pathBox.appendChild(nr)};
   const lab=E('label','addlab');lab.appendChild(E('span',null,'Details (optional)'));const inp=document.createElement('input');inp.type='text';inp.className='addin';inp.maxLength=200;inp.placeholder='e.g. the video title, who you texted, what you ate';inp.setAttribute('data-focus','');
   inp.value=LG.pend.n||'';lab.appendChild(inp);card.appendChild(lab);
   /* everything you've written for this activity before, newest first: search as you type */
   const hist=[];Object.keys(logs).sort().reverse().forEach(k=>(logs[k]||[]).slice().sort((x,y)=>y.s-x.s).forEach(e=>{if(e.a===a.id&&e.n&&!hist.some(h=>h.n===e.n))hist.push({n:e.n,p:e.p||''})}));
-  pk.forEach(it=>{if(it.d&&!hist.some(h=>h.n===it.d))hist.push({n:it.d,p:it.t})});
+  {const walk=(l,pre)=>l.forEach(it=>{const pp=pre.concat(it.t);if(it.d&&!hist.some(h=>h.n===it.d))hist.push({n:it.d,p:pp.join(SEP)});walk(it.kids||[],pp)});walk(tree,[])}
   const rr=E('div','recrow');card.appendChild(rr);
   const upd=()=>{if(inp._sv)inp._sv();rr.innerHTML='';const q=inp.value.trim().toLowerCase(),list=(q?hist.filter(h=>h.n.toLowerCase().includes(q)&&h.n.toLowerCase()!==q):hist).slice(0,q?8:6);
     if(!list.length){rr.hidden=true;return}rr.hidden=false;rr.appendChild(E('span','reclab',q?'Matches':'Recent'));
     list.forEach(h=>{const b=E('button','recchip');b.type='button';b.textContent=(h.p?h.p+' · ':'')+h.n;b.addEventListener('click',()=>{inp.value=h.n;LG.pend.n=h.n;inp.dataset.auto='';
-      if(h.p&&pk.some(x=>x.t===h.p)){LG.pend.p=h.p;card.querySelectorAll('.pickrow .pickchip').forEach(z=>z.setAttribute('aria-checked',String(z.dataset.t===h.p)))}inp.focus();upd()});rr.appendChild(b)})};
+      if(h.p){const pp=h.p.split(SEP);if(nodeAt(pp)){LG.pend.path=pp;drawPath()}}inp.focus();upd()});rr.appendChild(b)})};
   inp._upd=upd;inp.addEventListener('input',()=>{LG.pend.n=inp.value;inp.dataset.auto='';upd()});upd();
   const sv=E('label','savesub'),svc=document.createElement('input');svc.type='checkbox';const svt=E('span');sv.append(svc,svt);card.appendChild(sv);
-  const svUpd=()=>{const v=inp.value.trim(),p=LG.pend.p;sv.hidden=!v||pk.some(x=>x.t===v||(x.t===p&&x.d===v));svt.textContent=p?`Remember this as “${p}”'s description`:`Save “${v.length>40?v.slice(0,40)+'…':v}” as a sub-activity of ${a.name||a.em}`};inp._sv=svUpd;svUpd();
+  const svUpd=()=>{const v=inp.value.trim(),pa=LG.pend.path,last=pa[pa.length-1],at=nodeAt(pa);sv.hidden=!v||(at&&(at.lst.some(x=>x.t===v)||(at.nd&&at.nd.d===v)));svt.textContent=`Save “${v.length>40?v.slice(0,40)+'…':v}” under ${last||a.name||a.em} for next time`};inp._sv=svUpd;svUpd();drawPath();
   if(slot){const dr=E('div','durrow');dr.appendChild(E('span','reclab','Length'));[30,60,90,120,180].forEach(m=>{const q=E('button','pickchip',m<60?m+'m':(m/60)+'h');q.type='button';q.setAttribute('role','radio');q.setAttribute('aria-checked',String(slot.e-slot.s===m));q.style.setProperty('--cc',c.color);
       q.addEventListener('click',()=>{slot.e=Math.min(1440,slot.s+m);renderActs();const fi=g.querySelector('.addin');if(fi)fi.focus()});dr.appendChild(q)});card.insertBefore(dr,lab)}
   const snap=E('button','snapbtn',slot?`Add to ${half}`:`Snap into ${half}`);snap.type='button';
-  const doSnap=()=>{const p=LG.pend,ex={d:dev,p:p.p,n:(inp.value||'').trim()};LG.view='cat';LG.pend=null;
-    if(svc.checked&&!sv.hidden&&ex.n){const L=pickList(a);if(ex.p){const it=L.find(x=>x.t===ex.p);if(it)it.d=ex.n}else if(!L.some(x=>x.t===ex.n))L.push({t:ex.n,d:''});a.picks=L;saveActs();if(!ex.p){ex.p=ex.n;ex.n=''}}
+  const doSnap=()=>{const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};LG.view='cat';LG.pend=null;
+    if(svc.checked&&!sv.hidden&&ex.n){const at=nodeAt(p.path);if(at&&!at.lst.some(x=>x.t===ex.n))at.lst.push({t:ex.n,d:''});a.picks=tree;saveActs();ex.p=p.path.concat(ex.n).join(SEP);ex.n=''}
     if(slot){addAt(a.id,ex,slot.s,slot.e,slot.k);closePanels();return}snapAct(a.id,snap,ex)};
   snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}
 /* extend an entry into the next half-hour block (no new entry) */
@@ -2131,14 +2159,18 @@ function renderActMan(){const box=_g('actManList');box.innerHTML='';
       const dt=document.createElement('textarea');dt.className='actdet';dt.rows=2;dt.maxLength=300;dt.id='amd-'+a.id;dt.placeholder='Details (optional) — shown under the activity in your bank';dt.setAttribute('aria-label','Details for '+a.name);dt.value=a.det||'';
       dt.addEventListener('change',()=>{const v=dt.value.trim();if(v)a.det=v;else delete a.det;saveActs();renderActs()});
       const sb=document.createElement('div');sb.className='subbox';const sh=document.createElement('div');sh.className='subhead';sh.textContent='Sub-activities';sb.appendChild(sh);
-      const L=pickList(a),save=()=>{const v=L.filter(x=>x.t.trim());if(v.length)a.picks=v;else delete a.picks;saveActs();renderActs()};
-      const row=(it,i)=>{const r=document.createElement('div');r.className='subrow2';const t=inp('text',it.t,`asn-${a.id}-${i}`,'Sub-activity name');t.className='subn';t.placeholder='e.g. Homefeed, MKBHD, Mom';
-        const d=inp('text',it.d||'',`asd-${a.id}-${i}`,'Description');d.className='subd';d.placeholder='Description (optional) — fills Details when you pick it';
-        const x=xbtn('Remove sub-activity '+it.t);t.addEventListener('change',()=>{it.t=t.value.trim();save()});d.addEventListener('change',()=>{it.d=d.value.trim();save()});
-        x.addEventListener('click',()=>{L.splice(L.indexOf(it),1);save();r.remove()});r.append(t,d,x);return r};
-      L.forEach((it,i)=>sb.appendChild(row(it,i)));
-      const sa=document.createElement('button');sa.type='button';sa.className='edsmall subadd';sa.textContent='+ Add sub-activity';
-      sa.addEventListener('click',()=>{const it={t:'',d:''};L.push(it);const r=row(it,L.length-1);sb.insertBefore(r,sa);r.querySelector('.subn').focus()});sb.appendChild(sa);
+      const L=pickList(a),clean=l=>l.filter(x=>x.t&&x.t.trim()).map(x=>{const o={t:x.t.trim(),d:x.d||''};const k=clean(x.kids||[]);if(k.length)o.kids=k;return o}),save=()=>{const v=clean(L);if(v.length)a.picks=v;else delete a.picks;saveActs();renderActs()};
+      let uid=0;const level=(lst,box,depth)=>{const row=it=>{const w=document.createElement('div');w.className='subnode';const r=document.createElement('div');r.className='subrow2';const id=`${a.id}-${uid++}`;
+          const t=inp('text',it.t,'asn-'+id,'Sub-activity name');t.className='subn';t.placeholder=depth?'e.g. J.Cole - Love Yourz':'e.g. Safari, YouTube, Mom';
+          const d=inp('text',it.d||'','asd-'+id,'Description');d.className='subd';d.placeholder='Description (optional)';
+          const kb=document.createElement('button');kb.type='button';kb.className='edsmall subkids';const kids=it.kids=it.kids||[];kb.textContent=kids.length?`${kids.length} inside ›`:'+ inside';kb.setAttribute('aria-expanded','false');kb.setAttribute('aria-label','Items inside '+(it.t||'this'));
+          const x=xbtn('Remove '+(it.t||'sub-activity'));t.addEventListener('change',()=>{it.t=t.value.trim();save()});d.addEventListener('change',()=>{it.d=d.value.trim();save()});
+          x.addEventListener('click',()=>{lst.splice(lst.indexOf(it),1);save();w.remove()});r.append(t,d,kb,x);w.appendChild(r);
+          const inner=document.createElement('div');inner.className='subinner';inner.hidden=true;w.appendChild(inner);let built=false;
+          kb.addEventListener('click',()=>{if(!built){level(kids,inner,depth+1);built=true}inner.hidden=!inner.hidden;kb.setAttribute('aria-expanded',String(!inner.hidden));if(!inner.hidden&&!kids.length){const n=inner.querySelector('.subadd');if(n)n.click()}});return w};
+        lst.forEach(it=>box.appendChild(row(it)));const sa=document.createElement('button');sa.type='button';sa.className='edsmall subadd';sa.textContent=depth?'+ Add inside':'+ Add sub-activity';
+        sa.addEventListener('click',()=>{const it={t:'',d:'',kids:[]};lst.push(it);const r=row(it);box.insertBefore(r,sa);r.querySelector('.subn').focus()});box.appendChild(sa)};
+      level(L,sb,0);
       ar.append(ae,an,ad,dt,sb);card.appendChild(ar)});
     const add=document.createElement('button');add.type='button';add.className='edsmall addact';add.textContent=`+ Add activity to ${c.name||c.em||'this category'}`;
     add.addEventListener('click',()=>{const a={id:'a'+Date.now().toString(36),cat:c.id,em:'',name:''};acts.unshift(a);saveActs();renderActMan();renderActs();const t=_g('ame-'+a.id);if(t){t.focus()}});
@@ -2195,8 +2227,12 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
     if(e0<=s0){_g('logErr').textContent='The end time needs to be after the start time.';return}
     const k=dayKey(new Date());{const ne={s:s0,e:e0,a:LG.sel,n:_g('logNote').value.trim()||undefined},sa=acts.find(x=>x.id===LG.sel),sc=sa&&catById(sa.cat);if(sc&&sc.subs&&sc.subs.length&&LG.dev&&LG.dev[sc.id])ne.d=LG.dev[sc.id];(logs[k]=logs[k]||[]).push(ne)}saveLogs();renderLogList();refreshSlice();
     _g('logErr').textContent='';_g('logNote').value='';_g('logFrom').value=mm2t(e0);toast(`Logged ${actById(LG.sel).name}, ${mm2t(s0)}–${mm2t(e0)}`)});
-  const setMan=on=>{const m=_g('actMan');m.hidden=!on;m.closest('.lpanel').classList.toggle('managing',on);m.closest('.lpanel').scrollTop=0;if(on){LG.manCat=null;renderActMan()}else renderActs()};
-  _g('actManDone').addEventListener('click',()=>setMan(false));
+  const setMan=(on,keep)=>{const m=_g('actMan');
+    if(on){MAN_DRAFT={c:JSON.stringify(cats),a:JSON.stringify(acts),dirty:false}}
+    else if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(keep){saveActs();if(d.dirty)toast('Changes saved')}else if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a);toast('Changes discarded')}}
+    manBar();m.hidden=!on;m.closest('.lpanel').classList.toggle('managing',on);m.closest('.lpanel').scrollTop=0;if(on){LG.manCat=null;renderActMan()}else renderActs()};
+  _g('actManDone').addEventListener('click',()=>{if(MAN_DRAFT&&MAN_DRAFT.dirty&&!confirm('Discard your changes?'))return;setMan(false)});
+  _g('actManSave').addEventListener('click',()=>setMan(false,true));
   _g('actManage').addEventListener('click',()=>{const m=_g('actMan');setMan(m.hidden)});
   _g('actAdd').addEventListener('click',()=>{const pal=['#3d7bf2','#2e8b2e','#e8442a','#f0922e','#8a3fd6','#e85ad8','#5fe0e8','#8b5a2b'];const c={id:'c'+Date.now().toString(36),em:'',name:'',color:pal[cats.length%pal.length]};cats.push(c);LG.manCat=c.id;saveActs();renderActMan();renderActs();_g('actMan').closest('.lpanel').scrollTop=0;const t=_g('cme-'+c.id);if(t){t.focus()}});
   document.querySelectorAll('.rpday button').forEach(b=>b.addEventListener('click',()=>{LG.day=+b.dataset.day;document.querySelectorAll('.rpday button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderReport()}));
@@ -2392,7 +2428,7 @@ var SYNC=(function(){
   function off(){cfg=null;K=null;save();status('Off')}
   return {sync,soon,create,join,setPass,off,on:()=>!!cfg,stamp:()=>cfg?stamp():'Off',url:()=>cfg?cfg.url:''}
 })();
-(function(){const _sl=saveLogs,_sa=saveActs;saveLogs=function(){_sl();SYNC.soon()};saveActs=function(){_sa();SYNC.soon()};
+(function(){const _sl=saveLogs,_sa=saveActs;saveLogs=function(){_sl();SYNC.soon()};saveActs=function(){_sa();if(!MAN_DRAFT)SYNC.soon()};
   const box=document.getElementById('syncBox');if(!box)return;
   const st=document.getElementById('syncStatus'),url=document.getElementById('syncUrl'),pass=document.getElementById('syncPass'),err=document.getElementById('syncErr'),
     setupEl=document.getElementById('syncSetup'),onEl=document.getElementById('syncOn'),recEl=document.getElementById('syncRec');

@@ -826,6 +826,9 @@ button.dv-rtt:hover{background:rgba(255,255,255,.08)}button.dv-rtt:focus-visible
 .subct[hidden]{display:none}
 .subinner{margin-left:18px}
 .manst.saved{color:#5ad48a;font-weight:700}
+html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
+.lpwrap{touch-action:none;overscroll-behavior:none}
+.lpanel{touch-action:pan-y;overscroll-behavior:contain}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2017,7 +2020,7 @@ function renderRun(){const pill=_g('runPill');if(!pill)return;pill.hidden=!runni
   pill.querySelector('.dia').style.background=a.color;pill.querySelector('.rn').textContent=actLabel(a);
   pill.querySelector('.rt').textContent=el2>=3600?`${Math.floor(el2/3600)}:${pad(Math.floor(el2%3600/60))}:${pad(el2%60)}`:`${pad(Math.floor(el2/60))}:${pad(el2%60)}`}
 function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
-function openLog(){const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce((a,e)=>Math.max(a,e.e),-1);
+function openLog(){document.documentElement.classList.add('modal-open');const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce((a,e)=>Math.max(a,e.e),-1);
   _g('logFrom').value=mm2t(last>=0&&last<n?last:Math.max(0,n-15));_g('logTo').value=mm2t(n);_g('logNote').value='';_g('logErr').textContent='';
   if(!LG.sel&&acts[0])LG.sel=acts[0].id;LG.view='home';LG.pend=null;LG.slot=null;{const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}setCustom(false);renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip');c&&c.focus()},30)}
 function setCustom(on){LG.custom=on;_g('lgCustom').hidden=!on;_g('bankHint').hidden=on;const o=_g('logOther');o.setAttribute('aria-expanded',String(on));o.textContent=on?'⚡ Snap mode':'🕘 Another time';
@@ -2042,7 +2045,7 @@ function addAt(id,ex,s0,e0,kk){const before=snapState();const k=kk||dayKey(new D
     if(prev&&next){prev.e=next.e;L.splice(L.indexOf(next),1)}else if(prev)prev.e=e0;else if(next)next.s=s0;
     else{const ne={s:s0,e:e0,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;L.push(ne)}}
   saveLogs();refreshSlice();dayM=-1;try{renderBankNow()}catch(x){}undoToast(`Added ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)}
-function closePanels(){LG.slot=null;if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a)}manBar();const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}_g('logPanel').hidden=true;_g('repPanel').hidden=true}
+function closePanels(){document.documentElement.classList.remove('modal-open');LG.slot=null;if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a)}manBar();const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}_g('logPanel').hidden=true;_g('repPanel').hidden=true}
 function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(!acts.some(a=>a.id===LG.sel))LG.sel=acts[0]&&acts[0].id;
   if(!cats.length){g.innerHTML='<p class="edhint">Your bank is empty. Tap Edit categories to add your first category and activities.</p>';return}
@@ -2229,7 +2232,7 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
     const file=new File([ics],`my-day-${ymd}.ics`,{type:'text/calendar'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Day log'}).catch(()=>{});_g('rpMsg').textContent='Choose Calendar to add the events.';return}
     try{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);_g('rpMsg').textContent='Calendar file created. Open it and tap Add All.'}catch(e){_g('rpMsg').textContent='Adding to Calendar works in the home-screen version.'}});_g('repOpen').addEventListener('click',()=>{closePanels();openReport()});
-  document.querySelectorAll('.lpwrap').forEach(w=>{w.addEventListener('click',e=>{if(e.target===w||e.target.closest('[data-close]'))closePanels()})});
+  document.querySelectorAll('.lpwrap').forEach(w=>{w.addEventListener('click',e=>{if(e.target.closest('[data-close]')){closePanels();return}if(e.target===w&&!MAN_DRAFT)closePanels()})});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(!_g('logPanel').hidden||!_g('repPanel').hidden)){e.stopImmediatePropagation();closePanels()}},true);
   _g('logQuick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const n=nowMin(),q=b.dataset.q;let s0;
     if(q==='hour')s0=Math.floor(n/60)*60;else if(q==='since'){const L=logs[dayKey(new Date())]||[];s0=L.reduce((a,x)=>Math.max(a,x.e),-1);if(s0<0||s0>=n){_g('logErr').textContent='Nothing logged earlier today to continue from.';return}}else s0=Math.max(0,n-(+q));
@@ -2465,6 +2468,11 @@ var SYNC=(function(){
 
 (function(){const b=document.getElementById('clkToggle');if(!b)return;const set=()=>{b.textContent=CLK12?'Clock: 12-hour':'Clock: 24-hour';b.setAttribute('aria-pressed',String(CLK12))};set();
   b.addEventListener('click',()=>{CLK12=!CLK12;try{localStorage.setItem('clock12',CLK12?'1':'0')}catch(e){}set();cfgVer++;zparts=null;dayM=-1;tick()})})();
+
+/* keep the bank's own scrolling alive on iPad: the backdrop never scrolls the page behind it */
+(function(){const w=document.getElementById('logPanel');if(!w)return;
+  w.addEventListener('touchmove',e=>{if(!e.target.closest('.lpanel'))e.preventDefault()},{passive:false});
+  const pn=w.querySelector('.lpanel');if(pn)pn.addEventListener('touchstart',()=>{const t=pn.scrollTop,m=pn.scrollHeight-pn.clientHeight;if(m>0){if(t<=0)pn.scrollTop=1;else if(t>=m)pn.scrollTop=m-1}},{passive:true})})();
 </script>
 
 </body>

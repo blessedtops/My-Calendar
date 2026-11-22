@@ -819,6 +819,13 @@ button.dv-rtt:hover{background:rgba(255,255,255,.08)}button.dv-rtt:focus-visible
 .mancancel{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--fg);font:600 14px/1 system-ui,sans-serif;cursor:pointer}
 .manst{flex:1;text-align:center;font-size:13px;color:var(--muted)}.manst.dirty{color:#ffb52e;font-weight:700}
 .mancancel:focus-visible,.mansave:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.subrow2{align-items:center}
+.subchev{flex:0 0 auto;width:36px;height:40px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);font-size:15px;cursor:pointer}
+.subchev.empty{opacity:.45}.subchev:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.subct{flex:0 0 auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,var(--cc,var(--glow)) 35%,transparent);color:var(--fg);font:700 11.5px/22px system-ui,sans-serif;text-align:center}
+.subct[hidden]{display:none}
+.subinner{margin-left:18px}
+.manst.saved{color:#5ad48a;font-weight:700}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -859,7 +866,7 @@ button.dv-rtt:hover{background:rgba(255,255,255,.08)}button.dv-rtt:focus-visible
     <h3 class="lpsub" hidden>Today</h3>
     <ul class="loglist" id="logList" hidden></ul>
     <div class="actman" id="actMan" hidden>
-      <div class="manbar"><button type="button" class="mancancel" id="actManDone">Cancel</button><span class="manst" id="manSt" role="status">No changes</span><button type="button" class="snapbtn mansave" id="actManSave">Save</button></div>
+      <div class="manbar"><button type="button" class="mancancel" id="actManDone">‹ Done</button><span class="manst" id="manSt" role="status">No changes</span><button type="button" class="snapbtn mansave" id="actManSave">Save</button></div>
       <h3 class="lpsub">Categories &amp; activities</h3>
       <p class="edhint" id="actManHint">Tap a category to edit it and its activities, or add a new one.</p>
       <button type="button" class="edsmall addcat" id="actAdd">+ Add category</button>
@@ -2160,17 +2167,24 @@ function renderActMan(){const box=_g('actManList');box.innerHTML='';
       dt.addEventListener('change',()=>{const v=dt.value.trim();if(v)a.det=v;else delete a.det;saveActs();renderActs()});
       const sb=document.createElement('div');sb.className='subbox';const sh=document.createElement('div');sh.className='subhead';sh.textContent='Sub-activities';sb.appendChild(sh);
       const L=pickList(a),clean=l=>l.filter(x=>x.t&&x.t.trim()).map(x=>{const o={t:x.t.trim(),d:x.d||''};const k=clean(x.kids||[]);if(k.length)o.kids=k;return o}),save=()=>{const v=clean(L);if(v.length)a.picks=v;else delete a.picks;saveActs();renderActs()};
-      let uid=0;const level=(lst,box,depth)=>{const row=it=>{const w=document.createElement('div');w.className='subnode';const r=document.createElement('div');r.className='subrow2';const id=`${a.id}-${uid++}`;
+      let uid=0;const level=(lst,box,depth,parentName)=>{const row=it=>{const w=document.createElement('div');w.className='subnode';const r=document.createElement('div');r.className='subrow2';const id=`${a.id}-${uid++}`;
+          const kids=it.kids=it.kids||[];const kb=document.createElement('button');kb.type='button';kb.className='subchev';kb.setAttribute('aria-expanded','false');
           const t=inp('text',it.t,'asn-'+id,'Sub-activity name');t.className='subn';t.placeholder=depth?'e.g. J.Cole - Love Yourz':'e.g. Safari, YouTube, Mom';
+          const ct=document.createElement('span');ct.className='subct';
           const d=inp('text',it.d||'','asd-'+id,'Description');d.className='subd';d.placeholder='Description (optional)';
-          const kb=document.createElement('button');kb.type='button';kb.className='edsmall subkids';const kids=it.kids=it.kids||[];kb.textContent=kids.length?`${kids.length} inside ›`:'+ inside';kb.setAttribute('aria-expanded','false');kb.setAttribute('aria-label','Items inside '+(it.t||'this'));
-          const x=xbtn('Remove '+(it.t||'sub-activity'));t.addEventListener('change',()=>{it.t=t.value.trim();save()});d.addEventListener('change',()=>{it.d=d.value.trim();save()});
-          x.addEventListener('click',()=>{lst.splice(lst.indexOf(it),1);save();w.remove()});r.append(t,d,kb,x);w.appendChild(r);
-          const inner=document.createElement('div');inner.className='subinner';inner.hidden=true;w.appendChild(inner);let built=false;
-          kb.addEventListener('click',()=>{if(!built){level(kids,inner,depth+1);built=true}inner.hidden=!inner.hidden;kb.setAttribute('aria-expanded',String(!inner.hidden));if(!inner.hidden&&!kids.length){const n=inner.querySelector('.subadd');if(n)n.click()}});return w};
-        lst.forEach(it=>box.appendChild(row(it)));const sa=document.createElement('button');sa.type='button';sa.className='edsmall subadd';sa.textContent=depth?'+ Add inside':'+ Add sub-activity';
-        sa.addEventListener('click',()=>{const it={t:'',d:'',kids:[]};lst.push(it);const r=row(it);box.insertBefore(r,sa);r.querySelector('.subn').focus()});box.appendChild(sa)};
-      level(L,sb,0);
+          const x=xbtn('Remove '+(it.t||'sub-activity'));
+          const inner=document.createElement('div');inner.className='subinner';inner.hidden=true;let built=false;
+          const sync=()=>{const n=kids.filter(k=>k.t).length;kb.textContent=inner.hidden?'▸':'▾';kb.classList.toggle('empty',!kids.length);ct.textContent=n?String(n):'';ct.hidden=!n;
+            kb.setAttribute('aria-label',`${inner.hidden?'Show':'Hide'} items under ${it.t||'this'}${n?` (${n})`:''}`);const sa=inner.querySelector(':scope>.subadd');if(sa)sa.textContent=`+ Add under ${it.t||'this'}`};
+          t.addEventListener('change',()=>{it.t=t.value.trim();save();sync();if(box._chg)box._chg()});d.addEventListener('change',()=>{it.d=d.value.trim();save()});
+          x.addEventListener('click',()=>{lst.splice(lst.indexOf(it),1);save();w.remove();if(box._chg)box._chg()});
+          r.append(kb,t,ct,d,x);w.append(r,inner);
+          inner._chg=()=>{if(!kids.length){inner.hidden=true;kb.setAttribute('aria-expanded','false');kb.focus()}sync()};
+          kb.addEventListener('click',()=>{if(!built){level(kids,inner,depth+1,()=>it.t||'this');built=true}inner.hidden=!inner.hidden;kb.setAttribute('aria-expanded',String(!inner.hidden));sync();if(!inner.hidden&&!kids.length){const n=inner.querySelector(':scope>.subadd');if(n)n.click()}});
+          sync();return w};
+        lst.forEach(it=>box.appendChild(row(it)));const sa=document.createElement('button');sa.type='button';sa.className='edsmall subadd';sa.textContent=`+ Add under ${parentName()}`;
+        sa.addEventListener('click',()=>{const it={t:'',d:'',kids:[]};lst.push(it);const r=row(it);box.insertBefore(r,sa);r.querySelector('.subn').focus();if(box._chg)box._chg()});box.appendChild(sa)};
+      level(L,sb,0,()=>a.name||a.em||'this activity');
       ar.append(ae,an,ad,dt,sb);card.appendChild(ar)});
     const add=document.createElement('button');add.type='button';add.className='edsmall addact';add.textContent=`+ Add activity to ${c.name||c.em||'this category'}`;
     add.addEventListener('click',()=>{const a={id:'a'+Date.now().toString(36),cat:c.id,em:'',name:''};acts.unshift(a);saveActs();renderActMan();renderActs();const t=_g('ame-'+a.id);if(t){t.focus()}});
@@ -2228,11 +2242,12 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
     const k=dayKey(new Date());{const ne={s:s0,e:e0,a:LG.sel,n:_g('logNote').value.trim()||undefined},sa=acts.find(x=>x.id===LG.sel),sc=sa&&catById(sa.cat);if(sc&&sc.subs&&sc.subs.length&&LG.dev&&LG.dev[sc.id])ne.d=LG.dev[sc.id];(logs[k]=logs[k]||[]).push(ne)}saveLogs();renderLogList();refreshSlice();
     _g('logErr').textContent='';_g('logNote').value='';_g('logFrom').value=mm2t(e0);toast(`Logged ${actById(LG.sel).name}, ${mm2t(s0)}–${mm2t(e0)}`)});
   const setMan=(on,keep)=>{const m=_g('actMan');
+    if(on&&keep==='stay'){if(MAN_DRAFT){const was=MAN_DRAFT.dirty;MAN_DRAFT=null;saveActs();MAN_DRAFT={c:JSON.stringify(cats),a:JSON.stringify(acts),dirty:false};manBar();renderActs();if(was){const st=_g('manSt');st.textContent='Saved ✓';st.classList.add('saved');setTimeout(()=>{st.classList.remove('saved');manBar()},1800)}}return}
     if(on){MAN_DRAFT={c:JSON.stringify(cats),a:JSON.stringify(acts),dirty:false}}
     else if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(keep){saveActs();if(d.dirty)toast('Changes saved')}else if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a);toast('Changes discarded')}}
     manBar();m.hidden=!on;m.closest('.lpanel').classList.toggle('managing',on);m.closest('.lpanel').scrollTop=0;if(on){LG.manCat=null;renderActMan()}else renderActs()};
-  _g('actManDone').addEventListener('click',()=>{if(MAN_DRAFT&&MAN_DRAFT.dirty&&!confirm('Discard your changes?'))return;setMan(false)});
-  _g('actManSave').addEventListener('click',()=>setMan(false,true));
+  _g('actManDone').addEventListener('click',()=>{if(MAN_DRAFT&&MAN_DRAFT.dirty&&!confirm('You have unsaved changes. Leave without saving?'))return;setMan(false)});
+  _g('actManSave').addEventListener('click',()=>setMan(true,'stay'));
   _g('actManage').addEventListener('click',()=>{const m=_g('actMan');setMan(m.hidden)});
   _g('actAdd').addEventListener('click',()=>{const pal=['#3d7bf2','#2e8b2e','#e8442a','#f0922e','#8a3fd6','#e85ad8','#5fe0e8','#8b5a2b'];const c={id:'c'+Date.now().toString(36),em:'',name:'',color:pal[cats.length%pal.length]};cats.push(c);LG.manCat=c.id;saveActs();renderActMan();renderActs();_g('actMan').closest('.lpanel').scrollTop=0;const t=_g('cme-'+c.id);if(t){t.focus()}});
   document.querySelectorAll('.rpday button').forEach(b=>b.addEventListener('click',()=>{LG.day=+b.dataset.day;document.querySelectorAll('.rpday button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderReport()}));

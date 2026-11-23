@@ -861,6 +861,13 @@ html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
 .dv-arch summary{cursor:pointer;padding:10px 2px;font:700 14px/1.2 system-ui,sans-serif;color:var(--muted,#9aa3bd);list-style-position:inside}
 .dv-xi{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;margin-top:6px;padding:10px 12px;border-radius:10px;border:0;border-left:4px solid var(--c);background:rgba(255,255,255,.04);color:inherit;opacity:.75;cursor:pointer;font:500 14px/1.3 system-ui,sans-serif}
 .dv-xi .xt{font:600 12px ui-monospace,Menlo,monospace;color:var(--muted,#9aa3bd)}.dv-xi .xn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dv-xi .xk{font:700 11px/1 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#ffb86b}.dv-xi.x-cancelled .xk{color:#ff8a8a}.dv-xi.x-cancelled .xn{text-decoration:line-through;text-decoration-color:rgba(255,255,255,.45)}
+.edwhere{display:grid;gap:10px;padding:12px;margin:2px 0 12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--cc,#888) 45%,transparent);background:color-mix(in srgb,var(--cc,#888) 8%,transparent)}
+.edwhere select.addin,.edpath select.addin{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+.edpath{display:grid;gap:10px;padding-left:12px;border-left:2px solid color-mix(in srgb,var(--cc,#888) 60%,transparent)}.edpath:empty{display:none}#entEdDvL[hidden]{display:none}
+.edcopy{min-height:50px;padding:0 16px;border-radius:12px;border:1px solid rgba(160,190,255,.45);background:rgba(160,190,255,.07);color:#b9ceff;font:700 15px/1 system-ui,sans-serif;cursor:pointer}
+.dv-clip{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;border-radius:10px;border:1px dashed var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);font:600 13px/1.3 system-ui,sans-serif}
+.dv-clip .ct{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dv-clip button{flex:none;min-height:36px;padding:0 14px;border-radius:9px;border:0;background:var(--c);color:#0b0f1a;font:800 13px/1 system-ui,sans-serif;cursor:pointer}
+.dayview.pasting .dv-track{cursor:copy}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1839,11 +1846,14 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
     rb.setAttribute('aria-label',`Day ribbon: ${segs.length} activities logged`);box.appendChild(rb);
     const sc=document.createElement('div');sc.className='dv-rscale';[0,3,6,9,12,15,18,21,24].forEach(k=>{const t=document.createElement('span');t.style.left=(k/24*100)+'%';
       if(k%6===0&&k<24){const sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 24 24');sv.setAttribute('class','dv-sky');t.appendChild(sv);skyIcon(sv,k,12,12,22,k&&k+1<=hn?'past':'')}
-      const tx=document.createElement('b');tx.textContent=k===24?'':hLab(k);t.appendChild(tx);sc.appendChild(t)});box.appendChild(sc);dv.appendChild(box)}
+      const tx=document.createElement('b');tx.textContent=k===24?'':hLab(k);t.appendChild(tx);sc.appendChild(t)});box.appendChild(sc);
+    if(CLIP){const cb=document.createElement('div');cb.className='dv-clip';cb.style.setProperty('--c',actById(CLIP.a).color);const tx=document.createElement('span');tx.className='ct';const dm=CLIP.dur;tx.textContent=`⧉ ${entLabel(CLIP)} · ${dm>=60?(+(dm/60).toFixed(2))+'h':dm+'m'} — tap an empty spot to paste`;
+      const dn=document.createElement('button');dn.type='button';dn.textContent='Done';dn.addEventListener('click',()=>{CLIP=null;dayM=-1;renderDay(now,h)});cb.append(tx,dn);box.appendChild(cb)}
+    dv.appendChild(box)}
   for(let k=0;k<24;k++){const row=document.createElement('div');row.className='dv-row'+(k<hn?' past':k===hn?' cur':'');row.style.setProperty('--hc',hc(k));
     const lab=document.createElement('div');lab.className='dv-h';const t=document.createElement('span');t.textContent=hLabAP(k);lab.appendChild(t);
     if(k%6===0){const sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 24 24');sv.setAttribute('class','dv-sky');lab.prepend(sv);skyIcon(sv,k,12,12,22,k&&k+1<=hn?'past':'')}
-    const tr=document.createElement('div');tr.className='dv-track';tr.addEventListener('click',ev=>{if(ev.target.closest('.dv-bar'))return;const r=tr.getBoundingClientRect(),fr=Math.max(0,Math.min(.999,(ev.clientX-r.left)/r.width)),st=k*60+(fr<.5?0:30);openLogAt(st,st+30,dayKey(now))});
+    const tr=document.createElement('div');tr.className='dv-track';tr.addEventListener('click',ev=>{if(ev.target.closest('.dv-bar'))return;const r=tr.getBoundingClientRect(),fr=Math.max(0,Math.min(.999,(ev.clientX-r.left)/r.width)),st=k*60+(fr<.5?0:30);CLIP?pasteAt(st,dayKey(now)):openLogAt(st,st+30,dayKey(now))});
     if(k===hn){const u=document.createElement('div');u.className='dv-used';u.style.width=((h%1)*100)+'%';tr.appendChild(u)}
     const a0=k*60,a1=a0+60,seg=L.map(e=>({e,s:Math.max(e.s,a0),t:Math.min(e.e,a1)})).filter(x=>x.t>x.s).sort((x,y)=>x.s-y.s||y.t-x.t),lanes=[];
     seg.forEach(x=>{let i=lanes.findIndex(end=>end<=x.s);if(i<0){i=lanes.length;lanes.push(0)}lanes[i]=x.t;x.l=i});
@@ -2399,29 +2409,48 @@ function edOpen(){ED.draft=JSON.parse(JSON.stringify(cfg));ED.day=new Date().get
   $('editor').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
 function edClose(){$('editor').hidden=true;$('editToggle').setAttribute('aria-expanded','false');ED.draft=null}
 /* ---------- undo + edit an entry from Day view ---------- */
-var UNDO=null;
+var UNDO=null,CLIP=null;
+function pasteAt(st,k){if(!CLIP)return;const before=snapState(),c=CLIP,ne={s:st,e:Math.min(1440,st+c.dur),a:c.a};['p','d','n','t','amt'].forEach(f=>{if(c[f]!=null&&c[f]!=='')ne[f]=c[f]});if(ne.e<=ne.s)return;
+  (logs[k]=logs[k]||[]).push(ne);saveLogs();refreshSlice();dayM=-1;try{renderBankNow()}catch(x){}undoToast(`Pasted ${entLabel(ne)} at ${mm2t(st)}`,before)}
 function snapState(){return JSON.stringify(logs)}
 function undoToast(msg,before){UNDO=before;const t=document.createElement('div');t.className='toast utoast';t.setAttribute('role','status');const sp=document.createElement('span');sp.textContent=msg;t.appendChild(sp);
   const b=document.createElement('button');b.type='button';b.textContent='Undo';b.addEventListener('click',()=>{if(UNDO){logs=JSON.parse(UNDO);UNDO=null;saveLogs();refreshSlice();dayM=-1;try{renderBankNow();renderActs()}catch(e){}t.remove();toast('Undone')}});t.appendChild(b);
   document.querySelectorAll('.utoast').forEach(x=>x.remove());document.body.appendChild(t);setTimeout(()=>t.remove(),6000)}
 function openEntryEditor(e,k){let ov=document.getElementById('entEd');if(!ov){ov=document.createElement('div');ov.id='entEd';ov.className='artov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','entEdT');
     ov.innerHTML='<div class="artcard edcard"><div class="arthead"><h2 id="entEdT"></h2><button type="button" class="artx" aria-label="Close">×</button></div><p class="edsub"></p>'+
+    '<div class="edwhere"><label class="addlab"><span>Activity</span><select id="entEdAct" class="addin"></select></label><label class="addlab" id="entEdDvL"><span>Device</span><select id="entEdDv" class="addin"></select></label><div id="entEdPath" class="edpath"></div></div>'+
     '<label class="addlab"><span>Title</span><input type="text" class="addin" id="entEdTi" maxlength="80"></label><label class="addlab"><span>Details</span><input type="text" class="addin" id="entEdN" maxlength="200"></label>'+
     '<div class="edtimes"><label class="addlab"><span>From</span><input type="time" id="entEdS" step="300"></label><label class="addlab"><span>To</span><input type="time" id="entEdE" step="300"></label></div>'+
     '<div class="edbtns"><button type="button" class="pickchip" data-x="-30">−30m</button><button type="button" class="pickchip" data-x="30">+30m</button><button type="button" class="pickchip" data-x="60">+1h</button></div>'+
-    '<label class="addlab" id="entEdAL"><span id="entEdAT">Amount</span><input type="text" inputmode="decimal" class="addin" id="entEdA" placeholder="0.00"></label><p class="lperr" id="entEdErr" role="alert"></p><div class="edarch"><span class="edarl">Didn&rsquo;t happen?</span><button type="button" class="archb" data-x="missed">⏭ Missed</button><button type="button" class="archb" data-x="cancelled">✕ Cancelled</button><button type="button" class="archb restb" hidden>↩ Restore to day</button></div><div class="edfoot"><button type="button" class="eddel">Delete</button><button type="button" class="snapbtn entsave">Save</button></div></div>';
+    '<label class="addlab" id="entEdAL"><span id="entEdAT">Amount</span><input type="text" inputmode="decimal" class="addin" id="entEdA" placeholder="0.00"></label><p class="lperr" id="entEdErr" role="alert"></p><div class="edarch"><span class="edarl">Didn&rsquo;t happen?</span><button type="button" class="archb" data-x="missed">⏭ Missed</button><button type="button" class="archb" data-x="cancelled">✕ Cancelled</button><button type="button" class="archb restb" hidden>↩ Restore to day</button></div><div class="edfoot"><button type="button" class="eddel">Delete</button><button type="button" class="edcopy">⧉ Copy</button><button type="button" class="snapbtn entsave">Save</button></div></div>';
     document.body.appendChild(ov);ov.addEventListener('click',ev=>{if(ev.target===ov)ov.hidden=true});ov.querySelector('.artx').addEventListener('click',()=>ov.hidden=true);
     document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!ov.hidden){ev.stopPropagation();ov.hidden=true}},true)}
   const a=actById(e.a),$$=s=>ov.querySelector(s),t2=m=>`${pad(Math.floor(Math.min(m,1439)/60))}:${pad(Math.min(m,1439)%60)}`,fromT=v=>{const [h,m]=(v||'0:0').split(':').map(Number);return h*60+m};
-  $$('#entEdT').textContent=e.t||aLabel(a);$$('#entEdTi').value=e.t||aLabel(a)+(e.p?' · '+e.p:'');$$('.edsub').textContent=[a.catEm&&a.catEm+' '+a.catName,e.d].filter(Boolean).join(' · ');
+  $$('#entEdT').textContent=e.t||aLabel(a);$$('#entEdTi').value=e.t||aLabel(a);$$('.edsub').textContent=[a.catEm&&a.catEm+' '+a.catName,e.d].filter(Boolean).join(' · ');
   $$('.edcard').style.setProperty('--cc',a.color);$$('#entEdN').value=e.n||'';{const on=catMoney(actById(e.a))||e.amt!=null;$$('#entEdAL').hidden=!on;$$('#entEdAT').textContent=`Amount (${CUR}, optional)`;$$('#entEdA').value=e.amt!=null?(+e.amt).toFixed(2):''}$$('#entEdS').value=t2(e.s);$$('#entEdE').value=e.e>=1440?'23:59':t2(e.e);$$('#entEdErr').textContent='';
+  /* where it belongs: category › activity › sub-activities, device — picked from the bank like on the add page */
+  let selA=e.a,path=e.p?e.p.split(' / '):[],dev=e.d||'';const rawA=id=>acts.find(x=>x.id===id);
+  {const asel=$$('#entEdAct');asel.innerHTML='';cats.forEach(c=>{const og=document.createElement('optgroup');og.label=[c.em,c.name].filter(Boolean).join(' ')||'Untitled';acts.filter(x=>x.cat===c.id).forEach(x=>og.appendChild(new Option(aLabel(actById(x.id)),x.id)));if(og.children.length)asel.appendChild(og)});
+    if(!rawA(e.a))asel.prepend(new Option(aLabel(a),e.a));asel.value=selA}
+  const drawWhere=()=>{const A=actById(selA),ra=rawA(selA),c=(ra&&catById(ra.cat))||{},subs=(c.subs||[]).filter(Boolean),ds=$$('#entEdDv');
+    ds.innerHTML='';ds.appendChild(new Option('—',''));subs.forEach(x=>ds.appendChild(new Option(x,x)));if(dev&&!subs.includes(dev))ds.appendChild(new Option(dev,dev));ds.value=dev;$$('#entEdDvL').hidden=!subs.length&&!dev;
+    const pw=$$('#entEdPath');pw.innerHTML='';let lst=ra?pickList(ra):[];
+    for(let i=0;i<=path.length;i++){const opts=(lst||[]).map(x=>x.t);if(i<path.length&&!opts.includes(path[i]))opts.push(path[i]);if(!opts.length)break;
+      const lb=document.createElement('label');lb.className='addlab';const sp=document.createElement('span');sp.textContent=i?'Under '+path[i-1]:'Sub-activity';const sl=document.createElement('select');sl.className='addin';
+      sl.appendChild(new Option(i?'— stop here —':'— none —',''));opts.forEach(t=>sl.appendChild(new Option(t,t)));sl.value=path[i]||'';const ii=i;sl.onchange=()=>{path=path.slice(0,ii);if(sl.value)path.push(sl.value);drawWhere()};lb.append(sp,sl);pw.appendChild(lb);
+      if(i>=path.length)break;const nd=(lst||[]).find(x=>x.t===path[i]);lst=nd&&nd.kids||[]}
+    $$('.edcard').style.setProperty('--cc',A.color);$$('#entEdT').textContent=$$('#entEdTi').value.trim()||aLabel(A);$$('.edsub').textContent=[A.catEm&&A.catEm+' '+A.catName,dev].filter(Boolean).join(' · ');
+    {const on=catMoney(ra||A)||e.amt!=null;$$('#entEdAL').hidden=!on}};
+  $$('#entEdAct').onchange=ev=>{const old=aLabel(actById(selA)),ti=$$('#entEdTi');selA=ev.target.value;path=[];if(!ti.value.trim()||ti.value.trim()===old)ti.value=aLabel(actById(selA));drawWhere()};
+  $$('#entEdDv').onchange=ev=>{dev=ev.target.value;drawWhere()};drawWhere();
   ov.querySelectorAll('.edbtns button').forEach(b=>b.onclick=()=>{const en=$$('#entEdE'),v=Math.max(fromT($$('#entEdS').value)+5,Math.min(1440,fromT(en.value)+(+b.dataset.x)));en.value=v>=1440?'23:59':t2(v)});
   {const ar=$$('.edarch');ar.classList.toggle('isx',!!e.x);$$('.edarl').textContent=e.x?`Archived as ${XLAB[e.x]}`:"Didn't happen?";ar.querySelectorAll('.archb[data-x]').forEach(b=>{b.hidden=!!e.x;b.onclick=()=>{const before=snapState();e.x=b.dataset.x;saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(q){}undoToast(`${XEM[e.x]} ${aName(a)} moved to ${XLAB[e.x]}`,before)}});
     const rb=$$('.restb');rb.hidden=!e.x;rb.onclick=()=>{const before=snapState();delete e.x;saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(q){}undoToast(`↩ ${aName(a)} restored to the day`,before)}}
+  $$('.edcopy').onclick=()=>{CLIP={a:e.a,p:e.p,d:e.d,n:e.n,t:e.t,amt:e.amt,dur:Math.max(5,e.e-e.s)};ov.hidden=true;dayM=-1;toast('Copied — tap a slot to paste')};
   $$('.eddel').onclick=()=>{const before=snapState(),L=logs[k]||[],i=L.indexOf(e);if(i>=0)L.splice(i,1);if(!L.length)delete logs[k];saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Deleted ${a.name||a.em}`,before)};
   $$('.entsave').onclick=()=>{const s0=fromT($$('#entEdS').value);let e0=$$('#entEdE').value==='23:59'?1440:fromT($$('#entEdE').value);if(e0<=s0){$$('#entEdErr').textContent='End has to be after start.';return}
     const ar=parseAmt($$('#entEdA').value);if(!$$('#entEdAL').hidden&&!ar.ok){$$('#entEdErr').textContent=ar.msg;return}
-    const before=snapState();e.s=s0;e.e=e0;const n=$$('#entEdN').value.trim();if(n)e.n=n;else delete e.n;{const tv=$$('#entEdTi').value.trim();if(tv&&tv!==aLabel(a))e.t=tv;else delete e.t}if(!$$('#entEdAL').hidden){if(ar.v!=null)e.amt=ar.v;else delete e.amt}saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Saved ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)};
+    const before=snapState();e.s=s0;e.e=e0;e.a=selA;if(path.length)e.p=path.join(' / ');else delete e.p;if(dev)e.d=dev;else delete e.d;const n=$$('#entEdN').value.trim();if(n)e.n=n;else delete e.n;{const tv=$$('#entEdTi').value.trim();if(tv&&tv!==aLabel(actById(selA)))e.t=tv;else delete e.t}if(!$$('#entEdAL').hidden){if(ar.v!=null)e.amt=ar.v;else delete e.amt}saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Saved ${aName(actById(selA))}, ${mm2t(s0)}–${mm2t(e0)}`,before)};
   ov.hidden=false;setTimeout(()=>$$('#entEdN').focus(),30)}
 function toast(msg){const t=mk('div',{className:'toast',textContent:msg});t.setAttribute('role','status');document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 $('editToggle').addEventListener('click',()=>{$('editor').hidden?edOpen():edClose()});

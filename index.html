@@ -849,6 +849,18 @@ html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
 .devsug{min-height:34px;padding:4px 10px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--fg);font:600 13px/1 system-ui,sans-serif;cursor:pointer}
 .devsug:hover{background:rgba(127,127,127,.12)}.devsug:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
 .dv-bar .nm:empty{display:none}
+.ttlrow{display:flex;gap:6px}.ttlrow .ttlin{flex:1;font-weight:700}
+.ttlhint{font-weight:500;color:var(--muted)}
+.ttlreset{flex:0 0 auto;width:48px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--fg);font-size:18px;cursor:pointer}
+.ttlreset:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+.edarch{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 12px}.edarl{flex:1 0 100%;font:600 12px/1.2 system-ui,sans-serif;color:var(--muted,#9aa3bd);letter-spacing:.04em;text-transform:uppercase}
+.archb{flex:1;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,184,107,.45);background:rgba(255,184,107,.08);color:#ffc98a;font:700 14px/1 system-ui,sans-serif;cursor:pointer}
+.archb[data-x=cancelled]{border-color:rgba(255,138,138,.45);background:rgba(255,138,138,.07);color:#ff9d9d}.archb.restb{border-color:rgba(130,200,255,.5);background:rgba(130,200,255,.08);color:#9fd4ff}
+.archb[hidden]{display:none}
+.dv-arch{margin:14px 0 90px;border:1px solid var(--line,rgba(255,255,255,.12));border-radius:14px;padding:4px 10px 8px;background:rgba(255,255,255,.025);flex:0 0 auto}
+.dv-arch summary{cursor:pointer;padding:10px 2px;font:700 14px/1.2 system-ui,sans-serif;color:var(--muted,#9aa3bd);list-style-position:inside}
+.dv-xi{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;margin-top:6px;padding:10px 12px;border-radius:10px;border:0;border-left:4px solid var(--c);background:rgba(255,255,255,.04);color:inherit;opacity:.75;cursor:pointer;font:500 14px/1.3 system-ui,sans-serif}
+.dv-xi .xt{font:600 12px ui-monospace,Menlo,monospace;color:var(--muted,#9aa3bd)}.dv-xi .xn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dv-xi .xk{font:700 11px/1 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#ffb86b}.dv-xi.x-cancelled .xk{color:#ff8a8a}.dv-xi.x-cancelled .xn{text-decoration:line-through;text-decoration-color:rgba(255,255,255,.45)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1594,11 +1606,11 @@ function drawSector(svg,Z,sched){
   const mk3=[],nm3=[],sk3=[],bigSky=[];for(let k=0;k<24;k+=3){mk3[k]=el('line',{x1:P(R-11,deg(k))[0],y1:P(R-11,deg(k))[1],x2:P(R+(k%6?4:7),deg(k))[0],y2:P(R+(k%6?4:7),deg(k))[1],class:'hr3mark'+(k%6?'':' hr6')},S);const [tx,ty]=P(R+(k%6?11:14),deg(k));nm3[k]=el('text',{x:tx,y:ty,class:'hr3num','font-size':7.5},S);if(k%6===0){const [ix,iy]=P(R+25,deg(k));sk3[k]=skyIcon(S,k,ix,iy,11)}nm3[k].textContent=hLab(k)}
   const ringUpd=hn=>{[mk3,nm3].forEach(A=>A.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k+3<=Math.floor(hn))));sk3.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k+1<=Math.floor(hn)));bigSky.forEach(([k,e])=>e&&e.classList.toggle('past',k>0&&k+1<=Math.floor(hn)));[nm3,sk3].forEach(A=>A.forEach((e,k)=>{if(e)e.style.display=(k===Z.w0||k===(Z.w0+3)%24)?'none':''}));ringSegs.forEach((e,k)=>{const inBlk=k>=Z.w0&&k<Z.w0+3,past=k<Math.floor(hn)&&!inBlk,pastIn=inBlk&&k<Math.floor(hn);
     e.setAttribute('fill',pastIn?'#3a3f4c':rayCol(k));e.setAttribute('fill-opacity',pastIn?'.82':inBlk?'1':'.85');e.style.display=past?'none':'';e.setAttribute('d',segD(k,inBlk?7.5:4.5));const isCur=k===Math.floor(hn);e.classList.toggle('srccur',inBlk&&!isCur&&!pastIn);e.classList.toggle('ringneon-tube',isCur);e.classList.toggle('rn-soft',isCur);if(isCur){e.setAttribute('d',segD(k,8));curCore.setAttribute('d',segD(k,2.6));if(topG){topG.appendChild(e);topG.appendChild(curCore);topG.appendChild(dimC)}}})};
-  /* sector body: 3 hour columns (angle) x 6 ten-minute rows (outward) */
+  /* sector body: 3 hour columns (angle) x 6 ten-minute rows (:00 at the rim, emptying inward) */
   const G=el('g',{class:'slice'},svg);
   el('path',{d:ann(R+3,RO,a1,a2),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
   el('path',{d:ann(RO-7,RO-2,a1+.5,a2-.5),fill:blues[Math.floor(Z.w0/3)%8],'fill-opacity':.9},G);
-  const band=(RO-9-RI)/6,geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
+  const band=(RO-9-RI)/6,geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
     return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
   const colors=[],cells=[];
   for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(b&&b.color||FREE_COLOR);cells.push(el('path',{d:geo(i),fill:colors[i]},G))}
@@ -1609,7 +1621,7 @@ function drawSector(svg,Z,sched){
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
   const curHr=i=>{mlabs.forEach((t,j)=>t.setAttribute('class','sqlab'+(j<i%6?' past':j===i%6?' cur':'')));const k=Math.floor(i/6),q=P(RO-27,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=hLab(Z.w0+k)};
   for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=CLK12?hLab(Z.w0+k):String((Z.w0+k)%24||(k?24:0));const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
-  const mlabs=[];for(let r=0;r<6;r++){const rr=RI+(r+.5)*band,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
+  const mlabs=[];for(let r=0;r<6;r++){const rr=RI+(5-r+.5)*band,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
     mlabs.push(el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G));mlabs[r].textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
   const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;
@@ -1764,11 +1776,12 @@ async function dayReportCanvas(d){const W=1080,P=56,k=dayKey(d),L=dayEntries(d).
   const TH=dayThreads(L),tot={};TH.forEach(t=>{tot[t.cat]=tot[t.cat]||{m:0,color:t.color,em:t.em};tot[t.cat].m+=t.e-t.s});const T=Object.entries(tot).sort((a,b)=>b[1].m-a[1].m);
   let cov=0,ce=-1;L.slice().sort((a,b)=>a.s-b.s).forEach(x=>{const s0=Math.max(x.s,ce);if(x.e>s0)cov+=x.e-s0;ce=Math.max(ce,x.e)});
   const meas=document.createElement('canvas').getContext('2d');meas.font='500 26px system-ui,-apple-system,sans-serif';
-  const rows=L.map(e=>{const a=actById(e.a),title=aLabel(a)+(e.p?' · '+e.p:''),sub=[SPEND&&e.amt!=null?money(e.amt):'',e.d,e.n].filter(Boolean).join(' · ');return {e,a,title,subL:sub?wrapText(meas,sub,W-P*2-250):[]}});
+  const rows=L.map(e=>{const a=actById(e.a),title=(e.t||aLabel(a))+(e.p?' · '+e.p:''),sub=[SPEND&&e.amt!=null?money(e.amt):'',e.d,e.n].filter(Boolean).join(' · ');return {e,a,title,subL:sub?wrapText(meas,sub,W-P*2-250):[]}});
   const listH=rows.reduce((s,r)=>s+58+r.subL.length*32,0)+(rows.length?0:60);
   const SP={};let spTot=0;if(SPEND)L.forEach(e=>{if(e.amt==null)return;const a=actById(e.a),key=[a.catEm,a.name,e.p].filter(Boolean).join(' › ');SP[key]=SP[key]||{v:0,color:a.color};SP[key].v+=+e.amt;spTot+=+e.amt});
   const SPL=Object.entries(SP).sort((a,b)=>b[1].v-a[1].v),spH=SPL.length?90+SPL.length*46+60:0;
-  const H=P+120+760+90+T.length*52+70+listH+P+spH;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+  const XR=dayArchived(d).map(e=>{const a=actById(e.a);return {e,a,title:(e.t||aLabel(a))+(e.p?' · '+e.p:''),subL:e.n?wrapText(meas,e.n,W-P*2-250-160):[]}}),xH=XR.length?40+70+XR.reduce((s,r)=>s+58+r.subL.length*32,0):0;
+  const H=P+120+760+90+T.length*52+70+listH+P+spH+xH;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
   const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#141933');g.addColorStop(1,'#070915');x.fillStyle=g;x.fillRect(0,0,W,H);
   let y=P;x.fillStyle='#ffd27a';x.font='800 50px Manrope,system-ui,sans-serif';x.fillText(d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'}),P,y+44);
   x.fillStyle='#aab2cc';x.font='500 26px system-ui,sans-serif';x.fillText(`Astro Day · ${(+(cov/60).toFixed(1))}h logged · ${L.length} ${L.length===1?'entry':'entries'}`,P,y+90);y+=120;
@@ -1784,6 +1797,12 @@ async function dayReportCanvas(d){const W=1080,P=56,k=dayKey(d),L=dayEntries(d).
     x.fillStyle='#aab2cc';x.font='600 24px ui-monospace,Menlo,monospace';x.fillText(`${mm2t(r.e.s)}–${mm2t(r.e.e)}`,P+24,y+36);
     x.fillStyle='#eef1fb';x.font='700 27px system-ui,sans-serif';x.fillText(r.title,P+250,y+36);
     x.fillStyle='#aab2cc';x.font='500 26px system-ui,sans-serif';r.subL.forEach((l,i)=>x.fillText(l,P+250,y+70+i*32));y+=h});
+  if(XR.length){y+=40;x.strokeStyle='rgba(170,178,204,.25)';x.lineWidth=2;x.beginPath();x.moveTo(P,y);x.lineTo(W-P,y);x.stroke();x.fillStyle='#eef1fb';x.font='800 32px Manrope,system-ui,sans-serif';x.fillText('Missed & cancelled',P,y+50);y+=70;
+    XR.forEach(r=>{const h=58+r.subL.length*32;x.globalAlpha=.55;x.fillStyle=r.a.color;x.fillRect(P,y+6,8,h-18);x.globalAlpha=1;
+      x.fillStyle='#8890a8';x.font='600 24px ui-monospace,Menlo,monospace';x.fillText(`${mm2t(r.e.s)}–${mm2t(r.e.e)}`,P+24,y+36);
+      x.fillStyle='#c3c8d8';x.font='700 27px system-ui,sans-serif';const tl=wrapText(x,r.title,W-P*2-250-170)[0];x.fillText(tl,P+250,y+36);const tw=x.measureText(tl).width;x.strokeStyle='#c3c8d8';x.lineWidth=2;if(r.e.x==='cancelled'){x.beginPath();x.moveTo(P+250,y+27);x.lineTo(P+250+tw,y+27);x.stroke()}
+      x.fillStyle=r.e.x==='cancelled'?'#ff8a8a':'#ffb86b';x.font='700 22px system-ui,sans-serif';x.textAlign='right';x.fillText(`${XEM[r.e.x]||''} ${XLAB[r.e.x]||'Archived'}`.toUpperCase(),W-P,y+36);x.textAlign='left';
+      x.fillStyle='#8890a8';x.font='500 26px system-ui,sans-serif';r.subL.forEach((l,i)=>x.fillText(l,P+250,y+70+i*32));y+=h})}
   return cv}
 function pdfFromJpeg(bytes,w,h){const enc=new TextEncoder(),parts=[],offs=[];let len=0;const add=b=>{if(typeof b==='string')b=enc.encode(b);parts.push(b);len+=b.length};
   const pw=595,ph=Math.round(595*h/w);add('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
@@ -1834,13 +1853,17 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
       b.style.left=`calc(${((x.s-a0)/60*100).toFixed(3)}% + ${pl}px)`;b.style.width=`calc(${((x.t-x.s)/60*100).toFixed(3)}% - ${pl+pr}px)`;
       b.style.top=(3+x.l*LH)+'px';b.style.height=(LH-4)+'px';b.style.setProperty('--c',a.color);b.style.color=dvInk(a.color);
       const mins=x.t-x.s,first=Math.min(x.e.e,Math.floor(x.e.s/60)*60+60)-x.e.s,labelHere=cin?(first<12&&x.e.s>=a0-60):true;b.innerHTML='<span class="em"></span><span class="tx"><span class="nm"></span><span class="sub"></span></span>';
-      b.querySelector('.em').textContent=a.em;if(!labelHere){b.classList.add('quiet')}else if(mins>=12){b.querySelector('.nm').textContent=[aName(a),x.e.p].filter(Boolean).join(' · ');b.querySelector('.sub').textContent=[x.e.amt!=null&&SPEND?money(x.e.amt):'',x.e.d,x.e.n||`${mm2t(x.e.s)}–${mm2t(x.e.e)}`].filter(Boolean).join(' · ')}else b.classList.add('tiny');
+      b.querySelector('.em').textContent=x.e.t?'':a.em;if(!labelHere){b.classList.add('quiet')}else if(mins>=12){b.querySelector('.nm').textContent=[x.e.t||aName(a),x.e.p].filter(Boolean).join(' · ');b.querySelector('.sub').textContent=[x.e.amt!=null&&SPEND?money(x.e.amt):'',x.e.d,x.e.n||`${mm2t(x.e.s)}–${mm2t(x.e.e)}`].filter(Boolean).join(' · ')}else b.classList.add('tiny');
       if(cout||cin){const mid=3+x.l*LH+(LH-4)/2;if(cout){const k=OUTS.indexOf(x),ww=9+(OUTS.length-1-k)*6,w=document.createElement('div');w.className='dv-wrap out';w.style.top=mid+'px';w.style.width=ww+'px';w.style.right=(-ww-1)+'px';w.style.setProperty('--c',a.color);tr.appendChild(w)}
         if(cin){const k=INS.indexOf(x),ww=9+k*6,w=document.createElement('div');w.className='dv-wrap in';w.style.height=(mid+6)+'px';w.style.width=ww+'px';w.style.left=(-ww-1)+'px';w.style.setProperty('--c',a.color);tr.appendChild(w)}}
       b.title=`${entLabel(x.e)} · ${mm2t(x.e.s)}–${mm2t(x.e.e)}${x.e.n?' · '+x.e.n:''}`;if(!x.e.run){b.setAttribute('role','button');b.tabIndex=0;b.setAttribute('aria-label','Edit '+b.title);const op=ev=>{ev.stopPropagation();openEntryEditor(x.e,dayKey(now))};b.addEventListener('click',op);b.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();op(ev)}})}tr.appendChild(b)});
     if(k===hn){const n=document.createElement('div');n.className='dv-now';n.style.left=((h%1)*100)+'%';tr.appendChild(n)}
     tr.setAttribute('aria-label',`${hhmm(k)} – ${seg.length?seg.map(x=>actById(x.e.a).name).join(', '):'nothing logged'}`);tr.setAttribute('role','img');
     row.appendChild(lab);row.appendChild(tr);dv.appendChild(row)}
+  {const X=dayArchived(now);if(X.length){const sec=document.createElement('details');sec.className='dv-arch';const sm=document.createElement('summary');sm.textContent=`🗃 Missed & cancelled · ${X.length}`;sec.appendChild(sm);
+    X.forEach(e=>{const a=actById(e.a),b=document.createElement('button');b.type='button';b.className='dv-xi';b.style.setProperty('--c',a.color);b.innerHTML='<span class="xt"></span><span class="xn"></span><span class="xk"></span>';
+      b.querySelector('.xt').textContent=`${mm2t(e.s)}–${mm2t(e.e)}`;b.querySelector('.xn').textContent=entLabel(e)+(e.n?' · '+e.n:'');b.querySelector('.xk').textContent=XLAB[e.x]||'Archived';b.classList.add('x-'+e.x);b.addEventListener('click',()=>openEntryEditor(e,dayKey(now)));sec.appendChild(b)});
+    if(window._dvArchOpen)sec.open=true;sm.addEventListener('click',()=>{window._dvArchOpen=!sec.open});dv.appendChild(sec)}}
   dv.scrollTop=keep}
 function dayThreads(L){const by={};L.slice().sort((a,b)=>a.s-b.s).forEach(e=>{const a=actById(e.a),ck=a.cat||('_'+a.id);(by[ck]=by[ck]||[]).push({e,a})});
   const out=[];for(const ck in by){let cur=null;by[ck].forEach(({e,a})=>{if(cur&&e.s<=cur.e){cur.e=Math.max(cur.e,e.e)}else{cur={s:e.s,e:e.e,color:a.color,em:a.catEm||a.em,cat:a.catName||a.name,items:[],notes:[]};out.push(cur)}
@@ -2023,9 +2046,11 @@ function pickList(a){const n=l=>(l||[]).map(x=>typeof x==='string'?{t:x,d:''}:x)
 function actById(id){const a=acts.find(x=>x.id===id);if(!a)return {id,em:'❔',name:'Removed activity',color:'#8a8d96',catEm:'',catName:''};const c=catById(a.cat)||{em:'',name:'Other',color:'#8a8d96'};return Object.assign({},a,{name:a.name||a.em||'Untitled',color:c.color,catEm:c.em,catName:c.name||c.em||'Untitled'})}
 function actLabel(a){return (a.catEm?a.catEm+' › ':'')+a.em+' '+a.name}
 const aName=a=>a&&a.name!==a.em?a.name:'';const aLabel=a=>[a.em,aName(a)].filter(Boolean).join(' ');
-function entLabel(e){const a=actById(e.a);return (a.catEm?a.catEm+' › ':'')+(e.d?e.d+' › ':'')+aLabel(a)+(e.p?' · '+e.p:'')}
+function entLabel(e){const a=actById(e.a);return (a.catEm?a.catEm+' › ':'')+(e.d?e.d+' › ':'')+(e.t||aLabel(a))+(e.p?' · '+e.p:'')}
 function dur(m){m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?`${h}h ${r}m`:`${h}h`):`${r}m`}
-function dayEntries(d){const k=dayKey(d),L=(logs[k]||[]).slice();if(running&&running.day===k){const n=new Date();{const nm=n.getHours()*60+n.getMinutes();L.push({s:running.s,e:dayKey(n)===k?Math.min(1440,Math.max(Math.ceil((nm+1)/30)*30,running.s+30)):1440,a:running.a,run:true})}}return L}
+function dayArchived(d){return (logs[dayKey(d)]||[]).filter(e=>e.x).sort((a,b)=>a.s-b.s)}
+const XLAB={missed:'Missed',cancelled:'Cancelled'},XEM={missed:'⏭',cancelled:'✕'};
+function dayEntries(d){const k=dayKey(d),L=(logs[k]||[]).filter(e=>!e.x);if(running&&running.day===k){const n=new Date();{const nm=n.getHours()*60+n.getMinutes();L.push({s:running.s,e:dayKey(n)===k?Math.min(1440,Math.max(Math.ceil((nm+1)/30)*30,running.s+30)):1440,a:running.a,run:true})}}return L}
 function loggedAll(d,minute){const out=[];for(const e of dayEntries(d)){if(minute>=e.s&&minute<e.e&&!out.includes(e.a))out.push(e.a)}return out.map(id=>actById(id).color)}
 function loggedAt(d,minute){let c=null;for(const e of dayEntries(d)){if(minute>=e.s&&minute<e.e)c=actById(e.a).color}return c}
 /* activities are shown in the Day view only; the clocks stay activity-free */
@@ -2040,20 +2065,20 @@ function stopRun(sw){if(!running)return;const n=new Date(),k=dayKey(n);let endM=
   if(running.day!==k){(logs[running.day]=logs[running.day]||[]).push({s:running.s,e:1440,a:running.a});running.s=0;running.day=k}
   endM=sw?Math.floor(endM/30)*30:Math.min(1440,Math.max(Math.ceil(endM/30)*30,running.s+30));if(endM>running.s)(logs[k]=logs[k]||[]).push({s:running.s,e:endM,a:running.a});
   const a=actById(running.a);running=null;saveRun();saveLogs();refreshSlice();renderRun();if(!sw)toast(`Stopped ${a.name}`)}
-function addHalf(id,ex){ex=ex||{};const n=new Date(),k=dayKey(n),nm=n.getHours()*60+n.getMinutes(),bs=Math.floor(nm/30)*30,be=bs+30,L=(logs[k]=logs[k]||[]),a=actById(id),same=e=>e.a===id&&(e.d||'')===(ex.d||'')&&(e.p||'')===(ex.p||'')&&(e.n||'')===(ex.n||'')&&(e.amt==null&&ex.amt==null),nmx=[ex.d,a.name,ex.p].filter(Boolean).join(' › ');
+function addHalf(id,ex){ex=ex||{};const n=new Date(),k=dayKey(n),nm=n.getHours()*60+n.getMinutes(),bs=Math.floor(nm/30)*30,be=bs+30,L=(logs[k]=logs[k]||[]),a=actById(id),same=e=>!e.x&&e.a===id&&(e.d||'')===(ex.d||'')&&(e.p||'')===(ex.p||'')&&(e.n||'')===(ex.n||'')&&(e.amt==null&&ex.amt==null)&&(e.t||'')===(ex.t||''),nmx=[ex.d,a.name,ex.p].filter(Boolean).join(' › ');
   if(L.some(e=>same(e)&&e.s<be&&e.e>bs)){toast(`${nmx} is already in ${mm2t(bs)}–${mm2t(be)}`);return false}
   const prev=L.find(e=>same(e)&&e.e===bs);
-  if(prev){prev.e=be;toast(`Extended ${nmx} to ${mm2t(prev.s)}–${mm2t(be)}`)}else{const ne={s:bs,e:be,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;if(ex.amt!=null)ne.amt=ex.amt;L.push(ne);0}
+  if(prev){prev.e=be;toast(`Extended ${nmx} to ${mm2t(prev.s)}–${mm2t(be)}`)}else{const ne={s:bs,e:be,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;if(ex.amt!=null)ne.amt=ex.amt;if(ex.t)ne.t=ex.t;L.push(ne);0}
   saveLogs();refreshSlice();renderBankNow();return true}
 function halfLabel(){const nm=nowMin(),bs=Math.floor(nm/30)*30;return `＋ Add to ${mm2t(bs)}–${mm2t(bs+30)}`}
 function startRun(id){if(running){if(running.a===id)return;stopRun(true)}const n=new Date(),k=dayKey(n),nm=n.getHours()*60+n.getMinutes(),bs=Math.floor(nm/30)*30;
-  logs[k]=(logs[k]||[]).filter(e=>!(e.s>=bs&&e.s<bs+30));logs[k].forEach(e=>{if(e.s<bs&&e.e>bs)e.e=bs});saveLogs();
+  logs[k]=(logs[k]||[]).filter(e=>e.x||!(e.s>=bs&&e.s<bs+30));logs[k].forEach(e=>{if(!e.x&&e.s<bs&&e.e>bs)e.e=bs});saveLogs();
   running={a:id,s:bs,day:k,t:n.getTime()};saveRun();refreshSlice();renderRun();toast(`Started ${actById(id).name}`)}
 function renderRun(){const pill=_g('runPill');if(!pill)return;pill.hidden=!running;if(!running)return;const a=actById(running.a),el2=Math.max(0,Math.floor((Date.now()-running.t)/1000));
   pill.querySelector('.dia').style.background=a.color;pill.querySelector('.rn').textContent=actLabel(a);
   pill.querySelector('.rt').textContent=el2>=3600?`${Math.floor(el2/3600)}:${pad(Math.floor(el2%3600/60))}:${pad(el2%60)}`:`${pad(Math.floor(el2/60))}:${pad(el2%60)}`}
 function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
-function openLog(){document.documentElement.classList.add('modal-open');const n=nowMin(),L=logs[dayKey(new Date())]||[],last=L.reduce((a,e)=>Math.max(a,e.e),-1);
+function openLog(){document.documentElement.classList.add('modal-open');const n=nowMin(),L=(logs[dayKey(new Date())]||[]).filter(e=>!e.x),last=L.reduce((a,e)=>Math.max(a,e.e),-1);
   _g('logFrom').value=mm2t(last>=0&&last<n?last:Math.max(0,n-15));_g('logTo').value=mm2t(n);_g('logNote').value='';_g('logErr').textContent='';
   if(!LG.sel&&acts[0])LG.sel=acts[0].id;LG.view='home';LG.pend=null;LG.slot=null;{const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}setCustom(false);renderLogList();_g('actMan').hidden=true;_g('logPanel').hidden=false;setTimeout(()=>{const c=document.querySelector('.actchip');c&&c.focus()},30)}
 function setCustom(on){LG.custom=on;_g('lgCustom').hidden=!on;_g('bankHint').hidden=on;const o=_g('logOther');o.setAttribute('aria-expanded',String(on));o.textContent=on?'⚡ Snap mode':'🕘 Another time';
@@ -2068,15 +2093,15 @@ function snapAct(id,from,ex){const a=actById(id),r0=from.getBoundingClientRect()
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const an=cd.animate(reduce?[{opacity:1},{opacity:0}]:[{transform:'scale(1) rotate(0deg)',opacity:1,offset:0},{transform:'scale(1.12) rotate(-4deg)',opacity:1,offset:.22},{transform:'scale(1.12) rotate(-4deg)',opacity:1,offset:.42},{transform:`translate(${dx}px,${dy}px) scale(.18) rotate(8deg)`,opacity:.2,offset:1}],{duration:reduce?300:900,easing:'cubic-bezier(.5,0,.2,1)'});
   an.onfinish=()=>{cd.remove();btn.classList.remove('gulp');void btn.offsetWidth;btn.classList.add('gulp')}}
-function renderBankNow(){const b=_g('bankNow');if(!b)return;const nm=nowMin(),L=(logs[dayKey(new Date())]||[]).filter(e=>e.s<=nm&&e.e>nm);
+function renderBankNow(){const b=_g('bankNow');if(!b)return;const nm=nowMin(),L=(logs[dayKey(new Date())]||[]).filter(e=>!e.x&&e.s<=nm&&e.e>nm);
   if(!L.length){b.hidden=true;return}const a=actById(L[L.length-1].a);b.hidden=false;b.textContent=a.em||'•';b.style.setProperty('--c',a.color);
   b.title=`Now: ${L.map(e=>actById(e.a).name).join(', ')}`;b.dataset.more=L.length>1?'+'+(L.length-1):'';_g('logOpen').setAttribute('aria-label',`Activity Bank. Now: ${L.map(e=>actById(e.a).name).join(', ')}`)}
 function openLogAt(s0,e0,k){openLog();LG.slot={s:s0,e:e0,k:k||dayKey(new Date())};LG.view='home';renderActs()}
-function addAt(id,ex,s0,e0,kk){const before=snapState();const k=kk||dayKey(new Date()),L=(logs[k]=logs[k]||[]),a=actById(id),same=e=>e.a===id&&(e.d||'')===(ex.d||'')&&(e.p||'')===(ex.p||'')&&(e.n||'')===(ex.n||'')&&(e.amt==null&&ex.amt==null);
+function addAt(id,ex,s0,e0,kk){const before=snapState();const k=kk||dayKey(new Date()),L=(logs[k]=logs[k]||[]),a=actById(id),same=e=>!e.x&&e.a===id&&(e.d||'')===(ex.d||'')&&(e.p||'')===(ex.p||'')&&(e.n||'')===(ex.n||'')&&(e.amt==null&&ex.amt==null)&&(e.t||'')===(ex.t||'');
   if(L.some(e=>same(e)&&e.s<e0&&e.e>s0)){const o=L.find(e=>same(e)&&e.s<e0&&e.e>s0);o.s=Math.min(o.s,s0);o.e=Math.max(o.e,e0)}
   else{const prev=L.find(e=>same(e)&&e.e===s0),next=L.find(e=>same(e)&&e.s===e0);
     if(prev&&next){prev.e=next.e;L.splice(L.indexOf(next),1)}else if(prev)prev.e=e0;else if(next)next.s=s0;
-    else{const ne={s:s0,e:e0,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;if(ex.amt!=null)ne.amt=ex.amt;L.push(ne)}}
+    else{const ne={s:s0,e:e0,a:id};if(ex.d)ne.d=ex.d;if(ex.p)ne.p=ex.p;if(ex.n)ne.n=ex.n;if(ex.amt!=null)ne.amt=ex.amt;if(ex.t)ne.t=ex.t;L.push(ne)}}
   saveLogs();refreshSlice();dayM=-1;try{renderBankNow()}catch(x){}undoToast(`Added ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)}
 function tryClosePanels(){if(MAN_DRAFT&&MAN_DRAFT.dirty&&!confirm('Exit without saving your changes?'))return false;closePanels();return true}
 function closePanels(){document.documentElement.classList.remove('modal-open');LG.slot=null;if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a)}manBar();const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}_g('logPanel').hidden=true;_g('repPanel').hidden=true}
@@ -2093,7 +2118,7 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   const grp=groups.find(x=>x.c.id===LG.tab);if(LG.view!=='home'&&!grp)LG.view='home';
   /* ---- home: category tiles ---- */
   if(!LG.view||LG.view==='home'){
-    {const L=slot?[]:(logs[dayKey(new Date())]||[]).filter(e=>e.e===bs);if(L.length){const cs=E('div','contstrip');cs.appendChild(E('p','contlab',`Still going? Carry into ${half}`));
+    {const L=slot?[]:(logs[dayKey(new Date())]||[]).filter(e=>!e.x&&e.e===bs);if(L.length){const cs=E('div','contstrip');cs.appendChild(E('p','contlab',`Still going? Carry into ${half}`));
       L.forEach(e=>{const a=actById(e.a),b=E('button','contbtn');b.type='button';b.style.setProperty('--cc',a.color);b.innerHTML='<span class="go" aria-hidden="true">⏩</span><span class="tx"></span><span class="tm"></span>';
         b.querySelector('.tx').textContent=entLabel(e)+(e.n?' · '+e.n:'');b.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)} → ${mm2t(bs+30)}`;b.setAttribute('aria-label',`Extend ${a.name} to ${mm2t(bs+30)}`);
         b.addEventListener('click',()=>extendEntry(e));cs.appendChild(b)});g.appendChild(cs)}}
@@ -2123,6 +2148,10 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   const a=acts.find(x=>x.id===(LG.pend&&LG.pend.id));if(!a){go('cat');return}
   head(a.name,{label:c.name||c.em||'Back',fn:()=>go('cat')},a.em);
   const card=E('div','addcard');card.style.setProperty('--cc',c.color);
+  const tl=E('label','addlab ttllab');const tls=E('span',null,'Title');tls.appendChild(E('small','ttlhint',' · just for this entry, the template stays as is'));tl.appendChild(tls);
+  const tin=document.createElement('input');tin.type='text';tin.className='addin ttlin';tin.maxLength=80;tin.value=LG.pend.t||aLabel(a);tin.setAttribute('aria-label','Title for this entry');
+  tin.addEventListener('input',()=>{LG.pend.t=tin.value});const trs=E('button','ttlreset','↺');trs.type='button';trs.title='Back to template title';trs.setAttribute('aria-label','Reset title to template');
+  trs.addEventListener('click',()=>{tin.value=aLabel(a);LG.pend.t='';tin.focus()});const tw=E('div','ttlrow');tw.append(tin,trs);tl.appendChild(tw);card.appendChild(tl);
   const where=E('p','addwhere');where.textContent=[c.em+' '+c.name,dev,half].filter(Boolean).join('  ·  ');card.appendChild(where);
   /* ---- nested sub-activities: drill down as deep as you like, stop at any level ---- */
   const SEP=' / ',tree=pickList(a);LG.pend.path=LG.pend.path||(LG.pend.p?LG.pend.p.split(SEP):[]);
@@ -2157,17 +2186,17 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(slot){const dr=E('div','durrow');dr.appendChild(E('span','reclab','Length'));[30,60,90,120,180].forEach(m=>{const q=E('button','pickchip',m<60?m+'m':(m/60)+'h');q.type='button';q.setAttribute('role','radio');q.setAttribute('aria-checked',String(slot.e-slot.s===m));q.style.setProperty('--cc',c.color);
       q.addEventListener('click',()=>{slot.e=Math.min(1440,slot.s+m);renderActs();const fi=g.querySelector('.addin');if(fi)fi.focus()});dr.appendChild(q)});card.insertBefore(dr,lab)}
   const snap=E('button','snapbtn',slot?`Add to ${half}`:`Snap into ${half}`);snap.type='button';
-  const doSnap=()=>{const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
+  const doSnap=()=>{const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};{const tv=tin.value.trim();if(tv&&tv!==aLabel(a))ex.t=tv}if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
     if(svc.checked&&!sv.hidden&&ex.n){const at=nodeAt(p.path);if(at&&!at.lst.some(x=>x.t===ex.n))at.lst.push({t:ex.n,d:''});a.picks=tree;saveActs();ex.p=p.path.concat(ex.n).join(SEP);ex.n=''}
     if(slot){addAt(a.id,ex,slot.s,slot.e,slot.k);closePanels();return}snapAct(a.id,snap,ex)};
   snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}
 /* extend an entry into the next half-hour block (no new entry) */
 function extendEntry(e){const bs=Math.floor(nowMin()/30)*30,be=bs+30,a=actById(e.a),old=e.e;
   if(e.e>=bs&&e.e<be)e.e=be;else e.e=Math.min(1440,e.e+30);
-  const L=logs[dayKey(new Date())]||[],twin=L.find(x=>x!==e&&x.a===e.a&&(x.d||'')===(e.d||'')&&(x.p||'')===(e.p||'')&&(x.n||'')===(e.n||'')&&x.s>=old&&x.s<=e.e);
+  const L=logs[dayKey(new Date())]||[],twin=L.find(x=>x!==e&&!x.x&&x.a===e.a&&(x.d||'')===(e.d||'')&&(x.p||'')===(e.p||'')&&(x.n||'')===(e.n||'')&&x.s>=old&&x.s<=e.e);
   if(twin){e.e=Math.max(e.e,twin.e);L.splice(L.indexOf(twin),1)}
   saveLogs();refreshSlice();renderLogList();try{renderActs();renderBankNow()}catch(x){}toast(`${a.name} now runs ${mm2t(e.s)}–${mm2t(e.e)}`)}
-function renderLogList(){const ul=_g('logList'),L=(logs[dayKey(new Date())]||[]).slice().sort((x,y)=>x.s-y.s);ul.innerHTML='';
+function renderLogList(){const ul=_g('logList'),L=(logs[dayKey(new Date())]||[]).filter(e=>!e.x).sort((x,y)=>x.s-y.s);ul.innerHTML='';
   if(!L.length){ul.innerHTML='<li class="empty">Nothing logged yet today.</li>';return}
   L.forEach(e=>{const a=actById(e.a),li=document.createElement('li');
     li.innerHTML=`<span class="dia"></span><span class="tm"></span><span class="lbw"><span class="lb"></span><input type="text" class="lnote" maxlength="200" placeholder="Add a note…"></span><span class="hrs"></span><button type="button" class="extbtn">+30m</button><button type="button" class="edx" aria-label="Delete entry">×</button>`;
@@ -2267,6 +2296,7 @@ function renderReport(){const R=report(LG.day),tr=_g('rpTrack');tr.innerHTML='';
   txt+=`\n\nTotals\n`;Object.entries(R.tot).sort((x,y)=>y[1]-x[1]).forEach(([id,m])=>{const a=actById(id);txt+=`${actLabel(a)}: ${dur(m)}\n`});
   {const ct={};Object.entries(R.tot).forEach(([id,m])=>{const a=actById(id),k=a.catName||'Other';ct[k]=ct[k]||{m:0,em:a.catEm};ct[k].m+=m});const ks=Object.keys(ct);if(ks.length>1){txt+=`\nBy category\n`;ks.sort((x,y)=>ct[y].m-ct[x].m).forEach(k=>{txt+=`${ct[k].em?ct[k].em+' ':''}${k}: ${dur(ct[k].m)}\n`})}}
   txt+=`⬜ Not logged: ${dur(R.gap)}\n`;if(R.segs.some((g,i,a)=>!g.gap&&a.some(h=>h!==g&&!h.gap&&h.s<g.e&&h.e>g.s)))txt+=`(Activities that share a half hour each count the full time.)\n`;
+  {const X=dayArchived(R.d);if(X.length){txt+=`\nMissed & cancelled\n`;X.forEach(e=>{txt+=`${mm2t(e.s)}–${mm2t(e.e)}  ${entLabel(e)}${e.n?' · '+e.n:''} — ${XLAB[e.x]||'Archived'}\n`})}}
   _g('rpText').textContent=txt;_g('rpMsg').textContent='';return txt}
 function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.day===0)));renderReport();_g('repPanel').hidden=false;setTimeout(()=>_g('rpCopy').focus(),30)}
 (function(){
@@ -2286,7 +2316,7 @@ function openReport(){LG.day=0;document.querySelectorAll('.rpday button').forEac
   document.querySelectorAll('.lpwrap').forEach(w=>{w.addEventListener('click',e=>{if(e.target.closest('[data-close]')){tryClosePanels();return}if(e.target===w&&!MAN_DRAFT)closePanels()})});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(!_g('logPanel').hidden||!_g('repPanel').hidden)){e.stopImmediatePropagation();tryClosePanels()}},true);
   _g('logQuick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const n=nowMin(),q=b.dataset.q;let s0;
-    if(q==='hour')s0=Math.floor(n/60)*60;else if(q==='since'){const L=logs[dayKey(new Date())]||[];s0=L.reduce((a,x)=>Math.max(a,x.e),-1);if(s0<0||s0>=n){_g('logErr').textContent='Nothing logged earlier today to continue from.';return}}else s0=Math.max(0,n-(+q));
+    if(q==='hour')s0=Math.floor(n/60)*60;else if(q==='since'){const L=(logs[dayKey(new Date())]||[]).filter(e=>!e.x);s0=L.reduce((a,x)=>Math.max(a,x.e),-1);if(s0<0||s0>=n){_g('logErr').textContent='Nothing logged earlier today to continue from.';return}}else s0=Math.max(0,n-(+q));
     _g('logFrom').value=mm2t(s0);_g('logTo').value=mm2t(n);_g('logErr').textContent=''});
   ['logFrom','logTo'].forEach(id=>_g(id).addEventListener('input',()=>_g('logErr').textContent=''));
   _g('logSave').addEventListener('click',()=>{const s0=t2mm(_g('logFrom').value,false),e0=t2mm(_g('logTo').value,true);
@@ -2376,20 +2406,22 @@ function undoToast(msg,before){UNDO=before;const t=document.createElement('div')
   document.querySelectorAll('.utoast').forEach(x=>x.remove());document.body.appendChild(t);setTimeout(()=>t.remove(),6000)}
 function openEntryEditor(e,k){let ov=document.getElementById('entEd');if(!ov){ov=document.createElement('div');ov.id='entEd';ov.className='artov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','entEdT');
     ov.innerHTML='<div class="artcard edcard"><div class="arthead"><h2 id="entEdT"></h2><button type="button" class="artx" aria-label="Close">×</button></div><p class="edsub"></p>'+
-    '<label class="addlab"><span>Details</span><input type="text" class="addin" id="entEdN" maxlength="200"></label>'+
+    '<label class="addlab"><span>Title</span><input type="text" class="addin" id="entEdTi" maxlength="80"></label><label class="addlab"><span>Details</span><input type="text" class="addin" id="entEdN" maxlength="200"></label>'+
     '<div class="edtimes"><label class="addlab"><span>From</span><input type="time" id="entEdS" step="300"></label><label class="addlab"><span>To</span><input type="time" id="entEdE" step="300"></label></div>'+
     '<div class="edbtns"><button type="button" class="pickchip" data-x="-30">−30m</button><button type="button" class="pickchip" data-x="30">+30m</button><button type="button" class="pickchip" data-x="60">+1h</button></div>'+
-    '<label class="addlab" id="entEdAL"><span id="entEdAT">Amount</span><input type="text" inputmode="decimal" class="addin" id="entEdA" placeholder="0.00"></label><p class="lperr" id="entEdErr" role="alert"></p><div class="edfoot"><button type="button" class="eddel">Delete</button><button type="button" class="snapbtn entsave">Save</button></div></div>';
+    '<label class="addlab" id="entEdAL"><span id="entEdAT">Amount</span><input type="text" inputmode="decimal" class="addin" id="entEdA" placeholder="0.00"></label><p class="lperr" id="entEdErr" role="alert"></p><div class="edarch"><span class="edarl">Didn&rsquo;t happen?</span><button type="button" class="archb" data-x="missed">⏭ Missed</button><button type="button" class="archb" data-x="cancelled">✕ Cancelled</button><button type="button" class="archb restb" hidden>↩ Restore to day</button></div><div class="edfoot"><button type="button" class="eddel">Delete</button><button type="button" class="snapbtn entsave">Save</button></div></div>';
     document.body.appendChild(ov);ov.addEventListener('click',ev=>{if(ev.target===ov)ov.hidden=true});ov.querySelector('.artx').addEventListener('click',()=>ov.hidden=true);
     document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!ov.hidden){ev.stopPropagation();ov.hidden=true}},true)}
   const a=actById(e.a),$$=s=>ov.querySelector(s),t2=m=>`${pad(Math.floor(Math.min(m,1439)/60))}:${pad(Math.min(m,1439)%60)}`,fromT=v=>{const [h,m]=(v||'0:0').split(':').map(Number);return h*60+m};
-  $$('#entEdT').textContent=aLabel(a)+(e.p?' · '+e.p:'');$$('.edsub').textContent=[a.catEm&&a.catEm+' '+a.catName,e.d].filter(Boolean).join(' · ');
+  $$('#entEdT').textContent=e.t||aLabel(a);$$('#entEdTi').value=e.t||aLabel(a)+(e.p?' · '+e.p:'');$$('.edsub').textContent=[a.catEm&&a.catEm+' '+a.catName,e.d].filter(Boolean).join(' · ');
   $$('.edcard').style.setProperty('--cc',a.color);$$('#entEdN').value=e.n||'';{const on=catMoney(actById(e.a))||e.amt!=null;$$('#entEdAL').hidden=!on;$$('#entEdAT').textContent=`Amount (${CUR}, optional)`;$$('#entEdA').value=e.amt!=null?(+e.amt).toFixed(2):''}$$('#entEdS').value=t2(e.s);$$('#entEdE').value=e.e>=1440?'23:59':t2(e.e);$$('#entEdErr').textContent='';
   ov.querySelectorAll('.edbtns button').forEach(b=>b.onclick=()=>{const en=$$('#entEdE'),v=Math.max(fromT($$('#entEdS').value)+5,Math.min(1440,fromT(en.value)+(+b.dataset.x)));en.value=v>=1440?'23:59':t2(v)});
+  {const ar=$$('.edarch');ar.classList.toggle('isx',!!e.x);$$('.edarl').textContent=e.x?`Archived as ${XLAB[e.x]}`:"Didn't happen?";ar.querySelectorAll('.archb[data-x]').forEach(b=>{b.hidden=!!e.x;b.onclick=()=>{const before=snapState();e.x=b.dataset.x;saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(q){}undoToast(`${XEM[e.x]} ${aName(a)} moved to ${XLAB[e.x]}`,before)}});
+    const rb=$$('.restb');rb.hidden=!e.x;rb.onclick=()=>{const before=snapState();delete e.x;saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(q){}undoToast(`↩ ${aName(a)} restored to the day`,before)}}
   $$('.eddel').onclick=()=>{const before=snapState(),L=logs[k]||[],i=L.indexOf(e);if(i>=0)L.splice(i,1);if(!L.length)delete logs[k];saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Deleted ${a.name||a.em}`,before)};
   $$('.entsave').onclick=()=>{const s0=fromT($$('#entEdS').value);let e0=$$('#entEdE').value==='23:59'?1440:fromT($$('#entEdE').value);if(e0<=s0){$$('#entEdErr').textContent='End has to be after start.';return}
     const ar=parseAmt($$('#entEdA').value);if(!$$('#entEdAL').hidden&&!ar.ok){$$('#entEdErr').textContent=ar.msg;return}
-    const before=snapState();e.s=s0;e.e=e0;const n=$$('#entEdN').value.trim();if(n)e.n=n;else delete e.n;if(!$$('#entEdAL').hidden){if(ar.v!=null)e.amt=ar.v;else delete e.amt}saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Saved ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)};
+    const before=snapState();e.s=s0;e.e=e0;const n=$$('#entEdN').value.trim();if(n)e.n=n;else delete e.n;{const tv=$$('#entEdTi').value.trim();if(tv&&tv!==aLabel(a))e.t=tv;else delete e.t}if(!$$('#entEdAL').hidden){if(ar.v!=null)e.amt=ar.v;else delete e.amt}saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Saved ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)};
   ov.hidden=false;setTimeout(()=>$$('#entEdN').focus(),30)}
 function toast(msg){const t=mk('div',{className:'toast',textContent:msg});t.setAttribute('role','status');document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 $('editToggle').addEventListener('click',()=>{$('editor').hidden?edOpen():edClose()});

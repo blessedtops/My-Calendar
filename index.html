@@ -911,6 +911,11 @@ html.zcells #rays{visibility:visible}
 #dayView.book .dv-row.cur .dv-track::before{content:'';position:absolute;right:22px;top:-6px;width:11px;height:26px;background:var(--neon);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);filter:drop-shadow(0 0 4px var(--neon));z-index:4;pointer-events:none}
 #dayView.book .dv-bar{z-index:3}
 #dayView.book .dv-h span{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:700}
+/* the now-laser 'prints' the day: solid behind it, ghosted ahead of it */
+.dv-bar.printing{background:linear-gradient(90deg,var(--c) 0 var(--p),color-mix(in srgb,var(--c) 26%,rgba(12,15,30,.55)) var(--p) 100%)!important;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
+.dv-bar.printing,.dv-bar.unprinted{color:#f4f6ff!important;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.dv-bar.unprinted{background:color-mix(in srgb,var(--c) 22%,rgba(12,15,30,.5))!important;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 55%,transparent);border:1px dashed color-mix(in srgb,var(--c) 60%,transparent)}
+.dv-now{z-index:5}.dv-now::after{content:'';position:absolute;left:50%;top:-4px;width:9px;height:9px;border-radius:50%;background:#ff2d55;transform:translateX(-50%);box-shadow:0 0 8px #ff2d55}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1927,7 +1932,7 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
     const OUTS=seg.filter(x=>x.e.e>a1).sort((p,q)=>p.l-q.l),INS=seg.filter(x=>x.e.s<a0).sort((p,q)=>p.l-q.l);
     seg.forEach(x=>{const a=actById(x.e.a),b=document.createElement('div'),cin=x.e.s<a0,cout=x.e.e>a1,pl=cin?0:2,pr=cout?0:2;b.className='dv-bar'+(cin?' cin':'')+(cout?' cout':'');
       b.style.left=`calc(${((x.s-a0)/60*100).toFixed(3)}% + ${pl}px)`;b.style.width=`calc(${((x.t-x.s)/60*100).toFixed(3)}% - ${pl+pr}px)`;
-      b.style.top=(3+x.l*LH)+'px';b.style.height=(LH-4)+'px';b.style.setProperty('--c',a.color);b.style.color=dvInk(a.color);
+      b.style.top=(3+x.l*LH)+'px';b.style.height=(LH-4)+'px';b.style.setProperty('--c',a.color);b.style.color=dvInk(a.color);if(!dayOff){const nm=h*60;if(x.s>=nm)b.classList.add('unprinted');else if(x.t>nm){b.classList.add('printing');b.style.setProperty('--p',((nm-x.s)/(x.t-x.s)*100).toFixed(2)+'%')}}
       const mins=x.t-x.s,first=Math.min(x.e.e,Math.floor(x.e.s/60)*60+60)-x.e.s,labelHere=cin?(first<12&&x.e.s>=a0-60):true;b.innerHTML='<span class="em"></span><span class="tx"><span class="nm"></span><span class="sub"></span></span>';
       b.querySelector('.em').textContent=x.e.t?'':a.em;if(!labelHere){b.classList.add('quiet')}else if(mins>=12){b.querySelector('.nm').textContent=[x.e.t||aName(a),x.e.p].filter(Boolean).join(' · ');b.querySelector('.sub').textContent=[x.e.amt!=null&&SPEND?money(x.e.amt):'',x.e.d,x.e.n||`${mm2t(x.e.s)}–${mm2t(x.e.e)}`].filter(Boolean).join(' · ')}else b.classList.add('tiny');
       if(cout||cin){const mid=3+x.l*LH+(LH-4)/2;if(cout){const k=OUTS.indexOf(x),ww=9+(OUTS.length-1-k)*6,w=document.createElement('div');w.className='dv-wrap out';w.style.top=mid+'px';w.style.width=ww+'px';w.style.right=(-ww-1)+'px';w.style.setProperty('--c',a.color);tr.appendChild(w)}

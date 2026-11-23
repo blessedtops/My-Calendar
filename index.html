@@ -885,6 +885,12 @@ html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
 .pathbox .keeprow{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;padding:10px 12px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--cc,#9f9) 55%,transparent);align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 2px;font:600 14px/1.3 system-ui,sans-serif;cursor:pointer}.pathbox .keeprow .keeptx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.pathbox .keeprow .keephint{font-size:12px}.pathbox .keeprow input{flex:none;margin:0;width:22px;height:22px;accent-color:var(--cc,#9f9)}.keeprow .keephint{color:#8890a8;font-weight:500}
 .edpr{display:flex;gap:8px;align-items:stretch}.edpr>select,.edpr>input{flex:1;min-width:0}
 .edpbtn{flex:none;min-width:46px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:inherit;font:700 15px/1 system-ui,sans-serif;cursor:pointer}
+.banksearch{margin:0 0 14px}.banksearch .bsin{width:100%;box-sizing:border-box}.bsres{display:grid;gap:6px;margin-top:8px}.bsres:empty{display:none}
+.bslab{margin:6px 2px 0;font:700 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#8890a8}
+.bsitem{display:grid;gap:3px;width:100%;text-align:left;padding:10px 12px;border-radius:12px;border:0;border-left:4px solid var(--cc);background:color-mix(in srgb,var(--cc) 12%,rgba(255,255,255,.03));color:inherit;cursor:pointer}
+.bsitem .l1{font:700 15px/1.25 system-ui,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bsitem .l2{font:500 12.5px/1.25 system-ui,sans-serif;color:#9aa3bd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+textarea.addin.notes{display:block;width:100%;box-sizing:border-box;min-height:96px;resize:vertical;line-height:1.4;padding-top:12px;padding-bottom:12px;font-family:inherit;white-space:pre-wrap}
+#entEdDv{display:flex;flex-wrap:wrap;gap:8px}#entEdDv .devchip{min-height:40px;font-size:14px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1792,7 +1798,7 @@ function dayNav(step){dayOff=Math.max(0,Math.min(dayRange,dayOff+step));dayM=-1;
 function saveBlob(blob,name){const file=new File([blob],name,{type:blob.type});
   if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(()=>{});return}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Saved '+name)}
-function wrapText(ctx,t,maxW){const words=String(t).split(/\s+/),out=[];let line='';words.forEach(w=>{const test=line?line+' '+w:w;if(ctx.measureText(test).width>maxW&&line){out.push(line);line=w}else line=test});if(line)out.push(line);return out}
+function wrapText(ctx,t,maxW){if(/\n/.test(String(t)))return String(t).split(/\n/).flatMap(p=>p.trim()?wrapText(ctx,p,maxW):[]);const words=String(t).split(/\s+/),out=[];let line='';words.forEach(w=>{const test=line?line+' '+w:w;if(ctx.measureText(test).width>maxW&&line){out.push(line);line=w}else line=test});if(line)out.push(line);return out}
 function artSvgString(d){openDayArt(d);const ov=document.getElementById('dayArt'),svg=ov.querySelector('svg.artpic');const cl=svg.cloneNode(true),src=[svg,...svg.querySelectorAll('*')],dst=[cl,...cl.querySelectorAll('*')];
   src.forEach((e,i)=>{if(!e.getAttribute||!e.getAttribute('class'))return;const cs=getComputedStyle(e),o=dst[i];['fill','stroke','stroke-width','opacity','fill-opacity','stroke-opacity'].forEach(p=>{const v=cs.getPropertyValue(p);if(v)o.style.setProperty(p,v)})});
   cl.setAttribute('xmlns','http://www.w3.org/2000/svg');cl.setAttribute('width','720');cl.setAttribute('height','720');ov.hidden=true;return new XMLSerializer().serializeToString(cl)}
@@ -2133,6 +2139,7 @@ function addAt(id,ex,s0,e0,kk){const before=snapState();const k=kk||dayKey(new D
   saveLogs();refreshSlice();dayM=-1;try{renderBankNow()}catch(x){}undoToast(`Added ${a.name||a.em}, ${mm2t(s0)}–${mm2t(e0)}`,before)}
 function tryClosePanels(){if(MAN_DRAFT&&MAN_DRAFT.dirty&&!confirm('Exit without saving your changes?'))return false;closePanels();return true}
 function closePanels(){document.documentElement.classList.remove('modal-open');LG.slot=null;if(MAN_DRAFT){const d=MAN_DRAFT;MAN_DRAFT=null;if(d.dirty){cats=JSON.parse(d.c);acts=JSON.parse(d.a)}manBar();const m=_g('actMan');m.hidden=true;m.closest('.lpanel').classList.remove('managing')}_g('logPanel').hidden=true;_g('repPanel').hidden=true}
+const DSEP=' + ';function devParts(v){return v?String(v).split(DSEP).filter(Boolean):[]}
 function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(!acts.some(a=>a.id===LG.sel))LG.sel=acts[0]&&acts[0].id;
   if(!cats.length){g.innerHTML='<p class="edhint">Your bank is empty. Tap Edit categories to add your first category and activities.</p>';return}
@@ -2150,19 +2157,33 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
       L.forEach(e=>{const a=actById(e.a),b=E('button','contbtn');b.type='button';b.style.setProperty('--cc',a.color);b.innerHTML='<span class="go" aria-hidden="true">⏩</span><span class="tx"></span><span class="tm"></span>';
         b.querySelector('.tx').textContent=entLabel(e)+(e.n?' · '+e.n:'');b.querySelector('.tm').textContent=`${mm2t(e.s)}–${mm2t(e.e)} → ${mm2t(bs+30)}`;b.setAttribute('aria-label',`Extend ${a.name} to ${mm2t(bs+30)}`);
         b.addEventListener('click',()=>extendEntry(e));cs.appendChild(b)});g.appendChild(cs)}}
+    /* search everything you've logged + everything in the bank, tap to reuse */
+    {const sw=E('div','banksearch'),si=document.createElement('input');si.type='search';si.className='addin bsin';si.placeholder='🔍 Search past activities, e.g. Claude';si.setAttribute('aria-label','Search past activities and your bank');si.value=LG.q||'';si.autocomplete='off';
+      const res=E('div','bsres');sw.append(si,res);g.appendChild(sw);
+      const pick=(aid,p,n,t,d)=>{const ra=acts.find(x=>x.id===aid);if(!ra)return;if(d){LG.dev[ra.cat]=d}LG.q='';go('add',{tab:ra.cat,pend:{id:aid,p:p||'',n:n||'',...(t?{t}:{})}})};
+      const draw=()=>{const q=si.value.trim().toLowerCase();LG.q=si.value;res.innerHTML='';if(!q)return;const hit=v=>v&&String(v).toLowerCase().includes(q);
+        const seen=new Set(),past=[];Object.keys(logs).sort().reverse().some(k=>{(logs[k]||[]).slice().sort((x,y)=>y.s-x.s).forEach(e=>{if(past.length>=20||e.x||!acts.some(x=>x.id===e.a))return;const A=actById(e.a);
+          if(!(hit(e.p)||hit(e.n)||hit(e.t)||hit(e.d)||hit(A.name)||hit(A.catName)))return;const key=[e.a,e.p,e.d,e.n,e.t].join('|');if(seen.has(key))return;seen.add(key);past.push({e,k})});return past.length>=20});
+        const bank=[];acts.forEach(ra=>{const walk=(lst,pre)=>(lst||[]).forEach(nd=>{if(!nd||!nd.t)return;const pp=pre.concat(nd.t);if(hit(nd.t)&&!past.some(x=>x.e.a===ra.id&&(x.e.p||'')===pp.join(' / ')))bank.push({a:ra,p:pp.join(' / '),d:nd.d});walk(nd.kids,pp)});walk(ra.picks,[]);if(hit(ra.name)&&!past.some(x=>x.e.a===ra.id))bank.push({a:ra,p:''})});
+        const sec=(lab,arr,mk)=>{if(!arr.length)return;res.appendChild(E('p','bslab',lab));arr.slice(0,20).forEach(x=>res.appendChild(mk(x)))};
+        const btn=(color,line1,line2,fn)=>{const b=E('button','bsitem');b.type='button';b.style.setProperty('--cc',color);b.append(E('span','l1',line1),E('span','l2',line2));b.addEventListener('click',fn);return b};
+        sec('Past entries',past,({e,k})=>{const A=actById(e.a);return btn(A.color,entLabel(e),[e.n,k===dayKey(new Date())?'today':k.slice(5).replace('-','/')].filter(Boolean).join(' · '),()=>pick(e.a,e.p,e.n,e.t,e.d))});
+        sec('In your bank',bank,x=>{const A=actById(x.a.id);return btn(A.color,[aLabel(A),x.p].filter(Boolean).join(' · '),[A.catEm,A.catName].filter(Boolean).join(' ')||' ',()=>pick(x.a.id,x.p,x.d||'',null,null))});
+        if(!past.length&&!bank.length)res.appendChild(E('p','edhint',`Nothing matches “${si.value.trim()}” yet.`))};
+      si.addEventListener('input',draw);draw()}
     const grid=E('div','cathome');
     groups.forEach(({c,items})=>{const t=E('button','cattile');t.type='button';t.style.setProperty('--cc',c.color);
       t.innerHTML='<span class="em"></span><span class="nm"></span><span class="ct"></span>';t.querySelector('.em').textContent=c.em||'◆';t.querySelector('.nm').textContent=c.name;t.querySelector('.ct').textContent=`${items.length} ${items.length===1?'activity':'activities'}`;
       t.addEventListener('click',()=>go('cat',{tab:c.id}));grid.appendChild(t)});
     g.appendChild(grid);return}
-  const {c,items}=grp,subs=(c.subs||[]).filter(Boolean);if(subs.length&&!subs.includes(LG.dev[c.id]))LG.dev[c.id]=subs[0];const dev=subs.length?LG.dev[c.id]:'';
+  const {c,items}=grp,subs=(c.subs||[]).filter(Boolean);if(subs.length){const ok=subs.filter(x=>devParts(LG.dev[c.id]).includes(x));LG.dev[c.id]=ok.length?ok.join(DSEP):subs[0]};const dev=subs.length?LG.dev[c.id]:'';
   const head=(title,back,em)=>{const h=E('div','bankhead');h.style.setProperty('--cc',c.color);const b=E('button','bankback','‹ '+back.label);b.type='button';b.addEventListener('click',back.fn);
     const tt=E('div','bankttl');tt.appendChild(E('span','em',em));tt.appendChild(E('span','nm',title));h.append(b,tt);g.appendChild(h)};
   /* ---- category page ---- */
   if(LG.view==='cat'){head(c.name,{label:'Categories',fn:()=>go('home')},c.em);
-    if(subs.length){const dr=E('div','devrow');dr.setAttribute('role','radiogroup');dr.setAttribute('aria-label','Device');
-      subs.forEach(sb=>{const d=E('button','devchip',sb);d.type='button';d.setAttribute('role','radio');d.setAttribute('aria-checked',String(sb===dev));d.style.setProperty('--cc',c.color);
-        d.addEventListener('click',()=>{LG.dev[c.id]=sb;try{localStorage.setItem('bankDev',JSON.stringify(LG.dev))}catch(e){}renderActs()});dr.appendChild(d)});g.appendChild(dr)}
+    if(subs.length){const dr=E('div','devrow');dr.setAttribute('role','group');dr.setAttribute('aria-label','Device — tap more than one if you used several');
+      subs.forEach(sb=>{const d=E('button','devchip',sb);d.type='button';d.setAttribute('role','checkbox');d.setAttribute('aria-checked',String(devParts(dev).includes(sb)));d.style.setProperty('--cc',c.color);
+        d.addEventListener('click',()=>{const cur=devParts(LG.dev[c.id]),nx=cur.includes(sb)?cur.filter(x=>x!==sb):subs.filter(x=>cur.includes(x)||x===sb);LG.dev[c.id]=(nx.length?nx:[sb]).join(DSEP);try{localStorage.setItem('bankDev',JSON.stringify(LG.dev))}catch(e){}renderActs()});dr.appendChild(d)});g.appendChild(dr)}
     const gr=E('div','actgrid');
     if(!items.length)gr.appendChild(E('p','edhint','No activities yet. Add some under Edit categories.'));
     items.forEach(a=>{const b=E('button','actchip');b.type='button';b.style.setProperty('--cc',c.color);
@@ -2211,8 +2232,8 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
     ni.placeholder=`New under ${here}…`;ni.setAttribute('aria-label',`Add a new item under ${here}`);const nb=E('button','pickchip newbtn','+ Add');nb.type='button';nb.style.setProperty('--cc',c.color);
     const addNew=()=>{const v=ni.value.trim();if(!v)return;LG.pend.path=LG.pend.path.concat(v);drawPath();svUpd();const fi=card.querySelector('.addin:not(.newin)');if(fi)fi.focus()};
     nb.addEventListener('click',addNew);ni.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addNew()}});nr.append(ni,nb);pathBox.appendChild(nr)};
-  const lab=E('label','addlab');lab.appendChild(E('span',null,'Details (optional)'));const inp=document.createElement('input');inp.type='text';inp.className='addin';inp.maxLength=200;inp.placeholder='e.g. the video title, who you texted, what you ate';inp.setAttribute('data-focus','');
-  inp.value=LG.pend.n||'';lab.appendChild(inp);card.appendChild(lab);
+  const lab=E('label','addlab');lab.appendChild(E('span',null,'Details (optional)'));const inp=document.createElement('textarea');inp.rows=3;inp.className='addin notes';inp.maxLength=2000;inp.placeholder='e.g. the video title, who you texted, what you ate';inp.setAttribute('data-focus','');
+  inp.value=LG.pend.n||'';setTimeout(()=>growTA(inp),0);lab.appendChild(inp);card.appendChild(lab);
   let amtIn=null,amtErr=null;if(catMoney(a)){const al=E('label','addlab amtlab');al.appendChild(E('span',null,`Amount (${CUR}, optional)`));amtIn=document.createElement('input');amtIn.type='text';amtIn.inputMode='decimal';amtIn.className='addin amtin';amtIn.placeholder='0.00';amtIn.value=LG.pend.amt||'';
     amtIn.addEventListener('input',()=>{LG.pend.amt=amtIn.value;const r=parseAmt(amtIn.value);amtErr.textContent=r.ok?'':r.msg});al.appendChild(amtIn);amtErr=E('span','amterr');amtErr.setAttribute('role','alert');al.appendChild(amtErr);card.appendChild(al)}
   /* everything you've written for this activity before, newest first: search as you type */
@@ -2232,7 +2253,7 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   const doSnap=()=>{if(LG.pend.keep&&LG.pend.path.length){let l0=tree;LG.pend.path.forEach(t=>{let nd=l0.find(x=>x.t===t);if(!nd){nd={t,d:''};l0.push(nd)}nd.kids=nd.kids||[];l0=nd.kids});a.picks=tree;saveActs()}const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};{const tv=tin.value.trim();if(tv&&tv!==aLabel(a))ex.t=tv}if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
     if(svc.checked&&!sv.hidden&&ex.n){const at=nodeAt(p.path);if(at&&!at.lst.some(x=>x.t===ex.n))at.lst.push({t:ex.n,d:''});a.picks=tree;saveActs();ex.p=p.path.concat(ex.n).join(SEP);ex.n=''}
     if(slot){addAt(a.id,ex,slot.s,slot.e,slot.k);closePanels();return}snapAct(a.id,snap,ex)};
-  snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}
+  snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}
 /* extend an entry into the next half-hour block (no new entry) */
 function extendEntry(e){const bs=Math.floor(nowMin()/30)*30,be=bs+30,a=actById(e.a),old=e.e;
   if(e.e>=bs&&e.e<be)e.e=be;else e.e=Math.min(1440,e.e+30);
@@ -2452,10 +2473,12 @@ function undoToast(msg,before){UNDO=before;const t=document.createElement('div')
 function bankUndo(msg,act,beforeT,beforeL,path){const t=document.createElement('div');t.className='toast utoast';t.setAttribute('role','status');const sp=document.createElement('span');sp.textContent=msg;t.appendChild(sp);
   const b=document.createElement('button');b.type='button';b.textContent='Undo';b.addEventListener('click',()=>{act.picks=JSON.parse(beforeT);saveActs();if(beforeL){logs=JSON.parse(beforeL);saveLogs();refreshSlice();dayM=-1}if(LG.pend&&path)LG.pend.path=path.slice();try{renderActs()}catch(e){}t.remove();toast('Undone')});t.appendChild(b);
   document.querySelectorAll('.utoast').forEach(x=>x.remove());document.body.appendChild(t);setTimeout(()=>t.remove(),7000)}
+function growTA(t){if(!t||t.tagName!=='TEXTAREA')return;t.style.height='auto';t.style.height=Math.min(320,t.scrollHeight+2)+'px'}
+document.addEventListener('input',ev=>{if(ev.target&&ev.target.classList&&ev.target.classList.contains('notes'))growTA(ev.target)});
 function openEntryEditor(e,k){let ov=document.getElementById('entEd');if(!ov){ov=document.createElement('div');ov.id='entEd';ov.className='artov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','entEdT');
     ov.innerHTML='<div class="artcard edcard"><div class="arthead"><h2 id="entEdT"></h2><button type="button" class="artx" aria-label="Close">×</button></div><p class="edsub"></p>'+
-    '<div class="edwhere"><label class="addlab"><span>Activity</span><select id="entEdAct" class="addin"></select></label><label class="addlab" id="entEdDvL"><span>Device</span><select id="entEdDv" class="addin"></select></label><div id="entEdPath" class="edpath"></div></div>'+
-    '<label class="addlab"><span>Title</span><input type="text" class="addin" id="entEdTi" maxlength="80"></label><label class="addlab"><span>Details</span><input type="text" class="addin" id="entEdN" maxlength="200"></label>'+
+    '<div class="edwhere"><label class="addlab"><span>Category</span><select id="entEdCat" class="addin"></select></label><div class="addlab" id="entEdDvL"><span>Device · tap more than one if you used several</span><div id="entEdDv" class="devrow edv" role="group" aria-label="Devices"></div></div><label class="addlab"><span>Activity</span><select id="entEdAct" class="addin"></select></label><div id="entEdPath" class="edpath"></div></div>'+
+    '<label class="addlab"><span>Title</span><input type="text" class="addin" id="entEdTi" maxlength="80"></label><label class="addlab"><span>Details</span><textarea class="addin notes" id="entEdN" maxlength="2000" rows="3" placeholder="Notes…"></textarea></label>'+
     '<div class="edtimes"><label class="addlab"><span>From</span><input type="time" id="entEdS" step="300"></label><label class="addlab"><span>To</span><input type="time" id="entEdE" step="300"></label></div>'+
     '<div class="edbtns"><button type="button" class="pickchip" data-x="-30">−30m</button><button type="button" class="pickchip" data-x="30">+30m</button><button type="button" class="pickchip" data-x="60">+1h</button></div>'+
     '<label class="addlab" id="entEdAL"><span id="entEdAT">Amount</span><input type="text" inputmode="decimal" class="addin" id="entEdA" placeholder="0.00"></label><p class="lperr" id="entEdErr" role="alert"></p><div class="edarch"><span class="edarl">Didn&rsquo;t happen?</span><button type="button" class="archb" data-x="missed">⏭ Missed</button><button type="button" class="archb" data-x="cancelled">✕ Cancelled</button><button type="button" class="archb restb" hidden>↩ Restore to day</button></div><div class="edfoot"><button type="button" class="eddel">Delete</button><button type="button" class="edcopy">⧉ Copy</button><button type="button" class="snapbtn entsave">Save</button></div></div>';
@@ -2463,15 +2486,16 @@ function openEntryEditor(e,k){let ov=document.getElementById('entEd');if(!ov){ov
     document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!ov.hidden){ev.stopPropagation();ov.hidden=true}},true)}
   const a=actById(e.a),$$=s=>ov.querySelector(s),t2=m=>`${pad(Math.floor(Math.min(m,1439)/60))}:${pad(Math.min(m,1439)%60)}`,fromT=v=>{const [h,m]=(v||'0:0').split(':').map(Number);return h*60+m};
   $$('#entEdT').textContent=e.t||aLabel(a);$$('#entEdTi').value=e.t||aLabel(a);$$('.edsub').textContent=[a.catEm&&a.catEm+' '+a.catName,e.d].filter(Boolean).join(' · ');
-  $$('.edcard').style.setProperty('--cc',a.color);$$('#entEdN').value=e.n||'';{const on=catMoney(actById(e.a))||e.amt!=null;$$('#entEdAL').hidden=!on;$$('#entEdAT').textContent=`Amount (${CUR}, optional)`;$$('#entEdA').value=e.amt!=null?(+e.amt).toFixed(2):''}$$('#entEdS').value=t2(e.s);$$('#entEdE').value=e.e>=1440?'23:59':t2(e.e);$$('#entEdErr').textContent='';
+  $$('.edcard').style.setProperty('--cc',a.color);$$('#entEdN').value=e.n||'';setTimeout(()=>growTA($$('#entEdN')),0);{const on=catMoney(actById(e.a))||e.amt!=null;$$('#entEdAL').hidden=!on;$$('#entEdAT').textContent=`Amount (${CUR}, optional)`;$$('#entEdA').value=e.amt!=null?(+e.amt).toFixed(2):''}$$('#entEdS').value=t2(e.s);$$('#entEdE').value=e.e>=1440?'23:59':t2(e.e);$$('#entEdErr').textContent='';
   /* where it belongs: category › activity › sub-activities, device — picked from the bank like on the add page */
   let selA=e.a,path=e.p?e.p.split(' / '):[],dev=e.d||'',typing=-1;const rawA=id=>acts.find(x=>x.id===id);
-  {const asel=$$('#entEdAct');asel.innerHTML='';cats.forEach(c=>{const og=document.createElement('optgroup');og.label=[c.em,c.name].filter(Boolean).join(' ')||'Untitled';acts.filter(x=>x.cat===c.id).forEach(x=>og.appendChild(new Option(aLabel(actById(x.id)),x.id)));if(og.children.length)asel.appendChild(og)});
-    if(!rawA(e.a))asel.prepend(new Option(aLabel(a),e.a));asel.value=selA}
-  const drawWhere=()=>{const A=actById(selA),ra=rawA(selA),c=(ra&&catById(ra.cat))||{},subs=(c.subs||[]).filter(Boolean),ds=$$('#entEdDv');
-    ds.innerHTML='';ds.appendChild(new Option('—',''));subs.forEach(x=>ds.appendChild(new Option(x,x)));if(dev&&!subs.includes(dev))ds.appendChild(new Option(dev,dev));ds.value=dev;$$('#entEdDvL').hidden=!subs.length&&!dev;
+  let curCat=(rawA(e.a)||{}).cat||'_';
+  {const cs=$$('#entEdCat');cs.innerHTML='';cats.forEach(c=>{if(acts.some(x=>x.cat===c.id))cs.appendChild(new Option([c.em,c.name].filter(Boolean).join(' ')||'Untitled',c.id))});if(![...cs.options].some(o=>o.value===curCat))cs.prepend(new Option(a.catEm?a.catEm+' '+(a.catName||''):'Other',curCat));cs.value=curCat}
+  const fillActs=()=>{const asel=$$('#entEdAct');asel.innerHTML='';acts.filter(x=>x.cat===curCat).forEach(x=>asel.appendChild(new Option(aLabel(actById(x.id)),x.id)));if(![...asel.options].some(o=>o.value===selA))asel.prepend(new Option(aLabel(actById(selA)),selA));asel.value=selA};
+  const drawWhere=()=>{fillActs();const A=actById(selA),ra=rawA(selA),c=(ra&&catById(ra.cat))||{},subs=(c.subs||[]).filter(Boolean),ds=$$('#entEdDv');
+    ds.innerHTML='';{const dp=devParts(dev),all=subs.concat(dp.filter(x=>!subs.includes(x)));all.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='devchip';b.textContent=x;b.setAttribute('role','checkbox');b.setAttribute('aria-checked',String(dp.includes(x)));b.style.setProperty('--cc',A.color);b.onclick=()=>{const cur=devParts(dev);const nx=cur.includes(x)?cur.filter(y=>y!==x):all.filter(y=>cur.includes(y)||y===x);dev=nx.join(DSEP);drawWhere()};ds.appendChild(b)})}$$('#entEdDvL').hidden=!subs.length&&!dev;
     const pw=$$('#entEdPath');pw.innerHTML='';let lst=ra?pickList(ra):[];
-    for(let i=0;i<=path.length;i++){const opts=(lst||[]).map(x=>x.t);if(i<path.length&&!opts.includes(path[i]))opts.push(path[i]);if(!opts.length&&typing!==i&&i>0&&i===path.length)break;
+    for(let i=0;i<=path.length;i++){const opts=(lst||[]).map(x=>x.t);if(i<path.length&&!opts.includes(path[i]))opts.push(path[i]);
       const lb=document.createElement('label');lb.className='addlab';const sp=document.createElement('span');sp.textContent=i?'Under '+path[i-1]:'Sub-activity';const sl=document.createElement('select');sl.className='addin';
       sl.appendChild(new Option(i?'— stop here —':'— none —',''));opts.forEach(t=>sl.appendChild(new Option(t,t)));sl.appendChild(new Option('✎ Type your own…','\u0000'));sl.value=path[i]||'';const ii=i;
       sl.onchange=()=>{if(sl.value==='\u0000'){typing=ii;path=path.slice(0,ii);drawWhere();return}path=path.slice(0,ii);if(sl.value)path.push(sl.value);drawWhere()};
@@ -2483,8 +2507,9 @@ function openEntryEditor(e,k){let ov=document.getElementById('entEd');if(!ov){ov
       if(i>=path.length)break;const nd=(lst||[]).find(x=>x.t===path[i]);lst=nd&&nd.kids||[]}
     $$('.edcard').style.setProperty('--cc',A.color);$$('#entEdT').textContent=$$('#entEdTi').value.trim()||aLabel(A);$$('.edsub').textContent=[A.catEm&&A.catEm+' '+A.catName,dev].filter(Boolean).join(' · ');
     {const on=catMoney(ra||A)||e.amt!=null;$$('#entEdAL').hidden=!on}};
+  $$('#entEdCat').onchange=ev=>{const old=aLabel(actById(selA)),ti=$$('#entEdTi');curCat=ev.target.value;const first=acts.find(x=>x.cat===curCat);if(first)selA=first.id;path=[];const cc=catById(curCat)||{},sb=(cc.subs||[]).filter(Boolean);{const keep=devParts(dev).filter(x=>sb.includes(x));dev=keep.length?keep.join(DSEP):(sb.length?((LG.dev&&devParts(LG.dev[curCat]).length&&devParts(LG.dev[curCat]).every(x=>sb.includes(x)))?LG.dev[curCat]:sb[0]):'')}if(!ti.value.trim()||ti.value.trim()===old)ti.value=aLabel(actById(selA));drawWhere()};
   $$('#entEdAct').onchange=ev=>{const old=aLabel(actById(selA)),ti=$$('#entEdTi');selA=ev.target.value;path=[];if(!ti.value.trim()||ti.value.trim()===old)ti.value=aLabel(actById(selA));drawWhere()};
-  $$('#entEdDv').onchange=ev=>{dev=ev.target.value;drawWhere()};drawWhere();
+drawWhere();
   ov.querySelectorAll('.edbtns button').forEach(b=>b.onclick=()=>{const en=$$('#entEdE'),v=Math.max(fromT($$('#entEdS').value)+5,Math.min(1440,fromT(en.value)+(+b.dataset.x)));en.value=v>=1440?'23:59':t2(v)});
   {const ar=$$('.edarch');ar.classList.toggle('isx',!!e.x);$$('.edarl').textContent=e.x?`Archived as ${XLAB[e.x]}`:"Didn't happen?";ar.querySelectorAll('.archb[data-x]').forEach(b=>{b.hidden=!!e.x;b.onclick=()=>{const before=snapState();e.x=b.dataset.x;saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(q){}undoToast(`${XEM[e.x]} ${aName(a)} moved to ${XLAB[e.x]}`,before)}});
     const rb=$$('.restb');rb.hidden=!e.x;rb.onclick=()=>{const before=snapState();delete e.x;saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(q){}undoToast(`↩ ${aName(a)} restored to the day`,before)}}

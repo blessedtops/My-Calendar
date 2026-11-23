@@ -895,13 +895,29 @@ textarea.addin.notes{display:block;width:100%;box-sizing:border-box;min-height:9
 .daysrch{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;width:min(520px,calc(100% - 20px));max-height:calc(100dvh - 40px - env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:16px;background:rgba(14,18,36,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 34px rgba(0,0,0,.55);color:#eef1fb;box-sizing:border-box}
 .daysrch .dsh{display:flex;gap:8px}.daysrch .dsh .addin{flex:1;min-width:0}.daysrch .dsx{flex:none;width:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit;font-size:22px;cursor:pointer}
 .daysrch .dsres{overflow-y:auto;overscroll-behavior:contain;margin:0}.dv-srch{font-size:15px}
+.cells24 .c24num{font-weight:600}.cells24 .c24num.c24maj{font-weight:800}.cells24 .c24num.c24cur{fill:#fff;font-size:13px;filter:drop-shadow(0 0 4px rgba(255,210,120,.95))}
+.vmmenu .vmsub{display:flex;gap:6px;padding:2px 10px 8px 12px}.vmmenu .vmsub button{flex:1;flex-direction:row;align-items:center;justify-content:center;min-height:34px;padding:4px 10px;font-size:12.5px;border:1px solid rgba(255,255,255,.16);border-radius:999px}
+.vmmenu .vmsub button[aria-pressed="true"]{background:color-mix(in srgb,var(--glow) 45%,transparent);border-color:transparent}.zoomcrumb .zstyle{padding:6px 9px;font-size:15px}.zoomcrumb .zstyle[hidden]{display:none}
+html.zcells #rays{visibility:visible}
+.sechr-cur.c24hn{font-size:15px;stroke-width:1.1px}
+.c24num.c24blk{fill:#fff3d6;font-weight:800;filter:drop-shadow(0 0 3px rgba(255,205,70,.95)) drop-shadow(0 0 8px rgba(255,180,40,.55))}
+.c24num.past{fill-opacity:.4}
+/* Day as a book: every hour is a page, folded at :30 */
+#dayView.book .dv-row{margin-bottom:7px}
+#dayView.book .dv-track{border-radius:3px 10px 10px 3px;border:1px solid rgba(255,226,180,.17);border-left:3px solid var(--hc);background-image:linear-gradient(90deg,rgba(255,236,205,.045) 0%,rgba(255,236,205,.1) 44%,rgba(0,0,0,.4) 49.5%,rgba(255,246,228,.26) 50%,rgba(0,0,0,.32) 50.5%,rgba(255,236,205,.1) 56%,rgba(255,236,205,.045) 100%);box-shadow:1px 3px 0 -1px rgba(255,235,205,.15),2px 6px 0 -2px rgba(255,235,205,.09),0 9px 16px rgba(0,0,0,.38)}
+#dayView.book .dv-track::after{content:'';position:absolute;right:-1px;bottom:-1px;width:15px;height:15px;border-top-left-radius:7px;background:linear-gradient(315deg,rgba(10,12,24,.9) 48%,rgba(255,240,215,.38) 52%,rgba(255,240,215,.12) 100%);pointer-events:none;z-index:2}
+#dayView.book .dv-row.past .dv-track{background-color:rgba(120,110,95,.12);border-color:rgba(255,226,180,.08);border-left-color:rgba(140,145,160,.5)}
+#dayView.book .dv-row.cur .dv-track{border-color:color-mix(in srgb,var(--neon) 55%,transparent);border-left-color:var(--hc);box-shadow:1px 3px 0 -1px rgba(255,235,205,.15),2px 6px 0 -2px rgba(255,235,205,.09),0 0 12px color-mix(in srgb,var(--neon) 35%,transparent)}
+#dayView.book .dv-row.cur .dv-track::before{content:'';position:absolute;right:22px;top:-6px;width:11px;height:26px;background:var(--neon);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);filter:drop-shadow(0 0 4px var(--neon));z-index:4;pointer-events:none}
+#dayView.book .dv-bar{z-index:3}
+#dayView.book .dv-h span{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:700}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
 
 
-<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button><span class="zsep" aria-hidden="true"></span><button type="button" data-z="3">Day</button></nav>
+<nav class="zoomcrumb" id="zoomCrumb" aria-label="Zoom level" hidden><button type="button" data-z="0">24 h</button><button type="button" data-z="0s" class="zstyle" aria-label="Switch 24 h style">⇄</button><span aria-hidden="true">›</span><button type="button" data-z="1">3 h</button><span aria-hidden="true">›</span><button type="button" data-z="2">1 h</button><span class="zsep" aria-hidden="true"></span><button type="button" data-z="3">Day</button></nav>
 <section class="dayview" id="dayView" aria-label="Today's activities by hour" hidden></section>
 <div class="focusmoon" id="focusMoon" hidden><svg viewBox="0 0 200 200" role="img" aria-label="This month"></svg></div>
 <div class="logbar" id="logBar">
@@ -1007,7 +1023,7 @@ textarea.addin.notes{display:block;width:100%;box-sizing:border-box;min-height:9
       
     </div>
     <div class="side">
-      <div class="vmrow"><div class="quickzoom vmode"><button type="button" class="vmbtn" id="vmBtn" aria-haspopup="true" aria-expanded="false" aria-controls="vmMenu"><span aria-hidden="true">◐</span> View Mode <b id="vmCur" hidden></b> <span class="car" aria-hidden="true">▾</span></button><div class="vmmenu" id="vmMenu" role="menu" hidden><button type="button" role="menuitemradio" data-qz="0" aria-pressed="true"><span>24 h</span><small>Whole day</small></button><button type="button" role="menuitemradio" data-qz="1" aria-pressed="false"><span>3 h</span><small>Current 3-hour block</small></button><button type="button" role="menuitemradio" data-qz="2" aria-pressed="false"><span>1 h</span><small>Current hour</small></button></div></div><button type="button" class="vmbtn daybtn" data-qz="3"><span aria-hidden="true">▤</span> Day</button><button type="button" class="vmbtn fsbtn" data-qz="fs" aria-label="Full screen" title="Full screen">⤢</button></div>
+      <div class="vmrow"><div class="quickzoom vmode"><button type="button" class="vmbtn" id="vmBtn" aria-haspopup="true" aria-expanded="false" aria-controls="vmMenu"><span aria-hidden="true">◐</span> View Mode <b id="vmCur" hidden></b> <span class="car" aria-hidden="true">▾</span></button><div class="vmmenu" id="vmMenu" role="menu" hidden><button type="button" role="menuitemradio" data-qz="0" aria-pressed="true"><span>24 h</span><small>Whole day</small></button><div class="vmsub" role="group" aria-label="24 h style"><button type="button" data-f24="rays" aria-pressed="true">☀ Rays</button><button type="button" data-f24="cells" aria-pressed="false">▦ Cells</button></div><button type="button" role="menuitemradio" data-qz="1" aria-pressed="false"><span>3 h</span><small>Current 3-hour block</small></button><button type="button" role="menuitemradio" data-qz="2" aria-pressed="false"><span>1 h</span><small>Current hour</small></button></div></div><button type="button" class="vmbtn daybtn" data-qz="3"><span aria-hidden="true">▤</span> Day</button><button type="button" class="vmbtn fsbtn" data-qz="fs" aria-label="Full screen" title="Full screen">⤢</button></div>
       <section class="earthcard" aria-label="Earth's rotation toward the sun, live">
         <svg id="earth" viewBox="0 0 240 150" role="img" aria-label="Earth orbiting the sun and spinning, seen from south of the solar system so both turn clockwise">
           <defs>
@@ -1779,6 +1795,10 @@ var dayM=-1;
 function dvInk(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return '#fff';const n=parseInt(m[1],16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>150?'#141824':'#fff'}
 /* ---------- Day history + downloadable day report (JPG / PDF) ---------- */
 var dayOff=0,dayRange=3650,calMonth=null;
+var DAYBOOK=(()=>{try{return localStorage.getItem('dayStyle')!=='list'}catch(e){return true}})();
+function setDayBook(on){DAYBOOK=!!on;try{localStorage.setItem('dayStyle',DAYBOOK?'book':'list')}catch(e){}try{SYNC.soon()}catch(e){}const dv=document.getElementById('dayView');if(dv)dv.classList.toggle('book',DAYBOOK);dayM=-1;const n=new Date();if(zoomLevel===3)dayTick(n,n.getHours()+n.getMinutes()/60+n.getSeconds()/3600)}
+window.addEventListener('astro:settings',()=>{let v=true;try{v=localStorage.getItem('dayStyle')!=='list'}catch(e){}if(v!==DAYBOOK)setDayBook(v)});
+document.addEventListener('DOMContentLoaded',()=>{const dv=document.getElementById('dayView');if(dv)dv.classList.toggle('book',DAYBOOK)});
 function openDaySearch(){const E=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n};let pop=document.getElementById('daySrch');if(pop){pop.remove();return}
   pop=document.createElement('div');pop.id='daySrch';pop.className='daysrch';pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Search your days');
   const hd=document.createElement('div');hd.className='dsh';const si=document.createElement('input');si.type='search';si.className='addin';si.placeholder='Search everything you\u2019ve logged';si.autocomplete='off';si.value=window._dsQ||'';
@@ -1872,11 +1892,11 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
   const hc=k=>(k===6||k===18)?'#ff8a45':(k>18||k<6)?'#aebdf0':'#ffb52e',keep=dv.scrollTop;dv.innerHTML='';
   /* ---- day ribbon: the whole day at a glance ---- */
   {const box=document.createElement('div');box.className='dv-ribbon';
-    const top=document.createElement('div');top.className='dv-rtop';top.innerHTML='<div class="dv-nav"><button type="button" class="dv-navb" data-n="1" aria-label="Previous day">‹</button><button type="button" class="dv-rtt" aria-haspopup="dialog"></button><button type="button" class="dv-navb" data-n="-1" aria-label="Next day">›</button><button type="button" class="dv-navb dv-srch" aria-label="Search your days">🔍</button></div><div class="dv-acts"><button type="button" class="dv-artbtn">✨ Day art</button><button type="button" class="dv-artbtn dv-dl" aria-expanded="false">⬇ Save</button><div class="dv-dlm" hidden><button type="button" data-f="jpg">Image (JPG)</button><button type="button" data-f="pdf">PDF</button></div></div>';
+    const top=document.createElement('div');top.className='dv-rtop';top.innerHTML='<div class="dv-nav"><button type="button" class="dv-navb" data-n="1" aria-label="Previous day">‹</button><button type="button" class="dv-rtt" aria-haspopup="dialog"></button><button type="button" class="dv-navb" data-n="-1" aria-label="Next day">›</button><button type="button" class="dv-navb dv-srch" aria-label="Search your days">🔍</button></div><div class="dv-acts"><button type="button" class="dv-artbtn dv-bookbtn" aria-pressed="false">📖 Book</button><button type="button" class="dv-artbtn">✨ Day art</button><button type="button" class="dv-artbtn dv-dl" aria-expanded="false">⬇ Save</button><div class="dv-dlm" hidden><button type="button" data-f="jpg">Image (JPG)</button><button type="button" data-f="pdf">PDF</button></div></div>';
     top.querySelector('.dv-rtt').textContent=dayOff===0?'Today':dayOff===1?'Yesterday':now.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
     if(SPEND){const tot=L.reduce((t,e)=>t+(+e.amt||0),0);if(tot>0){const sp=document.createElement('span');sp.className='dv-spent';sp.textContent=`${money(tot)} spent`;top.querySelector('.dv-nav').after(sp)}}
     top.querySelectorAll('.dv-navb[data-n]').forEach(b=>{const n=+b.dataset.n;b.disabled=n>0?dayOff>=dayRange:dayOff<=0;b.addEventListener('click',()=>dayNav(n))});
-    top.querySelector('.dv-srch').addEventListener('click',()=>openDaySearch());top.querySelector('.dv-artbtn').addEventListener('click',()=>openDayArt(now));{const rt=top.querySelector('.dv-rtt');rt.textContent+=' ▾';rt.setAttribute('aria-label','Pick a day: '+rt.textContent);rt.addEventListener('click',()=>{calMonth=null;openDayCal(rt)})}
+    top.querySelector('.dv-srch').addEventListener('click',()=>openDaySearch());{const bb=top.querySelector('.dv-bookbtn');bb.setAttribute('aria-pressed',String(DAYBOOK));bb.textContent=DAYBOOK?'☰ List':'📖 Book';bb.setAttribute('aria-label',DAYBOOK?'Switch Day view to list':'Switch Day view to book pages');bb.addEventListener('click',()=>setDayBook(!DAYBOOK))}top.querySelector('.dv-artbtn:not(.dv-bookbtn)').addEventListener('click',()=>openDayArt(now));{const rt=top.querySelector('.dv-rtt');rt.textContent+=' ▾';rt.setAttribute('aria-label','Pick a day: '+rt.textContent);rt.addEventListener('click',()=>{calMonth=null;openDayCal(rt)})}
     {const dl=top.querySelector('.dv-dl'),dm=top.querySelector('.dv-dlm');dl.addEventListener('click',()=>{dm.hidden=!dm.hidden;dl.setAttribute('aria-expanded',String(!dm.hidden))});dm.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{dm.hidden=true;downloadDay(b.dataset.f)}))}box.appendChild(top);
     const rb=document.createElement('div');rb.className='dv-rbar';rb.setAttribute('role','img');
     const segs=L.map(x=>Object.assign({},x)).sort((x,y)=>x.s-y.s||y.e-x.e),ln=[];segs.forEach(x=>{let i=ln.findIndex(end=>end<=x.s);if(i<0){i=ln.length;ln.push(0)}ln[i]=x.e;x._l=i});const nl=Math.min(3,Math.max(1,ln.length));
@@ -1961,10 +1981,11 @@ function openDayArt(now){let ov=document.getElementById('dayArt');if(!ov){ov=doc
   ov.querySelector('.artfoot').textContent=all?`${dateStr(now).split('  ')[0]} · midnight at the top like your clock · each petal sits at the time it happened · outer petals are things done at the same time`:'Nothing logged yet today. Snap activities in the Activity Bank and your bloom grows here.';
   ov.querySelector('.artx').focus()}
 function zoomTick(now,h){
+  document.documentElement.classList.toggle('zcells',cellsFace(zoomLevel));
   if(zoomLevel===3){dayTick(now,h);return}
-  if(!(zoomLevel>0)||!zsvg)return;
+  if(!(zoomLevel>0||cellsFace(zoomLevel))||!zsvg)return;
   const Z=zWin(zoomLevel,h);
-  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -92 448 556':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
+  if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -92 448 556':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):cellsFace(Z.level)?drawCells24(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
     if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
       P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.ringUpd)P.ringUpd(h);
@@ -1989,23 +2010,67 @@ function zoomTick(now,h){
 }
 function drawFocusMoon(){const fm=document.getElementById('focusMoon');if(!fm)return;const now=new Date();fm.dataset.d=now.toDateString();
   buildHub(fm.querySelector('svg'),now,0,0,monday(now))}
-function updateZoomUI(){{const vc=document.getElementById('vmCur');if(vc&&zoomLevel<3)vc.textContent=['24 h','3 h','1 h'][zoomLevel]}document.querySelectorAll('.quickzoom [aria-pressed]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.qz===zoomLevel)));
-  document.querySelectorAll('#zoomCrumb button').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.z===zoomLevel)));
+function updateZoomUI(){{const vc=document.getElementById('vmCur');if(vc&&zoomLevel<3)vc.textContent=['24 h','3 h','1 h'][zoomLevel]}document.querySelectorAll('.quickzoom [aria-pressed]').forEach(b=>{b.setAttribute('aria-pressed',String(+b.dataset.qz===zoomLevel))});document.querySelectorAll('.vmmenu [data-f24]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f24===FACE24)));{const zs=document.querySelector('#zoomCrumb .zstyle');if(zs){zs.hidden=zoomLevel!==0;zs.textContent=FACE24==='cells'?'☀':'▦';zs.setAttribute('aria-label',FACE24==='cells'?'Switch 24 h to rays':'Switch 24 h to cells')}}
+  document.querySelectorAll('#zoomCrumb button[data-z]:not(.zstyle)').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.z===zoomLevel)));
   const ex=document.getElementById('exitFocus'),lab=zoomLevel>0?'Zoom out':'Exit full clock';ex.setAttribute('aria-label',lab);ex.title=lab;
   {const lb=document.getElementById('logBar');if(lb)lb.hidden=false}
   const k=document.querySelector('#focusLeft .dl-k');if(k)k.textContent=['Hours of day left','Left in these 3 hours','Left this hour','Hours of day left'][zoomLevel];
 }
+/* 24 h "cells" face: the 3 h design stretched round the whole day — 24 hour columns x 6 ten-minute rows, draining from the rim inward */
+var FACE24=(()=>{try{return localStorage.getItem('face24')==='cells'?'cells':'rays'}catch(e){return 'rays'}})();
+const cellsFace=lv=>lv===0&&FACE24==='cells';
+function drawCells24(svg,Z,sched){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const CX=C,CYY=CY,RI=100,RO=158,band=(RO-RI)/6;
+  const deg=t=>t/24*360-90,rad=d=>d*Math.PI/180,P=(r,d)=>[CX+r*Math.cos(rad(d)),CYY+r*Math.sin(rad(d))],f=q=>q[0].toFixed(2)+' '+q[1].toFixed(2);
+  const ann=(r1,r2,d1,d2)=>`M${f(P(r2,d1))}A${r2} ${r2} 0 0 1 ${f(P(r2,d2))}L${f(P(r1,d2))}A${r1} ${r1} 0 0 0 ${f(P(r1,d1))}Z`;
+  const G=el('g',{class:'slice cells24'},svg);
+  el('circle',{cx:CX,cy:CYY,r:RO+3,fill:'#0b0f1a','fill-opacity':.35},G);
+  el('circle',{cx:CX,cy:CYY,r:RI-3,fill:'#0b0f1a','fill-opacity':.35,stroke:'var(--tick-soft)','stroke-opacity':.4,'stroke-width':.6},G);
+  const geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.55,d1=deg(k)+g,d2=deg(k+1)-g,r1=RI+r*band+.9,r2=RI+(r+1)*band-.9;return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
+  const colors=[],cells=[];
+  for(let i=0;i<144;i++){const t=Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(b&&b.color||FREE_COLOR);cells.push(el('path',{d:geo(i),fill:colors[i]},G))}
+  const logOv=el('g',{class:'logov'},G),prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
+  {const rh=RI+3*band;el('circle',{cx:CX,cy:CYY,r:rh,fill:'none',class:'halfmark'},G)}
+  const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
+  const hnum=el('text',{class:'sechr-cur c24hn','text-anchor':'middle','dominant-baseline':'central'},G),curHr=i=>{const k=Math.floor(i/6),q=P(RO+12,deg(k+.5));hnum.setAttribute('x',q[0]);hnum.setAttribute('y',q[1]);hnum.textContent=hLab(k)};
+  /* hour numbers round the outside, 3-hour ones brighter, sky icons at 0/6/12/18 */
+  const R=90,TL=el('g',{class:'c24ticks'},svg),majL=[];
+  const nums=[],sky=[];for(let k=0;k<24;k++){const m3=k%3===0,[x1,y1]=P(m3?R-11:RO+1,deg(k)),[x2,y2]=P(RO+(m3?8:4),deg(k));const tl=el('line',{x1,y1,x2,y2,stroke:m3?'var(--tick)':'var(--tick-soft)','stroke-width':m3?1.5:.8,'stroke-linecap':'round'},m3?TL:G);if(m3)majL.push([k===0?24:k,tl]);
+    if(m3){const [tx,ty]=P(172,deg(k));const t=el('text',{x:tx,y:ty+5,'text-anchor':'middle','font-size':14,fill:'var(--fg)','font-family':'Manrope,sans-serif',class:'c24num'},G);t.textContent=hLab(k);nums[k]=t}
+    if(k%6===0){const [ix,iy]=P(192,deg(k));sky[k]=skyIcon(G,k,ix,iy,15,'onrim')}}
+  /* centre indicator, same as 3 h: the 24 ray-coloured hour segments, current hour in neon, past hours gone */
+  const S=el('g',{class:'srcring','aria-hidden':'true'},svg);el('circle',{cx:CX,cy:CYY,r:R,fill:'#0b0f1a','fill-opacity':.3},S);el('circle',{cx:CX,cy:CYY,r:R-11,fill:'none',stroke:'var(--tick-soft)','stroke-width':.6,'stroke-opacity':.4},S);
+  const rayCol=k=>(k===6||k===18)?'#ff8a45':(k>18||k<6)?'#aebdf0':'#ffb52e',segD=(k,w)=>chevD(P,R-4,w,deg(k)+.35,deg(k+1)-.35),segs=[];for(let k=0;k<24;k++)segs.push(el('path',{d:segD(k,4.5),fill:rayCol(k),'fill-opacity':.85},S));
+  const curCore=el('path',{class:'ringneon-core rn-soft'},S),dimC=el('path',{class:'ringdim'},S);
+  const segUpd=h=>{const hn=Math.floor(h),b0=Math.floor(h/3)*3;segs.forEach((e,k)=>{const cur=k===hn,inB=k>=b0&&k<b0+3;e.style.display=k<hn?'none':'';e.setAttribute('d',segD(k,cur?8:inB?7.5:4.5));e.setAttribute('fill-opacity',inB?'1':'.85');e.classList.toggle('srccur',inB&&!cur);e.classList.toggle('ringneon-tube',cur);e.classList.toggle('rn-soft',cur);if(cur){curCore.setAttribute('d',segD(k,2.6));S.appendChild(e);S.appendChild(curCore);S.appendChild(dimC)}})};
+  const ringUpd=h=>{segUpd(h);const hn=Math.floor(h),b0=Math.floor(h/3)*3;nums.forEach((t,k)=>{if(!t)return;t.style.display=k===hn?'none':'';t.classList.toggle('c24blk',k===b0||k===(b0+3)%24);t.classList.toggle('past',k>0&&k<=hn&&k!==b0)});majL.forEach(([k,l])=>l.classList.toggle('tickglow',k>h));sky.forEach((e,k)=>e&&e.classList.toggle('past',k>0&&k+1<=hn))};
+  /* neon time + date in the middle */
+  const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;
+  const mk=(x,anchor)=>[el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-tube',filter:'url(#neonGlow)'},T),el('text',{x,y:ty,'text-anchor':anchor,'dominant-baseline':'central',class:'neon-core'},T)];
+  const a=mk(CX-9,'end'),b=mk(CX+9,'start');b.forEach(x=>x.classList.add('neon-min'));a.forEach(x=>x.classList.add('neon-hr3'));
+  el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
+  el('text',{class:'tdate tday',x:CX,y:CYY+38,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=dateStr(new Date());
+  const ndB=miniNeedle(el('g',{'aria-hidden':'true'},svg),(r,t)=>P(r,deg(t)),R-9,R+1,0),needle=t=>ndB(t),dimUpd=t=>{const hr=Math.floor(t);dimC.setAttribute('d',t-hr<.02?'':usedD(P,R-4,8.2,deg(hr)+.35,deg(t)))};
+  svg.setAttribute('aria-label','24 hour cells: each hour is a column of six 10-minute cells that empty from the outside in');
+  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:144,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+}
+function setFace24(v){FACE24=v==='cells'?'cells':'rays';try{localStorage.setItem('face24',FACE24)}catch(e){}try{SYNC.soon()}catch(e){}
+  if(zoomLevel===0){const cl=cellsFace(0),root=document.documentElement;bigSvg.toggleAttribute('hidden',cl);zsvg.toggleAttribute('hidden',!cl);root.classList.remove('z1h');zparts=null;if(cl){const n=new Date();zoomTick(n,n.getHours()+n.getMinutes()/60+n.getSeconds()/3600)}else buildRaysFor({w0:0,span:24,level:0})}
+  updateZoomUI()}
+window.addEventListener('astro:settings',()=>{let v='rays';try{v=localStorage.getItem('face24')==='cells'?'cells':'rays'}catch(e){}if(v!==FACE24)setFace24(v)});
+window.addEventListener('load',()=>{if(FACE24==='cells')setTimeout(()=>setFace24('cells'),50)});
 function setZoom(lv,instant){
   lv=Math.max(0,Math.min(3,lv));if(lv===zoomLevel||!zsvg)return;
   if(lv===3||zoomLevel===3){const day=lv===3,root=document.documentElement,dv=document.getElementById('dayView'),now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
     zoomLevel=lv;zparts=null;root.classList.toggle('zday',day);dv.hidden=!day;root.classList.toggle('z1h',lv>=1);root.classList.toggle('zlv2',lv===2);
     if(day){dayOff=0;dayM=-1;dayTick(now,h);const c=dv.querySelector('.dv-row.cur');if(c)c.scrollIntoView({block:'center'})}
-    else{const showMain=lv===0;bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);if(showMain)buildRaysFor({w0:0,span:24,level:0});else zoomTick(now,h)}
+    else{const showMain=lv===0&&!cellsFace(0);bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);if(showMain)buildRaysFor({w0:0,span:24,level:0});else zoomTick(now,h)}
     updateZoomUI();if(!instant&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const t=day?dv:(lv===0?bigSvg:zsvg);t.classList.remove('dvin');void t.getBoundingClientRect();t.classList.add('dvin')}return}
   const now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600,prev=zoomLevel,inward=lv>prev;
   const small=zWin(Math.max(lv,prev),h),outer=zWin(Math.min(lv,prev),h),[ox,oy]=zpt(outer,small.w0+small.span/2,125);
   zoomLevel=lv;zparts=null;
-  const showMain=lv===0;bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);document.documentElement.classList.toggle('z1h',lv>=1);document.documentElement.classList.toggle('zlv2',lv===2);
+  const showMain=lv===0&&!cellsFace(0);bigSvg.toggleAttribute('hidden',!showMain);zsvg.toggleAttribute('hidden',showMain);document.documentElement.classList.toggle('z1h',lv>=1);document.documentElement.classList.toggle('zlv2',lv===2);
   if(showMain)buildRaysFor({w0:0,span:24,level:0});else zoomTick(now,h);
   updateZoomUI();
   if(instant||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -2040,7 +2105,7 @@ function setZoom(lv,instant){
     if(!inFocus()){showBtn();return}
     clearTimeout(tapT);tapT=setTimeout(()=>{if(zoomLevel<2)setZoom(zoomLevel+1)},320)});
   const back=()=>{zoomLevel>0?setZoom(zoomLevel-1):setFocus(false)};
-  document.querySelectorAll('#zoomCrumb button').forEach(b=>b.addEventListener('click',()=>setZoom(+b.dataset.z)));
+  document.querySelectorAll('#zoomCrumb button').forEach(b=>b.addEventListener('click',()=>{const z=b.dataset.z;if(z==='0s'){setFace24(FACE24==='cells'?'rays':'cells');return}setZoom(+z)}));
   document.addEventListener('gesturestart',e=>{if(inFocus())e.preventDefault()},{passive:false});
   document.addEventListener('gesturechange',e=>{if(inFocus())e.preventDefault()},{passive:false});
   document.addEventListener('gestureend',e=>{if(!inFocus())return;e.preventDefault();if(e.scale>1.2&&zoomLevel<2)setZoom(zoomLevel+1);else if(e.scale<.83)back()},{passive:false});
@@ -2048,7 +2113,8 @@ function setZoom(lv,instant){
   {const vb=document.getElementById('vmBtn'),vm=document.getElementById('vmMenu'),openM=on=>{vm.hidden=!on;vb.setAttribute('aria-expanded',String(on));if(on){const c=vm.querySelector('[aria-pressed="true"]')||vm.querySelector('button');c.focus()}};
     vb.addEventListener('click',()=>openM(vm.hidden));document.addEventListener('click',e=>{if(!vm.hidden&&!e.target.closest('.vmode'))openM(false)});
     vm.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();openM(false);vb.focus()}});vm.addEventListener('click',e=>{if(e.target.closest('button'))openM(false)})}
-  document.querySelectorAll('.vmmenu button,.vmrow>[data-qz]').forEach(b=>b.addEventListener('click',()=>{const q=b.dataset.qz;if(q==='fs'){const lv=zoomLevel;if(lv)setZoom(0,true);setFocus(true);if(lv)setZoom(lv,true);return}const lv=+q;if(lv===3){setFocus(true);setZoom(3,true);return}setZoom(lv,true)}));
+  document.querySelectorAll('.vmmenu [data-f24]').forEach(b=>b.addEventListener('click',()=>{setZoom(0,true);setFace24(b.dataset.f24)}));
+  document.querySelectorAll('.vmmenu button[data-qz],.vmrow>[data-qz]').forEach(b=>b.addEventListener('click',()=>{const q=b.dataset.qz;if(q==='fs'){const lv=zoomLevel;if(lv)setZoom(0,true);setFocus(true);if(lv)setZoom(lv,true);return}if(q==='0'){setZoom(0,true);return}const lv=+q;if(lv===3){setFocus(true);setZoom(3,true);return}setZoom(lv,true)}));
   exit.addEventListener('click',()=>setFocus(false));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&inFocus())back()});
   document.addEventListener('visibilitychange',()=>{if(root.classList.contains('focus')&&document.visibilityState==='visible')wake(true)});
@@ -2576,7 +2642,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 
 /* ---------- Sync across devices (end-to-end encrypted, Cloudflare Worker + D1) ---------- */
 /* settings that follow you across devices (device choice per category stays per-device) */
-const SYNC_KEYS=['daySchedule','clock12','trackSpend','spendCur','weekendsOff','bgGalaxy'];
+const SYNC_KEYS=['dayStyle','face24','daySchedule','clock12','trackSpend','spendCur','weekendsOff','bgGalaxy'];
 var SYNC=(function(){
   const LS='astroSync',enc=new TextEncoder(),dec=new TextDecoder(),SALT=enc.encode('astro-day-sync/v1'),B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
   let cfg=null,busy=false,again=false,timer=null,K=null;

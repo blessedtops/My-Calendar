@@ -837,6 +837,17 @@ html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
 .curset{display:flex;align-items:center;gap:8px;font-size:13.5px}.curset[hidden]{display:none}
 .curset input{width:4.5em;font:inherit;font-size:15px;padding:8px;border-radius:8px;border:1px solid var(--line);background:rgba(127,127,127,.12);color:var(--fg);text-align:center}
 #entEdAL[hidden]{display:none}
+.devbox{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:12px;border:1px dashed var(--line);background:rgba(0,0,0,.12)}
+.devhint{margin:0;font-size:12.5px;color:var(--muted);line-height:1.35}
+.devchips{display:flex;flex-wrap:wrap;gap:6px}
+.devtag{display:inline-flex;align-items:center;gap:4px;padding:2px 2px 2px 12px;border-radius:999px;border:1px solid var(--cc);background:color-mix(in srgb,var(--cc) 18%,transparent);font-size:14px;font-weight:600}
+.devtag button{width:32px;height:32px;border:0;border-radius:999px;background:transparent;color:var(--fg);font-size:16px;cursor:pointer}
+.devtag button:focus-visible{outline:2px solid var(--glow)}
+.devnone{font-size:13px;color:var(--muted);font-style:italic}
+.devadd{display:flex;gap:6px;flex-wrap:wrap}.catcard .devadd input{flex:1 1 180px}
+.devsugs{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.devsug{min-height:34px;padding:4px 10px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--fg);font:600 13px/1 system-ui,sans-serif;cursor:pointer}
+.devsug:hover{background:rgba(127,127,127,.12)}.devsug:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2185,8 +2196,21 @@ function renderActMan(){const box=_g('actManList');box.innerHTML='';
     r.append(em,nm,co,del);card.appendChild(r);
     if(SPEND){const ml=document.createElement('label');ml.className='moneysw';const mc=document.createElement('input');mc.type='checkbox';mc.checked=!!c.money;mc.addEventListener('change',()=>{if(mc.checked)c.money=true;else delete c.money;saveActs()});
       const mt=document.createElement('span');mt.textContent='💲 Track amounts in this category';ml.append(mc,mt);card.appendChild(ml)}
-    {const sr=document.createElement('div');sr.className='edrow subrow';const si=inp('text',(c.subs||[]).join(', '),'cms-'+c.id,'Devices or sub-groups for '+c.name);si.maxLength=200;si.placeholder='Devices / sub-groups (optional), e.g. 📱 Phone, 📲 iPad, 💻 Laptop';
-      si.addEventListener('change',()=>{const v=si.value.split(',').map(x=>x.trim()).filter(Boolean);if(v.length)c.subs=v;else delete c.subs;saveActs();renderActs()});sr.appendChild(si);card.appendChild(sr)}
+    {const box=document.createElement('div');box.className='devbox';const hd=document.createElement('div');hd.className='subhead';hd.textContent='Devices (optional)';
+      const hint=document.createElement('p');hint.className='devhint';hint.textContent='Shown as buttons when you log in this category, so you can pick which device you used. Your activities stay the same for every device.';
+      const chips=document.createElement('div');chips.className='devchips';const L=(c.subs||[]).slice();
+      const commit=()=>{if(L.length)c.subs=L.slice();else delete c.subs;saveActs()};
+      const draw=()=>{chips.innerHTML='';L.forEach((t,i)=>{const ch=document.createElement('span');ch.className='devtag';ch.style.setProperty('--cc',c.color);const tx=document.createElement('span');tx.textContent=t;
+          const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','Remove '+t);x.addEventListener('click',()=>{L.splice(i,1);commit();draw()});ch.append(tx,x);chips.appendChild(ch)});
+        if(!L.length){const e=document.createElement('span');e.className='devnone';e.textContent='No devices — activities log without one.';chips.appendChild(e)}
+        sug.innerHTML='';const left=['📱 Phone','📲 iPad','💻 Laptop','🖥️ Desktop','📺 TV','⌚ Watch','🎮 Console','🎧 Headphones','📖 Kindle'].filter(t=>!L.includes(t));
+        if(left.length){const lb=document.createElement('span');lb.className='reclab';lb.textContent='Quick add';sug.appendChild(lb);left.forEach(t=>{const q=document.createElement('button');q.type='button';q.className='devsug';q.textContent='+ '+t;q.setAttribute('aria-label','Add '+t);
+          q.addEventListener('click',()=>{L.push(t);commit();draw()});sug.appendChild(q)})}};
+      const sug=document.createElement('div');sug.className='devsugs';draw();
+      const ar=document.createElement('div');ar.className='devadd';const di=inp('text','','cms-'+c.id,'New device for '+(c.name||c.em));di.maxLength=40;di.placeholder='e.g. 📱 Phone, 📲 iPad, 💻 Laptop';
+      const db=document.createElement('button');db.type='button';db.className='edsmall';db.textContent='+ Add device';
+      const add=()=>{di.value.split(',').map(x=>x.trim()).filter(Boolean).forEach(v=>{if(!L.includes(v))L.push(v)});di.value='';commit();draw();di.focus()};
+      db.addEventListener('click',add);di.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add()}});ar.append(di,db);box.append(hd,hint,chips,sug,ar);card.appendChild(box)}
     acts.filter(a=>a.cat===c.id).forEach(a=>{const ar=document.createElement('div');ar.className='edrow actrow';
       const ae=inp('text',a.em,'ame-'+a.id,'Activity emoji','emo'),an=inp('text',a.name,'amn-'+a.id,'Activity name'),ad=xbtn('Remove '+(a.name||a.em));ae.placeholder='Emoji';an.placeholder='Name (optional if you use emoji)';
       ae.addEventListener('change',()=>{a.em=ae.value.trim();if(!a.em&&!a.name)a.name='Untitled';saveActs();renderActs()});an.addEventListener('change',()=>{a.name=an.value.trim()||(a.em?'':'Untitled');an.value=a.name;saveActs();renderActs()});

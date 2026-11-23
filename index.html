@@ -1620,7 +1620,7 @@ function drawSector(svg,Z,sched){
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
   const curHr=i=>{mlabs.forEach((t,j)=>t.setAttribute('class','sqlab'+(j<i%6?' past':j===i%6?' cur':'')));const k=Math.floor(i/6),q=P(RO-27,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=hLab(Z.w0+k)};
-  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=CLK12?hLab(Z.w0+k):String((Z.w0+k)%24||(k?24:0));const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
+  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=CLK12?hLab(Z.w0+k):String((Z.w0+k)%24);const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
   const mlabs=[];for(let r=0;r<6;r++){const rr=RI+(5-r+.5)*band,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
     mlabs.push(el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G));mlabs[r].textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */

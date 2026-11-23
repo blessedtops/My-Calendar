@@ -883,6 +883,8 @@ html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
 .cedbtn.del{border-color:rgba(255,110,110,.45);color:#ff9d9d}.cedbtn.ok{border-color:var(--cc,#9f9);color:var(--cc,#9f9)}.crumbed.editing .addin{flex:1 1 160px;min-width:0}
 .crumb.tmp{border:1.5px dashed color-mix(in srgb,var(--cc,#9f9) 70%,transparent);background:transparent!important;font-style:italic}
 .pathbox .keeprow{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;padding:10px 12px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--cc,#9f9) 55%,transparent);align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 2px;font:600 14px/1.3 system-ui,sans-serif;cursor:pointer}.pathbox .keeprow .keeptx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.pathbox .keeprow .keephint{font-size:12px}.pathbox .keeprow input{flex:none;margin:0;width:22px;height:22px;accent-color:var(--cc,#9f9)}.keeprow .keephint{color:#8890a8;font-weight:500}
+.edpr{display:flex;gap:8px;align-items:stretch}.edpr>select,.edpr>input{flex:1;min-width:0}
+.edpbtn{flex:none;min-width:46px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:inherit;font:700 15px/1 system-ui,sans-serif;cursor:pointer}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2463,15 +2465,21 @@ function openEntryEditor(e,k){let ov=document.getElementById('entEd');if(!ov){ov
   $$('#entEdT').textContent=e.t||aLabel(a);$$('#entEdTi').value=e.t||aLabel(a);$$('.edsub').textContent=[a.catEm&&a.catEm+' '+a.catName,e.d].filter(Boolean).join(' · ');
   $$('.edcard').style.setProperty('--cc',a.color);$$('#entEdN').value=e.n||'';{const on=catMoney(actById(e.a))||e.amt!=null;$$('#entEdAL').hidden=!on;$$('#entEdAT').textContent=`Amount (${CUR}, optional)`;$$('#entEdA').value=e.amt!=null?(+e.amt).toFixed(2):''}$$('#entEdS').value=t2(e.s);$$('#entEdE').value=e.e>=1440?'23:59':t2(e.e);$$('#entEdErr').textContent='';
   /* where it belongs: category › activity › sub-activities, device — picked from the bank like on the add page */
-  let selA=e.a,path=e.p?e.p.split(' / '):[],dev=e.d||'';const rawA=id=>acts.find(x=>x.id===id);
+  let selA=e.a,path=e.p?e.p.split(' / '):[],dev=e.d||'',typing=-1;const rawA=id=>acts.find(x=>x.id===id);
   {const asel=$$('#entEdAct');asel.innerHTML='';cats.forEach(c=>{const og=document.createElement('optgroup');og.label=[c.em,c.name].filter(Boolean).join(' ')||'Untitled';acts.filter(x=>x.cat===c.id).forEach(x=>og.appendChild(new Option(aLabel(actById(x.id)),x.id)));if(og.children.length)asel.appendChild(og)});
     if(!rawA(e.a))asel.prepend(new Option(aLabel(a),e.a));asel.value=selA}
   const drawWhere=()=>{const A=actById(selA),ra=rawA(selA),c=(ra&&catById(ra.cat))||{},subs=(c.subs||[]).filter(Boolean),ds=$$('#entEdDv');
     ds.innerHTML='';ds.appendChild(new Option('—',''));subs.forEach(x=>ds.appendChild(new Option(x,x)));if(dev&&!subs.includes(dev))ds.appendChild(new Option(dev,dev));ds.value=dev;$$('#entEdDvL').hidden=!subs.length&&!dev;
     const pw=$$('#entEdPath');pw.innerHTML='';let lst=ra?pickList(ra):[];
-    for(let i=0;i<=path.length;i++){const opts=(lst||[]).map(x=>x.t);if(i<path.length&&!opts.includes(path[i]))opts.push(path[i]);if(!opts.length)break;
+    for(let i=0;i<=path.length;i++){const opts=(lst||[]).map(x=>x.t);if(i<path.length&&!opts.includes(path[i]))opts.push(path[i]);if(!opts.length&&typing!==i&&i>0&&i===path.length)break;
       const lb=document.createElement('label');lb.className='addlab';const sp=document.createElement('span');sp.textContent=i?'Under '+path[i-1]:'Sub-activity';const sl=document.createElement('select');sl.className='addin';
-      sl.appendChild(new Option(i?'— stop here —':'— none —',''));opts.forEach(t=>sl.appendChild(new Option(t,t)));sl.value=path[i]||'';const ii=i;sl.onchange=()=>{path=path.slice(0,ii);if(sl.value)path.push(sl.value);drawWhere()};lb.append(sp,sl);pw.appendChild(lb);
+      sl.appendChild(new Option(i?'— stop here —':'— none —',''));opts.forEach(t=>sl.appendChild(new Option(t,t)));sl.appendChild(new Option('✎ Type your own…','\u0000'));sl.value=path[i]||'';const ii=i;
+      sl.onchange=()=>{if(sl.value==='\u0000'){typing=ii;path=path.slice(0,ii);drawWhere();return}path=path.slice(0,ii);if(sl.value)path.push(sl.value);drawWhere()};
+      const row=document.createElement('div');row.className='edpr';
+      if(typing===ii){const ti=document.createElement('input');ti.type='text';ti.className='addin';ti.maxLength=80;ti.value=path[ii]||'';ti.placeholder='Type a name';const ok=document.createElement('button');ok.type='button';ok.className='edpbtn';ok.textContent='OK';
+        const fin=()=>{const v=ti.value.trim();typing=-1;path=path.slice(0,ii);if(v)path.push(v);drawWhere()};ok.onclick=fin;ti.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();fin()}else if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();typing=-1;drawWhere()}});row.append(ti,ok);lb.append(sp,row);pw.appendChild(lb);setTimeout(()=>{ti.focus();ti.select()},0);break}
+      row.appendChild(sl);if(path[ii]){const ed=document.createElement('button');ed.type='button';ed.className='edpbtn';ed.textContent='✎';ed.setAttribute('aria-label','Rename '+path[ii]+' for this entry');ed.onclick=()=>{typing=ii;drawWhere()};row.appendChild(ed)}
+      lb.append(sp,row);pw.appendChild(lb);
       if(i>=path.length)break;const nd=(lst||[]).find(x=>x.t===path[i]);lst=nd&&nd.kids||[]}
     $$('.edcard').style.setProperty('--cc',A.color);$$('#entEdT').textContent=$$('#entEdTi').value.trim()||aLabel(A);$$('.edsub').textContent=[A.catEm&&A.catEm+' '+A.catName,dev].filter(Boolean).join(' · ');
     {const on=catMoney(ra||A)||e.amt!=null;$$('#entEdAL').hidden=!on}};

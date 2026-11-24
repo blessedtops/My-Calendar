@@ -951,6 +951,11 @@ html.zday .dayview{width:min(1100px,calc(100vw - 28px))}
 html:not(.zday) #dvClip{display:none}
 html.clipon.zday .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 html.clipon.zday .dayview::after{flex-basis:140px}
+/* clearer page separation in the Day book */
+#dayView.book .dv-row{margin-bottom:22px;position:relative}
+#dayView.book .dv-row+.dv-row::before{content:'';position:absolute;left:8%;right:8%;top:-13px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(255,226,180,.45) 20%,rgba(255,226,180,.45) 80%,transparent)}
+#dayView.book .dv-track{border:1.5px solid rgba(255,226,180,.42);border-left:4px solid var(--hc);box-shadow:0 0 0 1px rgba(0,0,0,.55),2px 4px 0 -1px rgba(255,235,205,.22),4px 8px 0 -2px rgba(255,235,205,.12),0 12px 22px rgba(0,0,0,.5)}
+#dayView.book .dv-row.past .dv-track{border-color:rgba(255,226,180,.2);border-left-color:rgba(140,145,160,.55)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2476,7 +2481,9 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   if(slot){const dr=E('div','durrow');dr.appendChild(E('span','reclab','Length'));[30,60,90,120,180].forEach(m=>{const q=E('button','pickchip',m<60?m+'m':(m/60)+'h');q.type='button';q.setAttribute('role','radio');q.setAttribute('aria-checked',String(slot.e-slot.s===m));q.style.setProperty('--cc',c.color);
       q.addEventListener('click',()=>{slot.e=Math.min(1440,slot.s+m);renderActs();const fi=g.querySelector('.addin');if(fi)fi.focus()});dr.appendChild(q)});card.insertBefore(dr,lab)}
   const snap=E('button','snapbtn',slot?`Add to ${half}`:`Snap into ${half}`);snap.type='button';
-  const doSnap=()=>{if(LG.pend.keep&&LG.pend.path.length){let l0=tree;LG.pend.path.forEach(t=>{let nd=l0.find(x=>x.t===t);if(!nd){nd={t,d:''};l0.push(nd)}nd.kids=nd.kids||[];l0=nd.kids});a.picks=tree;saveActs()}const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};{const tv=tin.value.trim();if(tv&&tv!==aLabel(a))ex.t=tv}if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
+  const doSnap=()=>{{const ce=document.querySelector('#actGrid .crumbed.editing input');if(ce&&ce.value.trim()&&LG.pend.path.length){const v=ce.value.trim(),cur=LG.pend.path[LG.pend.path.length-1];if(v!==cur){const ok=document.querySelector('#actGrid .crumbed.editing .ok');if(ok)ok.click()}}
+    const nw=document.querySelector('#actGrid .newin');if(nw&&nw.value.trim()){const v=nw.value.trim();LG.pend.path=LG.pend.path.concat(v);nw.value=''}}
+    if(LG.pend.keep&&LG.pend.path.length){let l0=tree;LG.pend.path.forEach(t=>{let nd=l0.find(x=>x.t===t);if(!nd){nd={t,d:''};l0.push(nd)}nd.kids=nd.kids||[];l0=nd.kids});a.picks=tree;saveActs()}const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};{const tv=tin.value.trim();if(tv&&tv!==aLabel(a))ex.t=tv}if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
     if(svc.checked&&!sv.hidden&&ex.n){const at=nodeAt(p.path);if(at&&!at.lst.some(x=>x.t===ex.n))at.lst.push({t:ex.n,d:''});a.picks=tree;saveActs();ex.p=p.path.concat(ex.n).join(SEP);ex.n=''}
     if(slot){addAt(a.id,ex,slot.s,slot.e,slot.k);closePanels();return}snapAct(a.id,snap,ex)};
   snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}
@@ -2745,7 +2752,7 @@ drawWhere();
   $$('.eddel').onclick=()=>{const before=snapState(),L=logs[k]||[],i=L.indexOf(e);if(i>=0)L.splice(i,1);if(!L.length)delete logs[k];saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Deleted ${a.name||a.em}`,before)};
   $$('.entsave').onclick=()=>{const s0=fromT($$('#entEdS').value);let e0=fromT($$('#entEdE').value);if($$('#entEdE').value==='23:59'||(e0===0&&s0>0))e0=1440;if(e0<=s0){$$('#entEdErr').textContent='End has to be after start.';return}
     const ar=parseAmt($$('#entEdA').value);if(!$$('#entEdAL').hidden&&!ar.ok){$$('#entEdErr').textContent=ar.msg;return}
-    const before=snapState();e.s=s0;e.e=e0;e.a=selA;if(path.length)e.p=path.join(' / ');else delete e.p;if(dev)e.d=dev;else delete e.d;const n=$$('#entEdN').value.trim();if(n)e.n=n;else delete e.n;{const tv=$$('#entEdTi').value.trim();if(tv&&tv!==aLabel(actById(selA)))e.t=tv;else delete e.t}if(!$$('#entEdAL').hidden){if(ar.v!=null)e.amt=ar.v;else delete e.amt}saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Saved ${aName(actById(selA))}, ${mm2t(s0)}–${mm2t(e0)}`,before)};
+    {const ti=$$('#entEdPath input');if(ti&&typing>=0){const v=ti.value.trim();path=path.slice(0,typing);if(v)path.push(v);typing=-1}}const before=snapState();e.s=s0;e.e=e0;e.a=selA;if(path.length)e.p=path.join(' / ');else delete e.p;if(dev)e.d=dev;else delete e.d;const n=$$('#entEdN').value.trim();if(n)e.n=n;else delete e.n;{const tv=$$('#entEdTi').value.trim();if(tv&&tv!==aLabel(actById(selA)))e.t=tv;else delete e.t}if(!$$('#entEdAL').hidden){if(ar.v!=null)e.amt=ar.v;else delete e.amt}saveLogs();refreshSlice();dayM=-1;ov.hidden=true;try{renderBankNow()}catch(x){}undoToast(`Saved ${aName(actById(selA))}, ${mm2t(s0)}–${mm2t(e0)}`,before)};
   ov.hidden=false;setTimeout(()=>$$('#entEdN').focus(),30)}
 function toast(msg){const t=mk('div',{className:'toast',textContent:msg});t.setAttribute('role','status');document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 $('editToggle').addEventListener('click',()=>{$('editor').hidden?edOpen():edClose()});

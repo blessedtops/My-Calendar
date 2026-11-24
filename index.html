@@ -965,6 +965,13 @@ html.clipon.zday .dayview::after{flex-basis:140px}
 .edmadd{min-height:34px;padding:0 12px;border-radius:999px;border:1px dashed rgba(255,255,255,.35);background:transparent;color:#b9ceff;font:700 13px/1 system-ui,sans-serif;cursor:pointer}
 .dsrow{display:flex;gap:6px;align-items:stretch}.dsrow .bsitem{flex:1;min-width:0}.dscopy{flex:none;width:48px;border-radius:12px;border:1px solid rgba(160,190,255,.4);background:rgba(160,190,255,.08);color:#b9ceff;font-size:18px;cursor:pointer}
 .dv-now-btn{width:auto!important;padding:0 12px!important;font:700 13px/1 system-ui,sans-serif!important;color:#ff6b8a!important;border-color:rgba(255,45,85,.45)!important}
+/* threads plug straight into the activity they carry */
+.dv-bar.cont-out{border-top-right-radius:3px!important;border-bottom-right-radius:3px!important;overflow:visible}
+.dv-bar.cont-in{border-top-left-radius:3px!important;border-bottom-left-radius:3px!important;overflow:visible}
+.dv-plug{position:absolute;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px rgba(10,12,24,.85),0 0 6px var(--c);z-index:4;pointer-events:none}
+.dv-plug.out{right:-7px}.dv-plug.in{left:-7px}
+.dv-plug.in::after{content:'';position:absolute;left:3px;top:3px;width:6px;height:6px;border-radius:50%;background:rgba(10,12,24,.85)}
+.dv-wrap{opacity:1;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--c) 70%,transparent))}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2068,6 +2075,7 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
       b.querySelector('.em').textContent=x.e.t?'':a.em;if(!labelHere){b.classList.add('quiet')}else if(mins>=12){b.querySelector('.nm').textContent=[x.e.t||aName(a),x.e.p].filter(Boolean).join(' · ');b.querySelector('.sub').textContent=[x.e.amt!=null&&SPEND?money(x.e.amt):'',x.e.d,x.e.n||`${mm2t(x.e.s)}–${mm2t(x.e.e)}`].filter(Boolean).join(' · ')}else b.classList.add('tiny');
       if(cout||cin){const mid=3+x.l*LH+(LH-4)/2;if(cout){const k=OUTS.indexOf(x),ww=9+(OUTS.length-1-k)*6,w=document.createElement('div');w.className='dv-wrap out';w.style.top=mid+'px';w.style.width=ww+'px';w.style.right=(-ww-1)+'px';w.style.setProperty('--c',a.color);tr.appendChild(w)}
         if(cin){const k=INS.indexOf(x),ww=9+k*6,w=document.createElement('div');w.className='dv-wrap in';w.style.height=(mid+6)+'px';w.style.width=ww+'px';w.style.left=(-ww-1)+'px';w.style.setProperty('--c',a.color);tr.appendChild(w)}}
+      if(cout){b.classList.add('cont-out');const pl=document.createElement('span');pl.className='dv-plug out';b.appendChild(pl)}if(cin){b.classList.add('cont-in');const pl=document.createElement('span');pl.className='dv-plug in';b.appendChild(pl)}
       b.title=`${entLabel(x.e)} · ${mm2t(x.e.s)}–${mm2t(x.e.e)}${x.e.n?' · '+x.e.n:''}`;if(!x.e.run){b.setAttribute('role','button');b.tabIndex=0;b.setAttribute('aria-label','Edit '+b.title);const op=ev=>{ev.stopPropagation();if(CLIP){const r=tr.getBoundingClientRect(),fr=ev.clientX?Math.max(0,Math.min(.999,(ev.clientX-r.left)/r.width)):(x.s-a0)/60;pasteAt(k*60+(fr<.5?0:30),dayKey(now));return}openEntryEditor(x.e,dayKey(now))};b.addEventListener('click',op);b.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();op(ev)}})}tr.appendChild(b)});
     if(k===hn){const n=document.createElement('div');n.className='dv-now';n.style.left=((h%1)*100)+'%';tr.appendChild(n)}
     tr.setAttribute('aria-label',`${hhmm(k)} – ${seg.length?seg.map(x=>actById(x.e.a).name).join(', '):'nothing logged'}`);tr.setAttribute('role','img');

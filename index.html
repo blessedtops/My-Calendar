@@ -1716,6 +1716,10 @@ function drawSector(svg,Z,sched){
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate tday',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=dateStr(dn);
   topG=el('g',{'aria-hidden':'true'},svg);const needle=miniNeedle(el('g',{'aria-hidden':'true'},svg),(r,t)=>P(r,deg(t)),R-9,R+1,0),dimUpd=t=>{const hr=Math.floor(t);dimC.setAttribute('d',t-hr<.02?'':usedD(P,R-4,8.2,deg(hr)+.35,deg(t)))};
+  /* crystal over the little clock face in the middle */
+  {const gd=el('defs',{},svg),cp=el('clipPath',{id:'gclip3'},gd),Rg=R+4;el('circle',{cx:CX,cy:CYY,r:Rg},cp);const FG=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg);
+    el('circle',{cx:CX,cy:CYY,r:Rg,fill:'url(#glassEdge)'},FG);const hi=el('g',{'clip-path':'url(#gclip3)'},FG);el('ellipse',{cx:CX-12,cy:CYY-Rg*.62,rx:Rg*.92,ry:Rg*.5,fill:'url(#glassHi)',transform:`rotate(-14 ${CX} ${CYY})`},hi);
+    el('circle',{cx:CX,cy:CYY,r:Rg-.5,fill:'none',stroke:'#fff','stroke-opacity':.2,'stroke-width':1.1},FG)}
   {const PG=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg),gp=ann(RI-3,RO+2,a1-.4,a2+.4);
     el('path',{d:gp,fill:'url(#paneHi)'},PG);el('path',{d:gp,fill:'none',stroke:'#fff','stroke-opacity':.22,'stroke-width':1.4,'stroke-linejoin':'round'},PG);
     el('path',{d:ann(RO+2,RO+5,a1-.4,a2+.4),fill:'#fff','fill-opacity':.1},PG);el('path',{d:ann(RI-6,RI-3,a1-.4,a2+.4),fill:'#000','fill-opacity':.25},PG)}

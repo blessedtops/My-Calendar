@@ -1185,12 +1185,12 @@ let cfgVer=0;
 function textOn(hex){const n=parseInt(String(hex).replace('#',''),16);if(isNaN(n))return '#fff';const r=(n>>16)&255,g=(n>>8)&255,b=n&255;
   return (0.299*r+0.587*g+0.114*b)/255>0.62?'#1d2230':'#ffffff'}
 /* schedule blocks are coloured by the time of day, not by activity: night lavender, sunrise/sunset orange, day gold */
-const NIGHT={19:'#1f3cbc',20:'#16299f',21:'#0f1d88',22:'#0b1676',23:'#09116a',0:'#080e62',1:'#091067',2:'#0b1572',3:'#0e1c84',4:'#152a9e',5:'#2040bc'};
-const DAY={7:'#ffe08a',8:'#ffd873',9:'#ffd05c',10:'#ffc844',11:'#ffc22e',12:'#ffbf1f',13:'#ffb81a',14:'#ffab1c',15:'#ff9f22',16:'#fb9128',17:'#f5822c'};
-function skyCol(t){const k=Math.floor(((t%24)+24)%24);return (k===6||k===18)?'#ff8a45':NIGHT[k]||DAY[k]||'#ffb52e'}
+const NIGHT={18:'#1f3cbc',19:'#182ca4',20:'#12218f',21:'#0d197c',22:'#0a136e',23:'#090f65',0:'#080e62',1:'#091067',2:'#0b1572',3:'#0e1c84',4:'#152a9e',5:'#2040bc'};
+const DAY={7:'#ffe08a',8:'#ffd873',9:'#ffd05c',10:'#ffc844',11:'#ffc22e',12:'#ffbf1f',13:'#ffb81a',14:'#ffab1c',15:'#ff9f22',16:'#fb9128'};
+function skyCol(t){const k=Math.floor(((t%24)+24)%24);return (k===6||k===17)?'#ff8a45':NIGHT[k]||DAY[k]||'#ffb52e'}
 /* lighter twin used where the colour sits on the dark background (chevron band) */
 function skyLite(t){const c=skyCol(t);if(!isNight(t))return c;const n=parseInt(c.slice(1),16),m=v=>Math.round(v+(255-v)*.32);return 'rgb('+m(n>>16)+','+m((n>>8)&255)+','+m(n&255)+')'}
-const isNight=t=>{const k=Math.floor(((t%24)+24)%24);return k>18||k<6};
+const isNight=t=>{const k=Math.floor(((t%24)+24)%24);return k>=18||k<6};
 function skySplit(a,b){const cut=Array.from({length:23},(_,i)=>i+1).filter(x=>x>a&&x<b),pts=[a,...cut,b],out=[];for(let i=0;i<pts.length-1;i++)out.push([pts[i],pts[i+1],skyCol(pts[i])]);return out}
 function schedFor(d){
   const out=[],free=(s,e)=>({s,e,type:'free',label:'Free time',color:FREE_COLOR,work:false});

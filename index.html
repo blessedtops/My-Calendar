@@ -918,6 +918,10 @@ html.zcells #rays{visibility:visible}
 .dv-now{z-index:5}.dv-now::after{content:'';position:absolute;left:50%;top:-4px;width:9px;height:9px;border-radius:50%;background:#ff2d55;transform:translateX(-50%);box-shadow:0 0 8px #ff2d55}
 .zfrieze .zcur{filter:drop-shadow(0 0 3px rgba(78,227,138,.9))}.zfrieze .zcur path{stroke:#4ee38a}
 .zfrieze .zpast{opacity:.3}.zfrieze .zpast path{stroke:#8a8d96}
+.bighand{filter:drop-shadow(2px 5px 3px rgba(0,0,0,.45))}
+.mprog.liquid{animation:liquid 2.8s ease-in-out infinite}
+@keyframes liquid{0%,100%{filter:brightness(1) drop-shadow(0 0 2px rgba(255,220,140,.5))}50%{filter:brightness(1.28) drop-shadow(0 0 7px rgba(255,220,140,.9))}}
+@media (prefers-reduced-motion:reduce){.mprog.liquid{animation:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -982,6 +986,11 @@ html.zcells #rays{visibility:visible}
 <button type="button" class="exitfocus" id="exitFocus" aria-label="Exit full clock" title="Exit full clock" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></button>
 <div class="wrap">
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="glassHi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".5" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <radialGradient id="glassEdge" cx="50%" cy="50%" r="50%"><stop offset="80%" stop-color="#000" stop-opacity="0"/><stop offset="96%" stop-color="#000" stop-opacity=".22"/><stop offset="100%" stop-color="#000" stop-opacity=".38"/></radialGradient>
+    <filter id="ringBevel" x="-12%" y="-12%" width="124%" height="128%"><feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="b"/><feSpecularLighting in="b" surfaceScale="4" specularConstant=".9" specularExponent="45" lighting-color="#ffffff" result="s"><feDistantLight azimuth="225" elevation="38"/></feSpecularLighting><feComposite in="s" in2="SourceAlpha" operator="in" result="sp"/><feOffset in="SourceAlpha" dx="2.5" dy="5" result="o"/><feGaussianBlur in="o" stdDeviation="3.5" result="ob"/><feComponentTransfer in="ob" result="sh"><feFuncA type="linear" slope=".5"/></feComponentTransfer><feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/><feMergeNode in="sp"/></feMerge></filter>
+    <linearGradient id="paneHi" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".26"/><stop offset=".28" stop-color="#fff" stop-opacity=".06"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset=".62" stop-color="#fff" stop-opacity=".09"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".04"/></linearGradient>
+    <filter id="cellBevel" x="-5%" y="-5%" width="110%" height="112%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="b"/><feSpecularLighting in="b" surfaceScale="2.4" specularConstant=".9" specularExponent="40" lighting-color="#ffffff" result="s"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting><feComposite in="s" in2="SourceAlpha" operator="in" result="sp"/><feOffset in="SourceAlpha" dx="1.2" dy="2.4" result="o"/><feGaussianBlur in="o" stdDeviation="1.4" result="ob"/><feComponentTransfer in="ob" result="sh"><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/><feMergeNode in="sp"/></feMerge></filter>
     <radialGradient id="dome" cx="50%" cy="50%" r="50%"><stop offset="58%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".2"/></radialGradient>
     <radialGradient id="gloss" cx="35%" cy="12%" r="70%"><stop offset="0%" stop-color="#fff" stop-opacity=".45"/><stop offset="55%" stop-color="#fff" stop-opacity="0"/></radialGradient>
     <linearGradient id="woodSide" x1="0" x2="1"><stop offset="0" stop-color="#4f2c10"/><stop offset=".18" stop-color="#9c612b"/><stop offset=".45" stop-color="#dba05c"/><stop offset=".72" stop-color="#9c612b"/><stop offset="1" stop-color="#40230b"/></linearGradient>
@@ -1203,7 +1212,8 @@ function skyIcon(par,h,x,y,size,cls){const kind={0:'moon',6:'rise',12:'sun',18:'
 function drawClock(svg,sched,opts){
   opts=opts||{};const big=!!opts.big,live=!!opts.live;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  sched.forEach(b=>skySplit(b.s,b.e).forEach(([p,q,c])=>el('path',{d:arc(p,q,150,88),fill:c,'fill-rule':'evenodd'},svg)));
+  const RG=big?el('g',{filter:'url(#ringBevel)'},svg):svg;
+  sched.forEach(b=>skySplit(b.s,b.e).forEach(([p,q,c])=>el('path',{d:arc(p,q,150,88),fill:c,'fill-rule':'evenodd'},RG)));
   sched.forEach(b=>{if(b.s<=0)return;const [x1,y1]=pt(b.s,88),[x2,y2]=pt(b.s,150);el('line',{x1,y1,x2,y2,stroke:'#0b0f1a','stroke-width':2.2,'stroke-opacity':.85},svg)});
   /* Great Zimbabwe chevron frieze round the outer edge, coloured by the time of day */
   const zz=[];if(big){const ZG=el('g',{class:'zfrieze','aria-hidden':'true'},svg),S=.25,r1=153,r2=162;
@@ -1256,6 +1266,12 @@ function drawClock(svg,sched,opts){
   const t=el('text',{x:C,y:CY+(big?4:14),'text-anchor':'middle','font-size':big?34:40,'font-weight':500,fill:'var(--fg)','font-family':'JetBrains Mono,monospace'},svg);
   t.textContent=big?'--:--':(work?`${work}/24`:'Off');
   if(big)t.setAttribute('visibility','hidden');
+  /* crystal cover: thicker-glass darkening at the rim, a curved reflection arc, a soft glint */
+  if(big){const gid='gclip'+(svg.id||'b'),gd=el('defs',{},svg),cp=el('clipPath',{id:gid},gd);el('circle',{cx:C,cy:CY,r:196},cp);
+    const GL=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg);
+    el('circle',{cx:C,cy:CY,r:197,fill:'url(#glassEdge)'},GL);
+    const hi=el('g',{'clip-path':`url(#${gid})`},GL);el('ellipse',{cx:C-24,cy:CY-118,rx:178,ry:96,fill:'url(#glassHi)',transform:`rotate(-14 ${C} ${CY})`},hi);
+    el('circle',{cx:C,cy:CY,r:195.5,fill:'none',stroke:'#fff','stroke-opacity':.16,'stroke-width':1.2},GL)}
   return {T:typeof T!=='undefined'?T:null,zz,done,doneHr:-1,logG:typeof logG!=='undefined'?logG:null,cur,hrNum,hrShown:-1,hg,hh,mm,majors,skys,hand,tip,text:t,core:typeof core!=='undefined'?core:null,halo:typeof halo!=='undefined'?halo:null,len:big?166:160};
 }
 
@@ -1682,7 +1698,8 @@ function drawSector(svg,Z,sched){
   const band=(RO-9-RI)/6,geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
     return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
   const colors=[],cells=[];
-  for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},G))}
+  const CG=el('g',{filter:'url(#cellBevel)'},G);
+  for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG))}
   const logOv=el('g',{class:'logov'},G);
   const prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
   {const rh=RI+3*band;el('path',{d:`M${f(P(rh,a1+.3))}A${rh} ${rh} 0 0 1 ${f(P(rh,a2-.3))}`,fill:'none',class:'halfmark'},G);}
@@ -1699,6 +1716,9 @@ function drawSector(svg,Z,sched){
   el('circle',{cx:CX,cy:ty-9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);el('circle',{cx:CX,cy:ty+9,r:3.8,class:'tdot',filter:'url(#neonGlow)'},T);
   const dn=new Date();el('text',{class:'tdate tday',x:CX,y:CYY+36,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=dateStr(dn);
   topG=el('g',{'aria-hidden':'true'},svg);const needle=miniNeedle(el('g',{'aria-hidden':'true'},svg),(r,t)=>P(r,deg(t)),R-9,R+1,0),dimUpd=t=>{const hr=Math.floor(t);dimC.setAttribute('d',t-hr<.02?'':usedD(P,R-4,8.2,deg(hr)+.35,deg(t)))};
+  {const PG=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg),gp=ann(RI-3,RO+2,a1-.4,a2+.4);
+    el('path',{d:gp,fill:'url(#paneHi)'},PG);el('path',{d:gp,fill:'none',stroke:'#fff','stroke-opacity':.22,'stroke-width':1.4,'stroke-linejoin':'round'},PG);
+    el('path',{d:ann(RO+2,RO+5,a1-.4,a2+.4),fill:'#fff','fill-opacity':.1},PG);el('path',{d:ann(RI-6,RI-3,a1-.4,a2+.4),fill:'#000','fill-opacity':.25},PG)}
   return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
@@ -1785,14 +1805,15 @@ function drawSlice(svg,Z,sched){
         el('ellipse',{rx:(ry*.32).toFixed(1),ry:ry.toFixed(1),class:'tendf'},e)});
       const fr=el('line',{class:'tlfront'},g);
       logs.push({g,ch,em,fr,quad,a,b})}}
+  const CG=el('g',{filter:'url(#cellBevel)'},G);
   for(let i=0;i<N;i++){const t=Z.w0+(i+.5)*UM/60,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));
-    cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},G))}
+    cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},CG))}
   const logUpd=(m,frc)=>{if(!logs.length)return;const cr=Math.floor(m/10),uf=Math.min(1,((m%10)+frc)/10);
     logs.forEach((L,r)=>{const st=r<cr?'past':r===cr?'cur':'up';if(L.st!==st){L.st=st;L.g.setAttribute('class','tlog '+st)}
       const u=st==='past'?1:st==='cur'?uf:0;L.ch.setAttribute('points',L.quad(0,u));L.em.setAttribute('points',st==='cur'?L.quad(Math.max(0,u-.09),u):L.quad(0,0));
       if(st==='cur'){const p0=sqP(u,L.a),p1=sqP(u,L.b);L.fr.setAttribute('x1',p0[0]);L.fr.setAttribute('y1',p0[1]);L.fr.setAttribute('x2',p1[0]);L.fr.setAttribute('y2',p1[1]);}})};
   const logOv=el('g',{class:'logov'},G);
-  const prog=el('polygon',{points:sqPoly(0,0),fill:colors[0],class:'mprog'},G);
+  const prog=el('polygon',{points:sqPoly(0,0),fill:colors[0],class:'mprog'+(three?'':' liquid')},G);
   if(!three){const hv=sqHalf(),[x1,y1]=sqP(0,hv),[x2,y2]=sqP(1,hv);el('line',{x1:x1+1,y1,x2:x2-1,y2,class:'halfmark'},G);}
   const curOut=el('polygon',{points:sqPoly(0),fill:'none',class:'mcur'},G);
   const nums=[];
@@ -1807,6 +1828,10 @@ function drawSlice(svg,Z,sched){
   if(three){const fg=el('g',{class:'zfrac','aria-label':`Block ${Z.w0/3+1} of 8`},svg);
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-glow',filter:'url(#neonGlow)'},fg).textContent=`${Z.w0/3+1}/8`;
     el('text',{x:C,y:-14,'text-anchor':'middle','dominant-baseline':'central',class:'zfrac-core'},fg).textContent=`${Z.w0/3+1}/8`;}
+  /* glass tray over the hour */
+  if(!three){const q=(p,dx,dy)=>(p[0]+dx)+','+(p[1]+dy),pts=[q(SQ.TL,-4,-4),q(SQ.TR,4,-4),q(SQ.BR,5,5),q(SQ.BL,-5,5)].join(' '),PG=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg);
+    el('polygon',{points:pts,fill:'url(#paneHi)','stroke-linejoin':'round'},PG);el('polygon',{points:pts,fill:'none',stroke:'#fff','stroke-opacity':.22,'stroke-width':1.4,'stroke-linejoin':'round'},PG);
+    el('line',{x1:SQ.BL[0]-5,y1:SQ.BL[1]+8,x2:SQ.BR[0]+5,y2:SQ.BR[1]+8,stroke:'#fff','stroke-opacity':.12,'stroke-width':3,'stroke-linecap':'round'},PG)}
   return {kind:'slice',Z,cells,colors,prog,curOut,nums,needle:ndl,dimUpd:dimU,logUpd,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 /* ---------- Day view: 24 hour bars with logged activities, like a calendar ---------- */
@@ -2051,7 +2076,8 @@ function drawCells24(svg,Z,sched){
   el('circle',{cx:CX,cy:CYY,r:RI-3,fill:'#0b0f1a','fill-opacity':.35,stroke:'var(--tick-soft)','stroke-opacity':.4,'stroke-width':.6},G);
   const geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.55,d1=deg(k)+g,d2=deg(k+1)-g,r1=RI+r*band+.9,r2=RI+(r+1)*band-.9;return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
   const colors=[],cells=[];
-  for(let i=0;i<144;i++){const t=Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},G))}
+  const CG=el('g',{filter:'url(#cellBevel)'},G);
+  for(let i=0;i<144;i++){const t=Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG))}
   const logOv=el('g',{class:'logov'},G),prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
   {const rh=RI+3*band;el('circle',{cx:CX,cy:CYY,r:rh,fill:'none',class:'halfmark'},G)}
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
@@ -2076,6 +2102,9 @@ function drawCells24(svg,Z,sched){
   el('text',{class:'tdate tday',x:CX,y:CYY+38,'text-anchor':'middle','dominant-baseline':'central'},TG).textContent=dateStr(new Date());
   const ndB=miniNeedle(el('g',{'aria-hidden':'true'},svg),(r,t)=>P(r,deg(t)),R-9,R+1,0),needle=t=>ndB(t),dimUpd=t=>{const hr=Math.floor(t);dimC.setAttribute('d',t-hr<.02?'':usedD(P,R-4,8.2,deg(hr)+.35,deg(t)))};
   svg.setAttribute('aria-label','24 hour cells: each hour is a column of six 10-minute cells that empty from the outside in');
+  {const gd=el('defs',{},svg),cp=el('clipPath',{id:'gclipc'},gd);el('circle',{cx:CX,cy:CYY,r:196},cp);const GL=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg);
+    el('circle',{cx:CX,cy:CYY,r:197,fill:'url(#glassEdge)'},GL);const hi=el('g',{'clip-path':'url(#gclipc)'},GL);el('ellipse',{cx:CX-24,cy:CYY-118,rx:178,ry:96,fill:'url(#glassHi)',transform:`rotate(-14 ${CX} ${CYY})`},hi);
+    el('circle',{cx:CX,cy:CYY,r:195.5,fill:'none',stroke:'#fff','stroke-opacity':.16,'stroke-width':1.2},GL)}
   return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:144,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function setFace24(v){FACE24=v==='cells'?'cells':'rays';try{localStorage.setItem('face24',FACE24)}catch(e){}try{SYNC.soon()}catch(e){}

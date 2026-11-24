@@ -956,6 +956,9 @@ html.clipon.zday .dayview::after{flex-basis:140px}
 #dayView.book .dv-row+.dv-row::before{content:'';position:absolute;left:8%;right:8%;top:-13px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(255,226,180,.45) 20%,rgba(255,226,180,.45) 80%,transparent)}
 #dayView.book .dv-track{border:1.5px solid rgba(255,226,180,.42);border-left:4px solid var(--hc);box-shadow:0 0 0 1px rgba(0,0,0,.55),2px 4px 0 -1px rgba(255,235,205,.22),4px 8px 0 -2px rgba(255,235,205,.12),0 12px 22px rgba(0,0,0,.5)}
 #dayView.book .dv-row.past .dv-track{border-color:rgba(255,226,180,.2);border-left-color:rgba(140,145,160,.55)}
+.catdelq{margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,110,110,.55);background:rgba(255,80,80,.1)}
+.catdelq p{margin:0 0 10px;font:600 14px/1.35 system-ui,sans-serif;color:#ffd6d6}.catdelq .cdqb{display:flex;gap:8px;justify-content:flex-end}
+.catdelq button{min-height:40px;padding:0 16px;border-radius:10px;font:700 14px/1 system-ui,sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:inherit}.catdelq .cdqyes{background:#e5484d;border-color:transparent;color:#fff}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2520,7 +2523,13 @@ function renderActMan(){const box=_g('actManList');box.innerHTML='';
     const em=inp('text',c.em,'cme-'+c.id,'Category emoji','emo'),nm=inp('text',c.name,'cmn-'+c.id,'Category name'),co=inp('color',c.color,'cmc-'+c.id,'Category color'),del=xbtn('Remove category '+(c.name||c.em));em.placeholder='Emoji';nm.placeholder='Name (optional if you use emoji)';
     em.addEventListener('change',()=>{c.em=em.value.trim();if(!c.em&&!c.name)c.name='Untitled';saveActs();renderActs()});nm.addEventListener('change',()=>{c.name=nm.value.trim()||(c.em?'':'Untitled');nm.value=c.name;saveActs();renderActs();const ab=card.querySelector('.addact');if(ab)ab.textContent=`+ Add activity to ${c.name||c.em||'this category'}`});
     co.addEventListener('input',()=>{c.color=co.value;saveActs();renderActs();refreshSlice()});
-    del.addEventListener('click',()=>{if(!confirmDel(card,`Remove ${c.name} and its activities?`))return;cats.splice(ci,1);acts=acts.filter(a=>a.cat!==c.id);LG.manCat=null;saveActs();renderActMan();renderActs();refreshSlice()});
+    del.addEventListener('click',()=>{if(card.querySelector('.catdelq'))return;const n=acts.filter(a=>a.cat===c.id).length,nm=[c.em,c.name].filter(Boolean).join(' ')||'this category';
+      const q=document.createElement('div');q.className='catdelq';q.setAttribute('role','alertdialog');q.innerHTML='<p></p><div class="cdqb"><button type="button" class="cdqno">Cancel</button><button type="button" class="cdqyes">Delete</button></div>';
+      q.querySelector('p').textContent=`Delete ${nm}${n?` and its ${n} ${n===1?'activity':'activities'}`:''}? Entries you already logged stay in your days.`;card.prepend(q);q.querySelector('.cdqno').focus();
+      q.querySelector('.cdqno').onclick=()=>q.remove();
+      q.querySelector('.cdqyes').onclick=()=>{const bC=JSON.stringify(cats),bA=JSON.stringify(acts);cats.splice(ci,1);acts=acts.filter(a=>a.cat!==c.id);LG.manCat=null;saveActs();renderActMan();renderActs();refreshSlice();
+        const t=document.createElement('div');t.className='toast utoast';t.setAttribute('role','status');const sp=document.createElement('span');sp.textContent=`Deleted ${nm}`;const ub=document.createElement('button');ub.type='button';ub.textContent='Undo';
+        ub.onclick=()=>{cats=JSON.parse(bC);acts=JSON.parse(bA);saveActs();renderActMan();renderActs();refreshSlice();t.remove();toast('Restored '+nm)};t.append(sp,ub);document.querySelectorAll('.utoast').forEach(x=>x.remove());document.body.appendChild(t);setTimeout(()=>t.remove(),10000)}});
     r.append(em,nm,co,del);card.appendChild(r);
     if(SPEND){const ml=document.createElement('label');ml.className='moneysw';const mc=document.createElement('input');mc.type='checkbox';mc.checked=!!c.money;mc.addEventListener('change',()=>{if(mc.checked)c.money=true;else delete c.money;saveActs()});
       const mt=document.createElement('span');mt.textContent='💲 Track amounts in this category';ml.append(mc,mt);card.appendChild(ml)}

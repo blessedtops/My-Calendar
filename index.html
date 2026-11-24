@@ -1706,9 +1706,9 @@ function drawSector(svg,Z,sched){
   el('path',{d:ann(R+3,RO,a1,a2),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
   const band=(RO-9-RI)/6,geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
     return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
-  const colors=[],cells=[];
+  const colors=[],cells=[],stars=[];
   const CG=el('g',{filter:'url(#cellBevel)'},G);
-  for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG))}
+  for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG));stars.push(isNight(t)?el('path',{d:geo(i),fill:'url(#nightStars)','pointer-events':'none'},CG):null)}
   const logOv=el('g',{class:'logov'},G);
   const prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
   {const rh=RI+3*band;el('path',{d:`M${f(P(rh,a1+.3))}A${rh} ${rh} 0 0 1 ${f(P(rh,a2-.3))}`,fill:'none',class:'halfmark'},G);}
@@ -1732,7 +1732,7 @@ function drawSector(svg,Z,sched){
   {const PG=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg),gp=ann(RI-3,RO+2,a1-.4,a2+.4);
     el('path',{d:gp,fill:'url(#paneHi)'},PG);el('path',{d:gp,fill:'none',stroke:'#fff','stroke-opacity':.22,'stroke-width':1.4,'stroke-linejoin':'round'},PG);
     el('path',{d:ann(RO+2,RO+5,a1-.4,a2+.4),fill:'#fff','fill-opacity':.1},PG);el('path',{d:ann(RI-6,RI-3,a1-.4,a2+.4),fill:'#000','fill-opacity':.25},PG)}
-  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+  return {kind:'slice',Z,cells,stars,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:18,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function drawSlice(svg,Z,sched){
   if(Z.level===1)return drawSector(svg,Z,sched);
@@ -1801,7 +1801,7 @@ function drawSlice(svg,Z,sched){
   const G=el('g',{class:'slice'},svg);
   const body=[sqP(0,0),sqP(1,0),sqP(1,1),sqP(0,1)];
   el('polygon',{points:body.map(q=>q.join(',')).join(' '),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
-  const colors=[],cells=[];
+  const colors=[],cells=[],stars=[];
   /* each 10-minute row is a log: fresh wood ahead, burning at the current minute, charred behind */
   const logs=[];
   if(SQ.round){const gd=(id,stops,v)=>{const g=el('linearGradient',Object.assign({id},v?{x1:0,x2:0,y1:0,y2:1}:{x1:0,x2:1,y1:0,y2:0}),df);stops.forEach(([o,c,op])=>el('stop',{offset:o,'stop-color':c,'stop-opacity':op==null?1:op},g))};
@@ -1820,7 +1820,7 @@ function drawSlice(svg,Z,sched){
       logs.push({g,ch,em,fr,quad,a,b})}}
   const CG=el('g',{filter:'url(#cellBevel)'},G);
   for(let i=0;i<N;i++){const t=Z.w0+(i+.5)*UM/60,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));
-    cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},CG))}
+    cells.push(el('polygon',{points:sqPoly(i),fill:colors[i],rx:2},CG));stars.push(isNight(t)?el('polygon',{points:sqPoly(i),fill:'url(#nightStars)','pointer-events':'none'},CG):null)}
   const logUpd=(m,frc)=>{if(!logs.length)return;const cr=Math.floor(m/10),uf=Math.min(1,((m%10)+frc)/10);
     logs.forEach((L,r)=>{const st=r<cr?'past':r===cr?'cur':'up';if(L.st!==st){L.st=st;L.g.setAttribute('class','tlog '+st)}
       const u=st==='past'?1:st==='cur'?uf:0;L.ch.setAttribute('points',L.quad(0,u));L.em.setAttribute('points',st==='cur'?L.quad(Math.max(0,u-.09),u):L.quad(0,0));
@@ -1845,7 +1845,7 @@ function drawSlice(svg,Z,sched){
   if(!three){const q=(p,dx,dy)=>(p[0]+dx)+','+(p[1]+dy),pts=[q(SQ.TL,-4,-4),q(SQ.TR,4,-4),q(SQ.BR,5,5),q(SQ.BL,-5,5)].join(' '),PG=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg);
     el('polygon',{points:pts,fill:'url(#paneHi)','stroke-linejoin':'round'},PG);el('polygon',{points:pts,fill:'none',stroke:'#fff','stroke-opacity':.22,'stroke-width':1.4,'stroke-linejoin':'round'},PG);
     el('line',{x1:SQ.BL[0]-5,y1:SQ.BL[1]+8,x2:SQ.BR[0]+5,y2:SQ.BR[1]+8,stroke:'#fff','stroke-opacity':.12,'stroke-width':3,'stroke-linecap':'round'},PG)}
-  return {kind:'slice',Z,cells,colors,prog,curOut,nums,needle:ndl,dimUpd:dimU,logUpd,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
+  return {kind:'slice',Z,cells,stars,colors,prog,curOut,nums,needle:ndl,dimUpd:dimU,logUpd,logOv,mk:g=>el('polygon',{},g),TG,ccx:C,ccy:50,a,b,lastM:-1,N,UM,shape:(e,i,fr,s0)=>e.setAttribute('points',sqPoly(i,fr,s0))};
 }
 /* ---------- Day view: 24 hour bars with logged activities, like a calendar ---------- */
 var dayM=-1;
@@ -2047,7 +2047,7 @@ function zoomTick(now,h){
   const Z=zWin(zoomLevel,h);
   if(!zparts||zparts.Z.w0!==Z.w0||zparts.Z.level!==Z.level||zparts.ver!==builtFor){zsvg.setAttribute('viewBox',Z.level===2?'-44 -92 448 556':'-20 -10 400 400');zparts=Z.level>=1?drawSlice(zsvg,Z,schedFor(now)):cellsFace(Z.level)?drawCells24(zsvg,Z,schedFor(now)):drawZoom(zsvg,Z,schedFor(now));zparts.ver=builtFor;buildRaysFor(Z)}
   if(zparts.kind==='slice'){const P=zparts,mins=(h-Z.w0)*60,m=Math.max(0,Math.min(P.N-1,Math.floor(mins/P.UM+1e-9))),fr=P.UM===1?(now.getSeconds()+now.getMilliseconds()/1000)/60:(mins-m*P.UM)/P.UM;
-    if(P.lastM!==m){P.lastM=m;P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
+    if(P.lastM!==m){P.lastM=m;if(P.stars)P.stars.forEach((st,i)=>{if(st)st.style.display=i<=m?'none':''});P.cells.forEach((c,i)=>{if(i<m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else if(i===m){c.setAttribute('fill','#8a8d96');c.setAttribute('fill-opacity','.22')}else{c.setAttribute('fill',P.colors[i]);c.setAttribute('fill-opacity','.95')}});
       P.shape(P.curOut,m);if(P.curHr)P.curHr(m);if(P.ringUpd)P.ringUpd(h);
       if(P.logOv&&CLOCK_ACTS){while(P.logOv.firstChild)P.logOv.removeChild(P.logOv.firstChild);P.logC=[];
         P.cells.forEach((c,i)=>{const cs=loggedAll(now,P.Z.w0*60+i*P.UM+Math.floor(P.UM/2)),k=cs.length;P.logC[i]=cs[0]||null;if(!k)return;
@@ -2088,9 +2088,9 @@ function drawCells24(svg,Z,sched){
   el('circle',{cx:CX,cy:CYY,r:RO+3,fill:'#0b0f1a','fill-opacity':.35},G);
   el('circle',{cx:CX,cy:CYY,r:RI-3,fill:'#0b0f1a','fill-opacity':.35,stroke:'var(--tick-soft)','stroke-opacity':.4,'stroke-width':.6},G);
   const geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.55,d1=deg(k)+g,d2=deg(k+1)-g,r1=RI+r*band+.9,r2=RI+(r+1)*band-.9;return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
-  const colors=[],cells=[];
+  const colors=[],cells=[],stars=[];
   const CG=el('g',{filter:'url(#cellBevel)'},G);
-  for(let i=0;i<144;i++){const t=Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG))}
+  for(let i=0;i<144;i++){const t=Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG));stars.push(isNight(t)?el('path',{d:geo(i),fill:'url(#nightStars)','pointer-events':'none'},CG):null)}
   const logOv=el('g',{class:'logov'},G),prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
   {const rh=RI+3*band;el('circle',{cx:CX,cy:CYY,r:rh,fill:'none',class:'halfmark'},G)}
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
@@ -2118,7 +2118,7 @@ function drawCells24(svg,Z,sched){
   {const gd=el('defs',{},svg),cp=el('clipPath',{id:'gclipc'},gd);el('circle',{cx:CX,cy:CYY,r:196},cp);const GL=el('g',{class:'glass','pointer-events':'none','aria-hidden':'true'},svg);
     el('circle',{cx:CX,cy:CYY,r:197,fill:'url(#glassEdge)'},GL);const hi=el('g',{'clip-path':'url(#gclipc)'},GL);el('ellipse',{cx:CX-24,cy:CYY-118,rx:178,ry:96,fill:'url(#glassHi)',transform:`rotate(-14 ${CX} ${CYY})`},hi);
     el('circle',{cx:CX,cy:CYY,r:195.5,fill:'none',stroke:'#fff','stroke-opacity':.16,'stroke-width':1.2},GL)}
-  return {kind:'slice',Z,cells,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:144,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
+  return {kind:'slice',Z,cells,stars,colors,prog,curOut,curHr,ringUpd,needle,dimUpd,logOv,mk:g=>el('path',{},g),TG,ccx:CX,ccy:CYY,a,b,lastM:-1,N:144,UM:10,shape:(e,i,fr,s0)=>e.setAttribute('d',geo(i,fr,s0))};
 }
 function setFace24(v){FACE24=v==='cells'?'cells':'rays';try{localStorage.setItem('face24',FACE24)}catch(e){}try{SYNC.soon()}catch(e){}
   if(zoomLevel===0){const cl=cellsFace(0),root=document.documentElement;bigSvg.toggleAttribute('hidden',cl);zsvg.toggleAttribute('hidden',!cl);root.classList.remove('z1h');zparts=null;if(cl){const n=new Date();zoomTick(n,n.getHours()+n.getMinutes()/60+n.getSeconds()/3600)}else buildRaysFor({w0:0,span:24,level:0})}

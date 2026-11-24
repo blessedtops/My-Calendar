@@ -1622,7 +1622,7 @@ function earthTick(now){
   document.getElementById('orbitDay').textContent=`${doy} of ${(now.getFullYear()%4?365:366)}`;
 }
 
-var ROT=(()=>{try{return localStorage.getItem('noonTop')==='1'?180:0}catch(e){return 0}})();
+var ROT=(()=>{try{return localStorage.getItem('noonTop')!=='0'?180:0}catch(e){return 0}})();
 function buildRaysFor(Z){
   const L=document.getElementById('raysLong'),S=document.getElementById('raysShort');if(!L||!S)return;
   while(L.firstChild)L.removeChild(L.firstChild);while(S.firstChild)S.removeChild(S.firstChild);
@@ -3012,7 +3012,7 @@ var SYNC=(function(){
 
 (function(){const b=document.getElementById('rotToggle');if(!b)return;const on=ROT===180;b.textContent=on?'Top of clock: noon ☀︎':'Top of clock: midnight ☾';b.setAttribute('aria-pressed',String(on));
   b.addEventListener('click',()=>{try{localStorage.setItem('noonTop',ROT===180?'0':'1')}catch(e){}let go=false;const rl=()=>{if(!go){go=true;location.reload()}};setTimeout(rl,4000);try{SYNC.on()?Promise.resolve(SYNC.sync()).finally(rl):setTimeout(rl,350)}catch(e){setTimeout(rl,350)}});
-  window.addEventListener('astro:settings',()=>{let v=0;try{v=localStorage.getItem('noonTop')==='1'?180:0}catch(e){}if(v!==ROT)location.reload()})})();
+  window.addEventListener('astro:settings',()=>{let v=0;try{v=localStorage.getItem('noonTop')!=='0'?180:0}catch(e){}if(v!==ROT)location.reload()})})();
 (function(){const b=document.getElementById('clkToggle');if(!b)return;const set=()=>{b.textContent=CLK12?'Clock: 12-hour':'Clock: 24-hour';b.setAttribute('aria-pressed',String(CLK12))};set();
   b.addEventListener('click',()=>{CLK12=!CLK12;try{localStorage.setItem('clock12',CLK12?'1':'0')}catch(e){}try{SYNC.soon()}catch(_){}set();cfgVer++;zparts=null;dayM=-1;tick()});
   window.addEventListener('astro:settings',()=>{let v=false;try{v=localStorage.getItem('clock12')==='1'}catch(e){}if(v!==CLK12){CLK12=v;set();cfgVer++;zparts=null;dayM=-1;tick()}})})();

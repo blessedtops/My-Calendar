@@ -996,6 +996,7 @@ html.zcal .side{visibility:hidden!important}
 .dv-bar.cont-out::after{right:-17px;top:calc(50% - 4.5px);border-left:0;border-bottom:0;border-top-right-radius:18px;-webkit-mask:linear-gradient(to bottom,#000 45%,transparent 100%);mask:linear-gradient(to bottom,#000 45%,transparent 100%)}
 .dv-bar.cont-in::before{left:-17px;bottom:calc(50% - 4.5px);border-right:0;border-top:0;border-bottom-left-radius:18px;-webkit-mask:linear-gradient(to top,#000 45%,transparent 100%);mask:linear-gradient(to top,#000 45%,transparent 100%)}
 #entEdPath .edkeep{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--cc,#9f9) 55%,transparent);font:600 14px/1.3 system-ui,sans-serif;cursor:pointer}#entEdPath .edkeep input{width:22px;height:22px;margin:0;flex:none;accent-color:var(--cc,#9f9)}#entEdPath .edkeep .keeptx{display:flex;flex-direction:column;gap:2px}#entEdPath .edkeep .keephint{font-size:12px;color:#8890a8;font-weight:500}
+html.noontop:not(.z1h) .sunwrap .bezel{background:linear-gradient(0deg,#ffffff 0%,#d6dff7 30%,#e9d9c8 49%,#ffd34d 62%,#ffa214 82%,#e97800 100%);box-shadow:0 0 0 1px rgba(220,200,170,.6),0 14px 34px 2px rgba(170,190,255,.55),0 -14px 34px 2px rgba(255,170,30,.55),0 0 80px 18px rgba(255,190,120,.18),inset 0 3px 2px rgba(255,255,255,.85),inset 0 -5px 10px rgba(170,70,0,.45)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1107,7 +1108,7 @@ html.zcal .side{visibility:hidden!important}
             <stop offset="62%" stop-color="#ffcf4a" stop-opacity=".55"/><stop offset="100%" stop-color="#ffb000" stop-opacity="0"/>
           </radialGradient>
         </defs>
-        <g filter="url(#haloBlur)"><path d="M-100 0A100 100 0 0 1 100 0Z" fill="url(#moonHaloG)"/><path d="M100 0A100 100 0 0 1 -100 0Z" fill="url(#haloG)"/></g>
+        <g filter="url(#haloBlur)" id="haloG0"><path d="M-100 0A100 100 0 0 1 100 0Z" fill="url(#moonHaloG)"/><path d="M100 0A100 100 0 0 1 -100 0Z" fill="url(#haloG)"/></g>
         <g class="rl" id="raysLong"></g><g class="rs" id="raysShort"></g>
       </svg>
       <div class="bezel"><svg id="clock" viewBox="-20 -10 400 400" role="img" aria-label="Live 24-hour clock for today"></svg><svg id="zclock" viewBox="-20 -10 400 400" role="img" aria-label="Zoomed clock" hidden></svg><div class="hit" id="clockHit" aria-hidden="true"></div><button type="button" class="expandbtn" id="expandBtn" aria-label="Enlarge clock" title="Enlarge clock"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div>
@@ -1171,7 +1172,7 @@ html.zcal .side{visibility:hidden!important}
     <div class="setrow">
       <button type="button" class="editbtn" id="editToggle" aria-expanded="false" aria-controls="editor">Edit schedule &amp; colors</button>
       <button type="button" class="editbtn" id="bgToggle" aria-pressed="true">Galaxy background: on</button>
-      <button type="button" class="editbtn" id="clkToggle" aria-pressed="false">Clock: 24-hour</button>
+      <button type="button" class="editbtn" id="clkToggle" aria-pressed="false">Clock: 24-hour</button><button type="button" class="editbtn" id="rotToggle" aria-pressed="false">Top of clock: midnight</button>
       <button type="button" class="editbtn" id="spendToggle" aria-pressed="false">Track spending: off</button>
       <label class="curset" id="curSet" hidden>Currency symbol <input type="text" id="curIn" maxlength="4" autocomplete="off"></label>
     </div>
@@ -1271,7 +1272,7 @@ const hDig=d=>CLK12?String(d.getHours()%12||12):pad(d.getHours());
 const tShort=d=>CLK12?`${d.getHours()%12||12}:${pad(d.getMinutes())}${d.getHours()<12?'am':'pm'}`:`${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const dateStr=d=>`${pad(d.getMonth()+1)}/${pad(d.getDate())}/${d.getFullYear()}`+(CLK12?(d.getHours()<12?'  ·  AM':'  ·  PM'):'');
 const hm=m=>`${Math.floor(m/60)}h ${pad(Math.floor(m%60))}m`;
-const pt=(h,r)=>{const a=(h/24*360-90)*Math.PI/180;return[C+r*Math.cos(a),CY+r*Math.sin(a)]};
+const pt=(h,r)=>{const a=(h/24*360-90+ROT)*Math.PI/180;return[C+r*Math.cos(a),CY+r*Math.sin(a)]};
 function arc(h1,h2,ro,ri){
   if(h2-h1>=24)return `M${C} ${CY-ro}A${ro} ${ro} 0 1 1 ${C-0.01} ${CY-ro}ZM${C} ${CY-ri}A${ri} ${ri} 0 1 0 ${C+0.01} ${CY-ri}Z`;
   const [x1,y1]=pt(h1,ro),[x2,y2]=pt(h2,ro),[x3,y3]=pt(h2,ri),[x4,y4]=pt(h1,ri),lg=(h2-h1)>12?1:0;
@@ -1402,7 +1403,7 @@ function build(now){
 
 function miniRays(){
   const r=document.createElementNS(NS,'svg');r.setAttribute('viewBox','-100 -100 200 200');r.setAttribute('class','minirays');r.setAttribute('aria-hidden','true');
-  const P=(rad,deg)=>{const a=(deg-90)*Math.PI/180;return `${(rad*Math.cos(a)).toFixed(2)} ${(rad*Math.sin(a)).toFixed(2)}`};
+  const P=(rad,deg)=>{const a=(deg-90+ROT)*Math.PI/180;return `${(rad*Math.cos(a)).toFixed(2)} ${(rad*Math.sin(a)).toFixed(2)}`};
   for(let h=0;h<24;h++){
     const a=h*15,major=h%3===0,r0=84,r1=major?98:93,hw=major?4.2:3.2;
     const night=h>18||h<6,dusk=h===18||h===6;
@@ -1621,13 +1622,14 @@ function earthTick(now){
   document.getElementById('orbitDay').textContent=`${doy} of ${(now.getFullYear()%4?365:366)}`;
 }
 
+var ROT=(()=>{try{return localStorage.getItem('noonTop')==='1'?180:0}catch(e){return 0}})();
 function buildRaysFor(Z){
   const L=document.getElementById('raysLong'),S=document.getElementById('raysShort');if(!L||!S)return;
   while(L.firstChild)L.removeChild(L.firstChild);while(S.firstChild)S.removeChild(S.firstChild);
   const P=(r,deg)=>{const a=(deg-90)*Math.PI/180;return `${(r*Math.cos(a)).toFixed(2)} ${(r*Math.sin(a)).toFixed(2)}`};
   const n=Z.level===0?24:12,majEvery=Z.level===1?4:3,k=24/n,sc=Z.level===0?1:k*.75;
   for(let i=0;i<n;i++){
-    const a=i*360/n,major=i%majEvery===0,odd=i%2===1,t=(Z.w0+Z.span*i/n)%24;
+    const a=i*360/n+(Z.level===0?ROT:0),major=i%majEvery===0,odd=i%2===1,t=(Z.w0+Z.span*i/n)%24;
     const r0=73,r1=major?99:odd?86:92,hw=(major?4.6:3.4)*sc,bend=(major?5:4)*sc;
     const d=`M${P(r0,a-hw)} Q${P((r0+r1)/2,a-hw*.2+bend*.35)} ${P(r1,a+bend)} Q${P((r0+r1)/2+2,a+hw*1.1+bend*.5)} ${P(r0,a+hw)} Z`;
     const dusk=Math.abs(t-6)<.01||Math.abs(t-18)<.01,night=!dusk&&(t>18||t<6);
@@ -1635,6 +1637,8 @@ function buildRaysFor(Z){
   }
 }
 buildRaysFor({w0:0,span:24,level:0});
+{const hg=document.getElementById('haloG0');if(hg&&ROT)hg.setAttribute('transform','rotate(180)')}
+if(ROT)document.documentElement.classList.add('noontop');
 let lastType=null;
 function tick(){
   const now=new Date();
@@ -1794,7 +1798,7 @@ function friezeUpd(F,h){const hn=Math.floor(h);F.forEach(([k,g])=>{g.classList.t
 function drawSector(svg,Z,sched){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   const h0=Z.w0%24,R=90,RI=R+8,RO=268,RAY=34;
-  const deg=t=>t/24*360-90,rad=d=>d*Math.PI/180,phi=deg(Z.w0+1.5),shift=(RO+RAY-R)/2-2;
+  const deg=t=>t/24*360-90+ROT,rad=d=>d*Math.PI/180,phi=deg(Z.w0+1.5),shift=(RO+RAY-R)/2-2;
   const CX=C-shift*Math.cos(rad(phi)),CYY=CY-shift*Math.sin(rad(phi));
   const P=(r,d)=>[CX+r*Math.cos(rad(d)),CYY+r*Math.sin(rad(d))],f=q=>q[0].toFixed(2)+' '+q[1].toFixed(2);
   const ann=(r1,r2,d1,d2)=>`M${f(P(r2,d1))}A${r2} ${r2} 0 0 1 ${f(P(r2,d2))}L${f(P(r1,d2))}A${r1} ${r1} 0 0 0 ${f(P(r1,d1))}Z`;
@@ -1834,8 +1838,8 @@ function drawSector(svg,Z,sched){
   {const rh=RI+3*band;el('path',{d:`M${f(P(rh,a1+.3))}A${rh} ${rh} 0 0 1 ${f(P(rh,a2-.3))}`,fill:'none',class:'halfmark'},G);}
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
-  const curHr=i=>{mlabs.forEach((t,j)=>t.setAttribute('class','sqlab'+(j<i%6?' past':j===i%6?' cur':'')));const k=Math.floor(i/6),q=P(RO+30,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=hLab(Z.w0+k)};
-  for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G).textContent=CLK12?hLab(Z.w0+k):String((Z.w0+k)%24);const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
+  const curHr=i=>{mlabs.forEach((t,j)=>t.setAttribute('class','sqlab'+(j<i%6?' past':j===i%6?' cur':'')));const k=Math.floor(i/6),q=P(RO+30,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=hLab(Z.w0+k);bnd.forEach((e,j)=>{if(e)e.style.display=j===k?'none':''})};
+  const bnd=[];for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));bnd[k]=el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G);bnd[k].textContent=CLK12?hLab(Z.w0+k):String((Z.w0+k)%24);const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
   const mlabs=[];for(let r=0;r<6;r++){const rr=RI+(5-r+.5)*band,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
     mlabs.push(el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G));mlabs[r].textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
@@ -1870,7 +1874,7 @@ function drawSlice(svg,Z,sched){
   el('path',{d:ray,fill:'url(#slRay)',class:'slray'},svg);
   el('path',{d:'M124 371 C146 387,164 405,180 435 C196 405,214 387,236 371 Z',fill:rc[0],'fill-opacity':.55},svg);
   /* dreamcatcher: hoop, spiral web, bead at the current hour, feathered strands */
-  {const RX=C,RY=50,R=94,deg2=t=>(t-90)*Math.PI/180,H=(r,t)=>[RX+r*Math.cos(deg2(t)),RY+r*Math.sin(deg2(t))];
+  {const RX=C,RY=50,R=94,deg2=t=>(t-90+ROT)*Math.PI/180,H=(r,t)=>[RX+r*Math.cos(deg2(t)),RY+r*Math.sin(deg2(t))];
    const S=el('g',{class:'dream','aria-hidden':'true'},svg);
    const hg=el('linearGradient',{id:'hoopG',x1:'0',x2:'1',y1:'0',y2:'1'},df);
    [['0','#d9a86a'],['.5','#8a5a2b'],['1','#5c3816']].forEach(([o,c])=>el('stop',{offset:o,'stop-color':c},hg));
@@ -2170,7 +2174,7 @@ function openDayArt(now){let ov=document.getElementById('dayArt');if(!ov){ov=doc
     ov.innerHTML='<div class="artcard"><div class="arthead"><h2>Your day, in bloom</h2><button type="button" class="artx" aria-label="Close">×</button></div><div class="artsvg"></div><ul class="artleg"></ul><p class="artfoot"></p></div>';
     document.body.appendChild(ov);const close=()=>{ov.hidden=true};ov.querySelector('.artx').addEventListener('click',close);ov.addEventListener('click',e=>{if(e.target===ov)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ov.hidden)close()})}
   ov.hidden=false;const L0=dayEntries(now).filter(e=>e.e>e.s),L=dayThreads(L0).map(t=>({s:t.s,e:t.e,_t:t})),S=360,C=S/2,N='http://www.w3.org/2000/svg',mk=(t,a,p)=>{const e=document.createElementNS(N,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
-  const P=(r,m)=>{const a=(m/1440*360-90)*Math.PI/180;return [C+r*Math.cos(a),C+r*Math.sin(a)]},f=v=>v.toFixed(1);
+  const P=(r,m)=>{const a=(m/1440*360-90+ROT)*Math.PI/180;return [C+r*Math.cos(a),C+r*Math.sin(a)]},f=v=>v.toFixed(1);
   const band=(r0,r1,m0,m1)=>{const big=(m1-m0)>720?1:0,[a,b]=P(r1,m0),[c,d]=P(r1,m1),[e,g]=P(r0,m1),[h2,i]=P(r0,m0);return `M${f(a)} ${f(b)}A${r1} ${r1} 0 ${big} 1 ${f(c)} ${f(d)}L${f(e)} ${f(g)}A${r0} ${r0} 0 ${big} 0 ${f(h2)} ${f(i)}Z`};
   const svg=mk('svg',{viewBox:`0 0 ${S} ${S}`,class:'artpic',role:'img'}),df=mk('defs',{},svg);
   const bg=mk('radialGradient',{id:'artBg'},df);[['0','#1b1f3a'],['.6','#0d1024'],['1','#05060f']].forEach(([o,c])=>mk('stop',{offset:o,'stop-color':c},bg));
@@ -2244,7 +2248,7 @@ const cellsFace=lv=>lv===0&&FACE24==='cells';
 function drawCells24(svg,Z,sched){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   const CX=C,CYY=CY,RI=100,RO=158,band=(RO-RI)/6;
-  const deg=t=>t/24*360-90,rad=d=>d*Math.PI/180,P=(r,d)=>[CX+r*Math.cos(rad(d)),CYY+r*Math.sin(rad(d))],f=q=>q[0].toFixed(2)+' '+q[1].toFixed(2);
+  const deg=t=>t/24*360-90+ROT,rad=d=>d*Math.PI/180,P=(r,d)=>[CX+r*Math.cos(rad(d)),CYY+r*Math.sin(rad(d))],f=q=>q[0].toFixed(2)+' '+q[1].toFixed(2);
   const ann=(r1,r2,d1,d2)=>`M${f(P(r2,d1))}A${r2} ${r2} 0 0 1 ${f(P(r2,d2))}L${f(P(r1,d2))}A${r1} ${r1} 0 0 0 ${f(P(r1,d1))}Z`;
   const G=el('g',{class:'slice cells24'},svg);
   el('circle',{cx:CX,cy:CYY,r:(RO+RI)/2,fill:'none',stroke:'#0b0f1a','stroke-width':RO-RI+6},G);
@@ -2900,7 +2904,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 
 /* ---------- Sync across devices (end-to-end encrypted, Cloudflare Worker + D1) ---------- */
 /* settings that follow you across devices (device choice per category stays per-device) */
-const SYNC_KEYS=['dayStyle','face24','daySchedule','clock12','trackSpend','spendCur','weekendsOff','bgGalaxy'];
+const SYNC_KEYS=['noonTop','dayStyle','face24','daySchedule','clock12','trackSpend','spendCur','weekendsOff','bgGalaxy'];
 var SYNC=(function(){
   const LS='astroSync',enc=new TextEncoder(),dec=new TextDecoder(),SALT=enc.encode('astro-day-sync/v1'),B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
   let cfg=null,busy=false,again=false,timer=null,K=null;
@@ -3004,6 +3008,9 @@ var SYNC=(function(){
 })();
 
 
+(function(){const b=document.getElementById('rotToggle');if(!b)return;const on=ROT===180;b.textContent=on?'Top of clock: noon ☀︎':'Top of clock: midnight ☾';b.setAttribute('aria-pressed',String(on));
+  b.addEventListener('click',()=>{try{localStorage.setItem('noonTop',ROT===180?'0':'1')}catch(e){}try{SYNC.soon()}catch(e){}setTimeout(()=>location.reload(),350)});
+  window.addEventListener('astro:settings',()=>{let v=0;try{v=localStorage.getItem('noonTop')==='1'?180:0}catch(e){}if(v!==ROT)location.reload()})})();
 (function(){const b=document.getElementById('clkToggle');if(!b)return;const set=()=>{b.textContent=CLK12?'Clock: 12-hour':'Clock: 24-hour';b.setAttribute('aria-pressed',String(CLK12))};set();
   b.addEventListener('click',()=>{CLK12=!CLK12;try{localStorage.setItem('clock12',CLK12?'1':'0')}catch(e){}try{SYNC.soon()}catch(_){}set();cfgVer++;zparts=null;dayM=-1;tick()});
   window.addEventListener('astro:settings',()=>{let v=false;try{v=localStorage.getItem('clock12')==='1'}catch(e){}if(v!==CLK12){CLK12=v;set();cfgVer++;zparts=null;dayM=-1;tick()}})})();

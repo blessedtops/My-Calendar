@@ -940,6 +940,11 @@ html.zday .dayview{width:min(1100px,calc(100vw - 28px))}
 /* clearer page edges */
 #dayView.book .dv-track{border-color:rgba(255,226,180,.3)}
 #dayView.book .dv-row:nth-of-type(even) .dv-track{background-color:rgba(255,240,215,.035)}
+.rpv{position:fixed;inset:0;z-index:90;background:rgba(5,7,16,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}
+.rpvbar{display:flex;align-items:center;gap:8px;max-width:760px;width:100%;margin:0 auto 10px;color:#eef1fb;font:700 16px/1 system-ui,sans-serif}.rpvsp{flex:1}
+.rpvbar button{min-height:42px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:inherit;font:700 14px/1 system-ui,sans-serif;cursor:pointer}
+.rpvbar button[data-f="jpg"]{background:#4f8cff;border-color:transparent}.rpvbar .rpvx{width:42px;padding:0;font-size:22px}
+.rpvbody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:flex;justify-content:center}.rpvbody img{width:100%;max-width:760px;height:auto;align-self:flex-start;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1955,6 +1960,14 @@ function pdfFromJpeg(bytes,w,h){const enc=new TextEncoder(),parts=[],offs=[];let
   const cs=`q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q`;obj(5,`<< /Length ${cs.length} >>`,enc.encode(cs));
   const xref=len;let t=`xref\n0 6\n0000000000 65535 f \n`;for(let i=1;i<=5;i++)t+=String(offs[i]).padStart(10,'0')+' 00000 n \n';add(t+`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
   const out=new Uint8Array(len);let p=0;parts.forEach(b=>{out.set(b,p);p+=b.length});return new Blob([out],{type:'application/pdf'})}
+/* look at the report first, then save it as JPG or PDF */
+async function previewDay(){const d=dayShown();toast('Making your day report…');const cv=await dayReportCanvas(d),name=`Astro-Day-${dayKey(d)}`,jpg=await new Promise(r=>cv.toBlob(r,'image/jpeg',.92));
+  const url=URL.createObjectURL(jpg),ov=document.createElement('div');ov.className='rpv';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Day report preview');
+  ov.innerHTML='<div class="rpvbar"><b>Day report</b><span class="rpvsp"></span><button type="button" data-f="jpg">⬇ JPG</button><button type="button" data-f="pdf">⬇ PDF</button><button type="button" class="rpvx" aria-label="Close preview">×</button></div><div class="rpvbody"><img alt="Preview of your day report"></div>';
+  ov.querySelector('img').src=url;const close=()=>{ov.remove();URL.revokeObjectURL(url);document.removeEventListener('keydown',esc,true)},esc=e=>{if(e.key==='Escape'){e.stopPropagation();close()}};
+  ov.querySelector('.rpvx').addEventListener('click',close);ov.addEventListener('click',e=>{if(e.target===ov)close()});document.addEventListener('keydown',esc,true);
+  ov.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click',async()=>{if(b.dataset.f==='jpg')saveBlob(jpg,name+'.jpg');else{const bytes=new Uint8Array(await jpg.arrayBuffer());saveBlob(pdfFromJpeg(bytes,cv.width,cv.height),name+'.pdf')}}));
+  document.body.appendChild(ov);ov.querySelector('[data-f="jpg"]').focus()}
 async function downloadDay(fmt){const d=dayShown();toast('Making your day report…');const cv=await dayReportCanvas(d);const name=`Astro-Day-${dayKey(d)}`;
   const jpg=await new Promise(r=>cv.toBlob(r,'image/jpeg',.92));if(fmt==='jpg'){saveBlob(jpg,name+'.jpg');return}
   const bytes=new Uint8Array(await jpg.arrayBuffer());saveBlob(pdfFromJpeg(bytes,cv.width,cv.height),name+'.pdf')}
@@ -1969,13 +1982,12 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
     if(SPEND){const tot=L.reduce((t,e)=>t+(+e.amt||0),0);if(tot>0){const sp=document.createElement('span');sp.className='dv-spent';sp.textContent=`${money(tot)} spent`;top.querySelector('.dv-nav').after(sp)}}
     top.querySelectorAll('.dv-navb[data-n]').forEach(b=>{const n=+b.dataset.n;b.disabled=n>0?dayOff>=dayRange:dayOff<=0;b.addEventListener('click',()=>dayNav(n))});
     top.querySelector('.dv-srch').addEventListener('click',()=>openDaySearch());{const bb=top.querySelector('.dv-bookbtn');bb.setAttribute('aria-pressed',String(DAYBOOK));bb.textContent=DAYBOOK?'☰ List':'📖 Book';bb.setAttribute('aria-label',DAYBOOK?'Switch Day view to list':'Switch Day view to book pages');bb.addEventListener('click',()=>setDayBook(!DAYBOOK))}top.querySelector('.dv-artbtn:not(.dv-bookbtn)').addEventListener('click',()=>openDayArt(now));{const rt=top.querySelector('.dv-rtt');rt.textContent+=' ▾';rt.setAttribute('aria-label','Pick a day: '+rt.textContent);rt.addEventListener('click',()=>{calMonth=null;openDayCal(rt)})}
-    {const dl=top.querySelector('.dv-dl'),dm=top.querySelector('.dv-dlm');dl.addEventListener('click',()=>{dm.hidden=!dm.hidden;dl.setAttribute('aria-expanded',String(!dm.hidden))});dm.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{dm.hidden=true;downloadDay(b.dataset.f)}))}box.appendChild(top);
+    {const dl=top.querySelector('.dv-dl'),dm=top.querySelector('.dv-dlm');dl.addEventListener('click',()=>{dm.hidden=true;previewDay()});dm.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{dm.hidden=true;downloadDay(b.dataset.f)}))}box.appendChild(top);
     const rb=document.createElement('div');rb.className='dv-rbar';rb.setAttribute('role','img');
     const segs=L.map(x=>Object.assign({},x)).sort((x,y)=>x.s-y.s||y.e-x.e),ln=[];segs.forEach(x=>{let i=ln.findIndex(end=>end<=x.s);if(i<0){i=ln.length;ln.push(0)}ln[i]=x.e;x._l=i});const nl=Math.min(3,Math.max(1,ln.length));
     const past=document.createElement('div');past.className='dv-rpast';past.style.width=(h/24*100)+'%';rb.appendChild(past);
     segs.forEach(x=>{if(x._l>=nl)return;const a=actById(x.a),sg=document.createElement('button');sg.type='button';sg.className='dv-rseg';sg.style.left=(x.s/14.4)+'%';sg.style.width=`max(3px,${((x.e-x.s)/14.4).toFixed(3)}%)`;
       sg.style.top=(x._l/nl*100)+'%';sg.style.height=(100/nl)+'%';sg.style.background=a.color;sg.setAttribute('aria-label',`${a.name}, ${mm2t(x.s)} to ${mm2t(x.e)}`);sg.title=`${a.em} ${a.name} · ${mm2t(x.s)}–${mm2t(x.e)}`;
-      if(x.e-x.s>=45)sg.textContent=a.em;
       sg.addEventListener('click',()=>{const r=dv.querySelectorAll('.dv-row')[Math.floor(x.s/60)];if(r){r.scrollIntoView({block:'center',behavior:'smooth'});r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash')}});rb.appendChild(sg)});
     const nw=document.createElement('div');nw.className='dv-rnow';nw.style.left=(h/24*100)+'%';rb.appendChild(nw);
     rb.setAttribute('aria-label',`Day ribbon: ${segs.length} activities logged`);box.appendChild(rb);

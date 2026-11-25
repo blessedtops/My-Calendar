@@ -1829,19 +1829,19 @@ function drawSector(svg,Z,sched){
   /* sector body: 3 hour columns (angle) x 6 ten-minute rows (:00 at the rim, emptying inward) */
   const G=el('g',{class:'slice'},svg);
   el('path',{d:ann(R+3,RO,a1,a2),fill:'#0b0f1a','fill-opacity':.55,stroke:'#ffd34d','stroke-opacity':.75,'stroke-width':1.6,'stroke-linejoin':'round',class:'slbody'},G);
-  const band=(RO-9-RI)/6,geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=RI+r*band+1.2,r2=RI+(r+1)*band-1.2;
+  const HG=5,band=(RO-9-RI-HG)/6,rOf=r=>RI+r*band+(r>=3?HG:0),geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.7,d1=deg(Z.w0+k)+g,d2=deg(Z.w0+k+1)-g,r1=rOf(r)+1.2,r2=rOf(r)+band-1.2;
     return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
   const colors=[],cells=[],stars=[];
   const CG=el('g',{filter:'url(#cellBevel)'},G);
   for(let i=0;i<18;i++){const t=Z.w0+Math.floor(i/6)+(i%6+.5)/6,b=sched.find(x=>t>=x.s&&t<x.e);colors.push(skyCol(t));cells.push(el('path',{d:geo(i),fill:colors[i]},CG));stars.push(isNight(t)?el('path',{d:geo(i),fill:'url(#nightStars)','pointer-events':'none'},CG):null)}
   const logOv=el('g',{class:'logov'},G);
   const prog=el('path',{d:geo(0,.02),fill:colors[0],class:'mprog'},G);
-  {const rh=RI+3*band;el('path',{d:`M${f(P(rh,a1+.3))}A${rh} ${rh} 0 0 1 ${f(P(rh,a2-.3))}`,fill:'none',class:'halfmark'},G);}
+  
   const curOut=el('path',{d:geo(0),fill:'none',class:'mcur'},G);
   const hn=el('text',{class:'sechr-cur','text-anchor':'middle','dominant-baseline':'central'},G);
   const curHr=i=>{mlabs.forEach((t,j)=>t.setAttribute('class','sqlab'+(j<i%6?' past':j===i%6?' cur':'')));const k=Math.floor(i/6),q=P(RO+30,deg(Z.w0+k+.5));hn.setAttribute('x',q[0]);hn.setAttribute('y',q[1]);hn.textContent=hLab(Z.w0+k);bnd.forEach((e,j)=>{if(e)e.style.display=j===k?'none':''})};
   const bnd=[];for(const k of [0,3]){const q=P(RO+15,deg(Z.w0+k));bnd[k]=el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sechr sechr-glow'},G);bnd[k].textContent=CLK12?hLab(Z.w0+k):String((Z.w0+k)%24);const hh=(Z.w0+k)%24;if(hh%6===0){const [ix,iy]=P(RO+36,deg(Z.w0+k));bigSky.push([hh,skyIcon(G,hh,ix,iy,20,'skybig')])}}
-  const mlabs=[];for(let r=0;r<6;r++){const rr=RI+(5-r+.5)*band,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
+  const mlabs=[];for(let r=0;r<6;r++){const rr=rOf(5-r)+band/2,t0=P(rr,a1-.6),t1=P(rr,a1-2.6),q=P(rr,a1-6);el('line',{x1:t0[0],y1:t0[1],x2:t1[0],y2:t1[1],class:'sqtick'},G);
     mlabs.push(el('text',{x:q[0],y:q[1],'text-anchor':'middle','dominant-baseline':'central',class:'sqlab'},G));mlabs[r].textContent=':'+pad(r*10)}
   /* neon time, date and block fraction inside the ring */
   const TG=el('g',{class:'tgrp'},svg),T=el('g',{class:'bigtime'},TG),ty=CYY-4;
@@ -2249,13 +2249,13 @@ var FACE24=(()=>{try{return localStorage.getItem('face24')==='cells'?'cells':'ra
 const cellsFace=lv=>lv===0&&FACE24==='cells';
 function drawCells24(svg,Z,sched){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  const CX=C,CYY=CY,RI=100,RO=158,band=(RO-RI)/6;
+  const CX=C,CYY=CY,RI=100,RO=158,HG=2.6,band=(RO-RI-HG)/6,rOf=r=>RI+r*band+(r>=3?HG:0);
   const deg=t=>t/24*360-90+ROT,rad=d=>d*Math.PI/180,P=(r,d)=>[CX+r*Math.cos(rad(d)),CYY+r*Math.sin(rad(d))],f=q=>q[0].toFixed(2)+' '+q[1].toFixed(2);
   const ann=(r1,r2,d1,d2)=>`M${f(P(r2,d1))}A${r2} ${r2} 0 0 1 ${f(P(r2,d2))}L${f(P(r1,d2))}A${r1} ${r1} 0 0 0 ${f(P(r1,d1))}Z`;
   const G=el('g',{class:'slice cells24'},svg);
   el('circle',{cx:CX,cy:CYY,r:(RO+RI)/2,fill:'none',stroke:'#0b0f1a','stroke-width':RO-RI+6},G);
   el('circle',{cx:CX,cy:CYY,r:RI-3,fill:'#0b0f1a','fill-opacity':.35,stroke:'var(--tick-soft)','stroke-opacity':.4,'stroke-width':.6},G);
-  const geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.55,d1=deg(k)+g,d2=deg(k+1)-g,r1=RI+r*band+.9,r2=RI+(r+1)*band-.9;return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
+  const geo=(i,fr,s0)=>{const k=Math.floor(i/6),r=5-i%6,g=.55,d1=deg(k)+g,d2=deg(k+1)-g,r1=rOf(r)+.9,r2=rOf(r)+band-.9;return ann(r1,r2,d1+(d2-d1)*(s0||0),fr==null?d2:d1+(d2-d1)*fr)};
   const colors=[],cells=[],stars=[];
   const CG=el('g',{filter:'url(#cellBevel)'},G);
   /* small tiles: vivid, solid night tones (no star speckle) so they read crisp, not smoky */

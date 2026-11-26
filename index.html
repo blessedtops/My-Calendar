@@ -1002,6 +1002,8 @@ svg text.tampm{font-family:"Poppins","Futura","Century Gothic",system-ui,sans-se
 .emo.subem{flex:0 0 auto!important;width:3.4em!important;max-width:3.4em!important;padding-left:0!important;text-align:center!important}
 .askrow{flex:1 0 100%;display:flex;flex-direction:column;gap:8px}.askin{width:100%}.valrow{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}.valrow:empty,.valrow[hidden]{display:none}.valrow .pickchip{min-width:40px;justify-content:center}
 .ttlrow .ttlem{flex:0 0 auto;font-size:22px;line-height:1;align-self:center;padding:0 2px}.ttlrow .ttlem[hidden]{display:none}#entEdTi{flex:1 1 auto;min-width:0}
+.ringneon-tube.slnow{fill:#4ee38a!important;stroke:#4ee38a!important;filter:drop-shadow(0 0 3px rgba(78,227,138,.95)) drop-shadow(0 0 8px rgba(40,200,110,.6))!important}.ringneon-core.slnow{fill:#d8ffe6!important}
+.newsub .newem{flex:0 0 3.2em!important;width:3.2em!important;min-width:0;text-align:center;padding-left:4px!important;padding-right:4px!important}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -1900,7 +1902,7 @@ function drawSlice(svg,Z,sched){
     el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'#000','stroke-opacity':.25,'stroke-width':9,filter:'url(#slBlur)'},S);
     el('circle',{cx:RX,cy:RY,r:RR,fill:'none',stroke:'var(--tick-soft)','stroke-width':.7,'stroke-opacity':.45},S);
     const seg=(k,w)=>chevD(H,RR,w,k*15+.4,(k+1)*15-.4);for(let k=0;k<hn;k++){el('path',{d:seg(k,6.5),fill:'#c8d2ea','fill-opacity':.14},S)}
-    for(let k=hn;k<24;k++){if(k===hn){el('path',{d:seg(k,8),class:'ringneon-tube rn-soft'},S);el('path',{d:seg(k,2.6),class:'ringneon-core rn-soft'},S)}
+    for(let k=hn;k<24;k++){if(k===hn){el('path',{d:seg(k,8),class:'ringneon-tube rn-soft slnow'},S);el('path',{d:seg(k,2.6),class:'ringneon-core rn-soft slnow'},S)}
       else el('path',{d:seg(k,6.5),fill:rayCol(k),'fill-opacity':.9},S)}
     for(let k=0;k<24;k+=3){const [x0,y0]=H(RR-5,k*15),[x1,y1]=H(RR+(k%6?10:13),k*15);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'hr3mark'+(k%6?'':' hr6')+(k&&k<=hn?' past':'')},S);{const [tx,ty]=H(RR+21,k*15);el('text',{x:tx,y:ty,class:'hr3num'+(k&&k<=hn?' past':''),'font-size':9},S).textContent=hLab(k);if(k%6===0){const [ix,iy]=H(RR+32,k*15);skyIcon(S,k,ix,iy,11,k&&k+1<=hn?'past':'')}}}
     {const dC=el('path',{class:'ringdim'},S);dimU=t=>{const hr=Math.floor(t);dC.setAttribute('d',t-hr<.02?'':usedD(H,RR,8.2,hr*15+.4,t*15))}}
@@ -2405,7 +2407,8 @@ function dayKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.get
 function mm2t(m){m=Math.max(0,Math.min(1440,Math.round(m)));if(CLK12){const H=Math.floor(m/60)%24;return `${H%12||12}:${pad(m%60)} ${H<12?'AM':'PM'}`}return `${pad(Math.floor(m/60)%24)}:${pad(m%60)}`}
 function t2mm(v,end){if(!v)return NaN;const [H,M]=v.split(':').map(Number);let x=H*60+M;if(end&&x===0)x=1440;return x}
 function catById(id){return cats.find(c=>c.id===id)}
-function pickList(a){const n=l=>(l||[]).map(x=>typeof x==='string'?{t:x,d:''}:x).filter(x=>x&&x.t).map(x=>{if(x.kids)x.kids=n(x.kids);return x});const r=n(a&&a.picks);if(a)a.picks=r;return r}
+function emOnly(t){t=(t||'').trim();return !!t&&/\p{Extended_Pictographic}/u.test(t)&&!/[\p{L}\p{N}]/u.test(t.replace(/[0-9#*](?=\ufe0f?\u20e3)/g,'').replace(/[\u20e3\ufe0f\u200d]/g,''))}
+function pickList(a){const n=l=>(l||[]).map(x=>typeof x==='string'?{t:x,d:''}:x).filter(x=>x&&x.t).map(x=>{if(!x.em&&emOnly(x.t))x.em=x.t.trim();if(x.kids)x.kids=n(x.kids);return x});const r=n(a&&a.picks);if(a)a.picks=r;return r}
 function actById(id){const a=acts.find(x=>x.id===id);if(!a)return {id,em:'❔',name:'Removed activity',color:'#8a8d96',catEm:'',catName:''};const c=catById(a.cat)||{em:'',name:'Other',color:'#8a8d96'};return Object.assign({},a,{name:a.name||a.em||'Untitled',color:c.color,catEm:c.em,catName:c.name||c.em||'Untitled'})}
 function actLabel(a){return (a.catEm?a.catEm+' › ':'')+a.em+' '+a.name}
 const aName=a=>a&&a.name!==a.em?a.name:'';const aLabel=a=>[a.em,aName(a)].filter(Boolean).join(' ');
@@ -2549,7 +2552,7 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
   const pathBox=E('div','pathbox');card.appendChild(pathBox);
   const drawPath=()=>{pathBox.innerHTML='';if(LG.pend.keep===undefined)LG.pend.keep=true;let ri=0;{let l0=tree;for(const t of LG.pend.path){const nd=l0.find(x=>x.t===t);if(!nd)break;nd.kids=nd.kids||[];l0=nd.kids;ri++}}const realP=LG.pend.path.slice(0,ri),tmpP=LG.pend.path.slice(ri);let at=nodeAt(realP);LG.pend.p=LG.pend.path.join(SEP);
     const bc=E('div','crumbs');bc.setAttribute('aria-label','Selected path');const seg=(label,i)=>{const b=E('button','crumb',label);b.type='button';b.addEventListener('click',()=>{LG.pend.path=LG.pend.path.slice(0,i);drawPath();svUpd()});return b};
-    bc.appendChild(seg([a.em,a.name].filter(Boolean).join(' ')||'Activity',0));const pdv=pDisp(a.id,LG.pend.path.join(SEP)).split(SEP);LG.pend.path.forEach((t,i)=>{bc.appendChild(E('span','csep','/'));const b=seg(pdv[i]||t,i+1);if(i>=ri){b.classList.add('tmp');b.title='Just this entry'}if(i===LG.pend.path.length-1)b.setAttribute('aria-current','true');bc.appendChild(b)});pathBox.appendChild(bc);
+    bc.appendChild(seg([a.em,a.name].filter(Boolean).join(' ')||'Activity',0));const pdv=pDisp(a.id,LG.pend.path.join(SEP)).split(SEP);LG.pend.path.forEach((t,i)=>{bc.appendChild(E('span','csep','/'));const pe=LG.pend.ems&&LG.pend.ems[t],lb=pdv[i]||t,b=seg(pe&&pe!==t&&!lb.startsWith(pe)?pe+' '+lb:lb,i+1);if(i>=ri){b.classList.add('tmp');b.title='Just this entry'}if(i===LG.pend.path.length-1)b.setAttribute('aria-current','true');bc.appendChild(b)});pathBox.appendChild(bc);
     if(tmpP.length){const kp=E('label','keeprow'),kc=document.createElement('input');kc.type='checkbox';kc.checked=!!LG.pend.keep;kc.addEventListener('change',()=>{LG.pend.keep=kc.checked});const kt=E('span','keeptx',`Save “${tmpP.join(' / ')}” to my bank`);kt.appendChild(E('small','keephint','Untick = just this entry'));kp.append(kc,kt);pathBox.appendChild(kp)}
     /* fix a mistake right here: rename or remove the item you're on */
     if(tmpP.length){const cur=LG.pend.path[LG.pend.path.length-1],er=E('div','crumbed'),rn=E('button','cedbtn','✎ Rename'),rm=E('button','cedbtn del','✕ Remove');rn.type=rm.type='button';er.append(E('span','cedl',`“${cur}”`),rn,rm);pathBox.appendChild(er);
@@ -2569,10 +2572,10 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
         q.appendChild(E('span','pt',(it.em&&it.em!==it.t?it.em+' ':'')+it.t+((it.kids||[]).length?'  ›':'')));if(it.d)q.appendChild(E('small','pd',it.d));
         q.addEventListener('click',()=>{LG.pend.path=LG.pend.path.concat(it.t);const fi=card.querySelector('.addin');if(fi&&it.d&&(!fi.value.trim()||fi.dataset.auto==='1')){fi.value=it.d;fi.dataset.auto='1';LG.pend.n=it.d}
           drawPath();if(fi){fi.focus();if(fi._upd)fi._upd()}});pr.appendChild(q)});pathBox.appendChild(pr)}
-    const nr=E('div','newsub'),ni=document.createElement('input');ni.type='text';ni.maxLength=80;ni.className='addin newin';const here=LG.pend.path.length?LG.pend.path[LG.pend.path.length-1]:(a.name||a.em);
-    ni.placeholder=LG.pend.path.length?`Add under ${here}…`:`New sub-activity for ${here}…`;ni.setAttribute('aria-label',`Add a new item under ${here}`);const nb=E('button','pickchip newbtn','+ Add');nb.type='button';nb.style.setProperty('--cc',c.color);
-    const addNew=()=>{const v=ni.value.trim();if(!v)return;LG.pend.path=LG.pend.path.concat(v);drawPath();svUpd();const fi=card.querySelector('.addin:not(.newin)');if(fi)fi.focus()};
-    nb.addEventListener('click',addNew);ni.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addNew()}});nr.append(ni,nb);pathBox.appendChild(nr)};
+    const nr=E('div','newsub'),nem=document.createElement('input');nem.type='text';nem.maxLength=16;nem.className='addin newem';nem.placeholder='🙂';nem.setAttribute('aria-label','Emoji for the new sub-activity');const ni=document.createElement('input');ni.type='text';ni.maxLength=80;ni.className='addin newin';const here=LG.pend.path.length?LG.pend.path[LG.pend.path.length-1]:(a.name||a.em);
+    ni.placeholder=LG.pend.path.length?`Name, under ${here}…`:`New sub-activity name…`;ni.setAttribute('aria-label',`Add a new item under ${here}`);const nb=E('button','pickchip newbtn','+ Add');nb.type='button';nb.style.setProperty('--cc',c.color);
+    const addNew=()=>{const em=nem.value.trim(),v=ni.value.trim()||em;if(!v)return;if(em){LG.pend.ems=LG.pend.ems||{};LG.pend.ems[v]=em}LG.pend.path=LG.pend.path.concat(v);drawPath();svUpd();const fi=card.querySelector('.addin:not(.newin)');if(fi)fi.focus()};
+    nb.addEventListener('click',addNew);[ni,nem].forEach(z=>z.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addNew()}}));nr.append(nem,ni,nb);pathBox.appendChild(nr)};
   const lab=E('label','addlab');lab.appendChild(E('span',null,'Details (optional)'));const inp=document.createElement('textarea');inp.rows=3;inp.className='addin notes';inp.maxLength=2000;inp.placeholder='Anything worth noting — one line each';inp.setAttribute('data-focus','');
   inp.value=LG.pend.n||'';setTimeout(()=>growTA(inp),0);lab.appendChild(inp);
   let valIn=null;{const ao=askOpts(a);if(ao){const vl=E('label','addlab vallab');vl.appendChild(E('span',null,'Value'));const vr=E('div','pickrow valrow');valIn=document.createElement('input');valIn.type='text';valIn.className='addin valin';valIn.maxLength=40;valIn.placeholder=ao.length?'Pick or type':'Type a number or word';valIn.value=LG.pend.v||'';valIn.addEventListener('input',()=>{LG.pend.v=valIn.value;vr.querySelectorAll('.pickchip').forEach(q=>q.setAttribute('aria-checked',String(q.textContent===valIn.value.trim())))});
@@ -2595,8 +2598,8 @@ function renderActs(){const g=_g('actGrid');g.innerHTML='';
       q.addEventListener('click',()=>{slot.e=Math.min(1440,slot.s+m);renderActs();const fi=g.querySelector('.addin');if(fi)fi.focus()});dr.appendChild(q)});card.insertBefore(dr,lab)}
   const snap=E('button','snapbtn',slot?`Add to ${half}`:`Snap into ${half}`);snap.type='button';
   const doSnap=()=>{{const ce=document.querySelector('#actGrid .crumbed.editing input');if(ce&&ce.value.trim()&&LG.pend.path.length){const v=ce.value.trim(),cur=LG.pend.path[LG.pend.path.length-1];if(v!==cur){const ok=document.querySelector('#actGrid .crumbed.editing .ok');if(ok)ok.click()}}
-    const nw=document.querySelector('#actGrid .newin');if(nw&&nw.value.trim()){const v=nw.value.trim();LG.pend.path=LG.pend.path.concat(v);nw.value=''}}
-    if(LG.pend.keep&&LG.pend.path.length){let l0=tree;LG.pend.path.forEach(t=>{let nd=l0.find(x=>x.t===t);if(!nd){nd={t,d:''};l0.push(nd)}nd.kids=nd.kids||[];l0=nd.kids});a.picks=tree;saveActs()}const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};if(valIn&&valIn.value.trim())ex.v=valIn.value.trim();{const tv=tNm({t:tin.value},a);if(tv)ex.t=tv}if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
+    const nw=document.querySelector('#actGrid .newin'),ne=document.querySelector('#actGrid .newem');if(nw&&(nw.value.trim()||(ne&&ne.value.trim()))){const em=ne?ne.value.trim():'',v=nw.value.trim()||em;if(em){LG.pend.ems=LG.pend.ems||{};LG.pend.ems[v]=em}LG.pend.path=LG.pend.path.concat(v);nw.value='';if(ne)ne.value=''}}
+    if(LG.pend.keep&&LG.pend.path.length){let l0=tree;LG.pend.path.forEach(t=>{let nd=l0.find(x=>x.t===t);if(!nd){nd={t,d:''};const em=LG.pend.ems&&LG.pend.ems[t];if(em)nd.em=em;l0.push(nd)}nd.kids=nd.kids||[];l0=nd.kids});a.picks=tree;saveActs()}const p=LG.pend,ex={d:dev,p:(p.path||[]).join(SEP),n:(inp.value||'').trim()};if(valIn&&valIn.value.trim())ex.v=valIn.value.trim();{const tv=tNm({t:tin.value},a);if(tv)ex.t=tv}if(amtIn){const r=parseAmt(amtIn.value);if(!r.ok){amtErr.textContent=r.msg+' — fix it or clear it';amtIn.focus();return}if(r.v!=null)ex.amt=r.v}LG.view='cat';LG.pend=null;
     if(svc.checked&&!sv.hidden&&ex.n){const at=nodeAt(p.path);if(at&&!at.lst.some(x=>x.t===ex.n))at.lst.push({t:ex.n,d:''});a.picks=tree;saveActs();ex.p=p.path.concat(ex.n).join(SEP);ex.n=''}
     if(slot){addAt(a.id,ex,slot.s,slot.e,slot.k);closePanels();return}snapAct(a.id,snap,ex)};
   snap.addEventListener('click',doSnap);inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();doSnap()}});card.appendChild(snap);g.appendChild(card)}

@@ -1004,6 +1004,7 @@ svg text.tampm{font-family:"Poppins","Futura","Century Gothic",system-ui,sans-se
 .ttlrow .ttlem{flex:0 0 auto;font-size:22px;line-height:1;align-self:center;padding:0 2px}.ttlrow .ttlem[hidden]{display:none}#entEdTi{flex:1 1 auto;min-width:0}
 .ringneon-tube.slnow{fill:#4ee38a!important;stroke:#4ee38a!important;filter:drop-shadow(0 0 3px rgba(78,227,138,.95)) drop-shadow(0 0 8px rgba(40,200,110,.6))!important}.ringneon-core.slnow{fill:#d8ffe6!important}
 .newsub .newem{flex:0 0 3.2em!important;width:3.2em!important;min-width:0;text-align:center;padding-left:4px!important;padding-right:4px!important}
+.dv-now::after{display:none!important}.dv-nowm{position:absolute;left:50%;top:-9px;transform:translate(-50%,-50%);padding:1px 5px;border-radius:7px;background:#ff2d55;color:#fff;font:700 10px/1.25 'Poppins',system-ui,sans-serif;letter-spacing:.02em;white-space:nowrap;box-shadow:0 0 8px rgba(255,45,85,.8);pointer-events:none}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
@@ -2117,7 +2118,7 @@ async function downloadDay(fmt){const d=dayShown();toast('Making your day report
   const jpg=await new Promise(r=>cv.toBlob(r,'image/jpeg',.92));if(fmt==='jpg'){saveBlob(jpg,name+'.jpg');return}
   const bytes=new Uint8Array(await jpg.arrayBuffer());saveBlob(pdfFromJpeg(bytes,cv.width,cv.height),name+'.pdf')}
 function dayTick(now,h){if(dayOff){now=dayShown();h=24}const m=dayOff?-1000-dayOff:Math.floor(h*60);if(m!==dayM){dayM=m;renderDay(now,h)}
-  const dv=document.getElementById('dayView'),nl=dv&&dv.querySelector('.dv-now'),us=dv&&dv.querySelector('.dv-used'),rn=dv&&dv.querySelector('.dv-rnow'),rp=dv&&dv.querySelector('.dv-rpast');if(rn){rn.style.left=(h/24*100)+'%';rp.style.width=(h/24*100)+'%'}if(nl){const f=(h%1)*100;nl.style.left=f+'%';if(us)us.style.width=f+'%'}}
+  const dv=document.getElementById('dayView'),nl=dv&&dv.querySelector('.dv-now'),us=dv&&dv.querySelector('.dv-used'),rn=dv&&dv.querySelector('.dv-rnow'),rp=dv&&dv.querySelector('.dv-rpast');if(rn){rn.style.left=(h/24*100)+'%';rp.style.width=(h/24*100)+'%'}if(nl){const f=(h%1)*100;nl.style.left=f+'%';{const lb=nl.querySelector('.dv-nowm');if(lb){const t=':'+String(Math.floor(h*60)%60).padStart(2,'0');if(lb.textContent!==t)lb.textContent=t}}if(us)us.style.width=f+'%'}}
 function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)return;const hn=Math.floor(h),L=(typeof dayEntries==='function'?dayEntries(now):[]).filter(e=>e.e>e.s);
   const hc=k=>(k===6||k===18)?'#ff8a45':(k>18||k<6)?'#aebdf0':'#ffb52e',keep=dv.scrollTop;dv.innerHTML='';
   /* ---- day ribbon: the whole day at a glance ---- */
@@ -2131,8 +2132,8 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
     const rb=document.createElement('div');rb.className='dv-rbar';rb.setAttribute('role','img');
     const segs=L.map(x=>Object.assign({},x)).sort((x,y)=>x.s-y.s||y.e-x.e),ln=[];segs.forEach(x=>{let i=ln.findIndex(end=>end<=x.s);if(i<0){i=ln.length;ln.push(0)}ln[i]=x.e;x._l=i});const nl=Math.min(3,Math.max(1,ln.length));
     const past=document.createElement('div');past.className='dv-rpast';past.style.width=(h/24*100)+'%';rb.appendChild(past);
-    segs.forEach(x=>{if(x._l>=nl)return;const a=actById(x.a),sg=document.createElement('button');sg.type='button';sg.className='dv-rseg';sg.style.left=(x.s/14.4)+'%';sg.style.width=`max(3px,${((x.e-x.s)/14.4).toFixed(3)}%)`;
-      sg.style.top=(x._l/nl*100)+'%';sg.style.height=(100/nl)+'%';sg.style.background=a.color;sg.setAttribute('aria-label',`${a.name}, ${mm2t(x.s)} to ${mm2t(x.e)}`);sg.title=`${a.em} ${a.name} · ${mm2t(x.s)}–${mm2t(x.e)}`;
+    segs.forEach(x=>{if(x._l>=nl)return;const a=actById(x.a),sg=document.createElement('button');sg.type='button';sg.className='dv-rseg';sg.style.left=`calc(${(x.s/14.4).toFixed(3)}% + 1px)`;sg.style.width=`max(3px,calc(${((x.e-x.s)/14.4).toFixed(3)}% - 2px))`;
+      sg.style.top=`calc(${(x._l/nl*100).toFixed(3)}% + 1px)`;sg.style.height=`calc(${(100/nl).toFixed(3)}% - 2px)`;sg.style.background=a.color;sg.setAttribute('aria-label',`${a.name}, ${mm2t(x.s)} to ${mm2t(x.e)}`);sg.title=`${a.em} ${a.name} · ${mm2t(x.s)}–${mm2t(x.e)}`;
       sg.addEventListener('click',()=>{const r=dv.querySelectorAll('.dv-row')[Math.floor(x.s/60)];if(r){r.scrollIntoView({block:'center',behavior:'smooth'});r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash')}});rb.appendChild(sg)});
     const nw=document.createElement('div');nw.className='dv-rnow';nw.style.left=(h/24*100)+'%';rb.appendChild(nw);
     rb.setAttribute('aria-label',`Day ribbon: ${segs.length} activities logged`);box.appendChild(rb);
@@ -2162,7 +2163,7 @@ function renderDay(now,h){const dv=document.getElementById('dayView');if(!dv)ret
         if(cin){const k=INS.indexOf(x),ww=9+k*6,w=document.createElement('div');w.className='dv-wrap in';w.style.height=(mid+6)+'px';w.style.width=ww+'px';w.style.left=(-ww-1)+'px';w.style.setProperty('--c',a.color);tr.appendChild(w)}}
       if(cout){b.classList.add('cont-out');}if(cin){b.classList.add('cont-in');}
       b.title=`${entLabel(x.e)} · ${mm2t(x.e.s)}–${mm2t(x.e.e)}${x.e.n?' · '+x.e.n:''}`;if(!x.e.run){b.setAttribute('role','button');b.tabIndex=0;b.setAttribute('aria-label','Edit '+b.title);const op=ev=>{ev.stopPropagation();if(CLIP){const r=tr.getBoundingClientRect(),fr=ev.clientX?Math.max(0,Math.min(.999,(ev.clientX-r.left)/r.width)):(x.s-a0)/60;pasteAt(k*60+(fr<.5?0:30),dayKey(now));return}openEntryEditor(x.e,dayKey(now))};b.addEventListener('click',op);b.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();op(ev)}})}tr.appendChild(b)});
-    if(k===hn){const n=document.createElement('div');n.className='dv-now';n.style.left=((h%1)*100)+'%';tr.appendChild(n)}
+    if(k===hn){const n=document.createElement('div');n.className='dv-now';n.style.left=((h%1)*100)+'%';const nm=document.createElement('span');nm.className='dv-nowm';nm.textContent=':'+String(Math.floor(h*60)%60).padStart(2,'0');n.appendChild(nm);tr.appendChild(n)}
     tr.setAttribute('aria-label',`${hhmm(k)} – ${seg.length?seg.map(x=>actById(x.e.a).name).join(', '):'nothing logged'}`);tr.setAttribute('role','img');
     row.appendChild(lab);row.appendChild(tr);dv.appendChild(row)}
   {const X=dayArchived(now);if(X.length){const sec=document.createElement('details');sec.className='dv-arch';const sm=document.createElement('summary');sm.textContent=`🗃 Missed & cancelled · ${X.length}`;sec.appendChild(sm);
